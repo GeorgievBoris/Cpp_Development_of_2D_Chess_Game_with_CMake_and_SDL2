@@ -1,0 +1,33 @@
+{
+    /*
+    This is an array of user-defined variables that will be available for substitution in the configurations via
+    the standard environment variable syntax: ${<var>} or ${env:<var>}. Strings and arrays of strings are
+    accepted.
+    */    
+    
+    "env": { // not used...placed here just for a test
+        "myIncludePath":["${workspaceFolder}"],
+        "myDefines": ["DEBUG", "MY_FEATURE=1"] 
+    },   
+    
+    // this array of configuration objects provides the IntelliSense engine with information
+    // about our project and our preferences. By default, the extension creates a configuration
+    // for us based on our type of OS. We may also add additional configurations.
+
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include/SDL2"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

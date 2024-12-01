@@ -1,0 +1,23 @@
+# A trailing "/**" matches everything inside. 
+# For example, "abc/**" matches all files inside directory "abc", relative to the location of the .gitignore file, 
+# with infinite depth.
+build/**
+!build/.gitkeep
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+!.vscode/c_cpp_properties.json
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# Ignoring all local history of files
+.history
+.ionide

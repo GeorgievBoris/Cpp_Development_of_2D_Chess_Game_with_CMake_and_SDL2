@@ -7,57 +7,56 @@
 // Third-party includes
 #include <SDL.h>
 // Own includes
+#include "sdl_utils/SDLLoader.h"
+#include "sdl_utils/MonitorWindow.h"
+#include "sdl_utils/Texture.h"
 
+static void draw(MonitorWindow& window, SDL_Surface* image) {
 
-static void draw(SDL_Window* window,SDL_Surface* screenSurface, SDL_Surface* image) {
+    SDL_Surface* screenSurface=window.getWindowSurface(); // according to the documentation: This surface will be freed when the window is destroyed.
+
     if(EXIT_SUCCESS!=SDL_BlitSurface(image,nullptr,screenSurface,nullptr)){
         std::cerr<<"SDL_BlitSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
         return;
     }
 
-    if(EXIT_SUCCESS!=SDL_UpdateWindowSurface(window)){
-        std::cerr<<"SDL_UpdateWindowSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
+    if(EXIT_SUCCESS!=window.updateWindowSurface()){
+        std::cerr<<"MonitorWindow::updateWindowSurface() failed."<<std::endl;
         return;
     }
 
     constexpr uint32_t timeDelayMilliseconds= 3000;
     SDL_Delay(timeDelayMilliseconds);
+
+    Texture::freeSurface(screenSurface);
 }
 
 
 static int32_t loadResources(SDL_Surface*& outImage){
-    const std::string filePath = "../resources/hello.bmp";
-    outImage=SDL_LoadBMP(filePath.c_str());
-    if (nullptr == outImage){
-        std::cerr<<"SDL_LoadBMP() failed. Reason: "<<SDL_GetError()<<std::endl;
+    // const std::string filePath = "../resources/hello.png"; // the system path is given relative to the "build" directory !!!
+    const char* filePath="../resources/hello.png"; // the system path is given relative to the "build" directory !!!
+
+    if(EXIT_SUCCESS!=Texture::createSurfaceFromFile(filePath,outImage)){
+        std::cerr<<"Texture::createSurfaceFromFile() failed"<<std::endl;
         return EXIT_FAILURE;
     }
+
     return EXIT_SUCCESS;
 }
 
-static int32_t init(SDL_Window*& outWindow, SDL_Surface*& outScreenSurface, SDL_Surface*& outImage){
+static int32_t init(MonitorWindow& window, SDL_Surface*& outImage){
+    MonitorWindowCfg cfg;
+    cfg.windowName = "SDL_Runtime";
+    cfg.windowWidth = 640;
+    cfg.windowHeight = 480;
+    cfg.windowFlags = WINDOW_SHOWN; 
 
-    const std::string windowName = "Hello, World!";
-    const int32_t windowX = SDL_WINDOWPOS_UNDEFINED; // SDL_WINDOWPOS_CENTERED;
-    const int32_t windowY = SDL_WINDOWPOS_UNDEFINED; // SDL_WINDOWPOS_CENTERED;
-    const int32_t windowWidth = 640;
-    const int32_t windowHeight = 480;
-    const uint32_t windowFlag = SDL_WINDOW_SHOWN; // SDL_WINDOW_HIDDEN SDL_WINDOW_FULLSCREEN_DESKTOP SDL_WINDOW_MAXIMIZED
-
-    outWindow = SDL_CreateWindow(windowName.c_str(),windowX,windowY,windowWidth,windowHeight,windowFlag);
-    if(nullptr==outWindow){
-        std::cerr<<"SDL_CreateWindow() failed. Reason: "<<SDL_GetError()<<std::endl;
+    if(EXIT_SUCCESS!=window.init(cfg)){
+        std::cerr<<"MonitorWindow::init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    // according to the documentation: This surface will be freed when the window is destroyed.
-    outScreenSurface = SDL_GetWindowSurface(outWindow);
-    if(nullptr==outScreenSurface){
-        std::cerr<<"SDL_GetWindowSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if(EXIT_SUCCESS != loadResources(outImage)){
+    if(EXIT_SUCCESS!=loadResources(outImage)){
         std::cerr<<"loadResources() failed."<<std::endl;
         return EXIT_FAILURE;
     }
@@ -65,57 +64,45 @@ static int32_t init(SDL_Window*& outWindow, SDL_Surface*& outScreenSurface, SDL_
     return EXIT_SUCCESS;
 }
 
-static void deinit(SDL_Window*& outWindow, [[maybe_unused]] SDL_Surface*& outScreenSurface, SDL_Surface*& outImage) {
-
+static void deinit(MonitorWindow& window, SDL_Surface*& outImage) {
     // here the deinitialization is performed...
     // ... in a reverse order to the init() function
 
-    if(nullptr!=outImage){
-        SDL_FreeSurface(outImage);
-        outImage=nullptr;
-    }
-    // // according to the documentation: This surface will be freed when the window is destroyed.
-    // if(nullptr!=outScreenSurface){
-    //     SDL_FreeSurface(outScreenSurface);
-    //     outScreenSurface = nullptr;
-    // }
-    
-    if(nullptr!=outWindow){
-        SDL_DestroyWindow(outWindow);
-        outWindow = nullptr;
-    }
+    Texture::freeSurface(outImage);
+    window.deinit();
 }
-
 
 static int32_t runApplication() {
 
-    SDL_Window* window=nullptr;
-    SDL_Surface* screenSurface=nullptr;
-    SDL_Surface* image=nullptr;
+    SDL_Surface* image = nullptr;
+    MonitorWindow window;
 
-    if(EXIT_SUCCESS!=init(window,screenSurface,image)){
+
+    if(EXIT_SUCCESS!=init(window,image)){
         std::cerr<<"init() failed."<<std::endl;
         return EXIT_FAILURE;
     }
 
-    draw(window,screenSurface,image);
+    draw(window,image);
 
-    deinit(window,screenSurface,image);
+    deinit(window,image);
 
     return EXIT_SUCCESS;
 }
 
 int32_t main([[maybe_unused]]int32_t argc, [[maybe_unused]]char* argv[]){
 
-    // In this case the VIDEO system of SDL is initialized, BUT can initialize many others as well
-    if(EXIT_SUCCESS!=SDL_Init(SDL_INIT_VIDEO)){
-        std::cerr<<"SDL_Init() failed. Reason: "<<SDL_GetError()<<std::endl;
+    if(EXIT_SUCCESS!=SDLLoader::init()){
+        std::cerr<<"SDLLoader::init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    runApplication();
+    if(EXIT_SUCCESS!=runApplication()){
+        std::cerr<<"runApplication() failed."<<std::endl;
+        return EXIT_FAILURE;
+    }
 
-    SDL_Quit();
+    SDLLoader::deinit();
 
     return EXIT_SUCCESS;
 }

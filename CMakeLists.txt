@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(sdl_runtime LANGUAGES CXX)
+project(input_events LANGUAGES CXX)
 #project(sdl_runtime) # LANGUAGES CXX could be important in some caes
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -25,11 +25,17 @@ find_package(${SDL2_ttf_name} REQUIRED)
 find_package(${SDL2_mixer_name} REQUIRED)
 
 add_executable(${PROJECT_NAME}
+                ${_BASE_DIR}/engine/Engine.h
+                ${_BASE_DIR}/engine/Engine.cpp
 
                 ${_BASE_DIR}/utils/drawing/Rectangle.h
                 ${_BASE_DIR}/utils/drawing/Rectangle.cpp
                 ${_BASE_DIR}/utils/drawing/Point.h
                 ${_BASE_DIR}/utils/drawing/Point.cpp
+                ${_BASE_DIR}/utils/thread/ThreadUtils.h
+                ${_BASE_DIR}/utils/thread/ThreadUtils.cpp
+                ${_BASE_DIR}/utils/time/Time.h
+                ${_BASE_DIR}/utils/time/Time.cpp
                 
                 ${_BASE_DIR}/sdl_utils/SDLLoader.cpp
                 ${_BASE_DIR}/sdl_utils/SDLLoader.h
@@ -38,6 +44,8 @@ add_executable(${PROJECT_NAME}
                 ${_BASE_DIR}/sdl_utils/MonitorWindow.h
                 ${_BASE_DIR}/sdl_utils/Texture.cpp
                 ${_BASE_DIR}/sdl_utils/Texture.h
+                ${_BASE_DIR}/sdl_utils/InputEvent.cpp
+                ${_BASE_DIR}/sdl_utils/InputEvent.h
                 
 
                 ${_BASE_DIR}/main.cpp

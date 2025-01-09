@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(input_events LANGUAGES CXX)
+project(hardware_rendering LANGUAGES CXX)
 #project(sdl_runtime) # LANGUAGES CXX could be important in some caes
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -25,8 +25,15 @@ find_package(${SDL2_ttf_name} REQUIRED)
 find_package(${SDL2_mixer_name} REQUIRED)
 
 add_executable(${PROJECT_NAME}
+                ${_BASE_DIR}/engine/config/EngineCfg.h
                 ${_BASE_DIR}/engine/Engine.h
                 ${_BASE_DIR}/engine/Engine.cpp
+                ${_BASE_DIR}/engine/EngineCfgLoader.h
+                ${_BASE_DIR}/engine/EngineCfgLoader.cpp
+
+                ${_BASE_DIR}/game/config/GameCfg.h
+                ${_BASE_DIR}/game/Game.h
+                ${_BASE_DIR}/game/Game.cpp
 
                 ${_BASE_DIR}/utils/drawing/Rectangle.h
                 ${_BASE_DIR}/utils/drawing/Rectangle.cpp
@@ -46,8 +53,9 @@ add_executable(${PROJECT_NAME}
                 ${_BASE_DIR}/sdl_utils/Texture.h
                 ${_BASE_DIR}/sdl_utils/InputEvent.cpp
                 ${_BASE_DIR}/sdl_utils/InputEvent.h
+                ${_BASE_DIR}/sdl_utils/Renderer.cpp
+                ${_BASE_DIR}/sdl_utils/Renderer.h
                 
-
                 ${_BASE_DIR}/main.cpp
 )
 
@@ -72,3 +80,20 @@ target_link_libraries(
             ${SDL2_TTF_LIBRARY}
             ${SDL2_MIXER_LIBRARY}
 )
+
+
+if(CMAKE_BUILD_TYPE MATCHES Release)
+    target_compile_definitions(
+        ${PROJECT_NAME}
+        PRIVATE
+        -DRELEASE_BUILD=1
+)
+
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+    )
+endif()

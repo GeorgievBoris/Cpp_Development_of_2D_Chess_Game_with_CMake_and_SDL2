@@ -29,10 +29,7 @@ public:
     void deinit();
     void destroyWindow();
 
-    int32_t updateWindowSurface();
-
-    // TODO remove me later on
-    SDL_Surface* getWindowSurface();
+    SDL_Window* getWindow() const;
 
 private:
     SDL_Window* _window=nullptr;

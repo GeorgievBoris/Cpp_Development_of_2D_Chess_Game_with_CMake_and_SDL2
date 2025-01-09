@@ -8,17 +8,15 @@
 // Own headers
 #include "sdl_utils/MonitorWindow.h"
 #include "sdl_utils/InputEvent.h"
+#include "game/Game.h"
+#include "sdl_utils/Renderer.h"
 // Forward Declarations
+struct EngineCfg;
 struct SDL_Surface;
-
-enum Images {
-    UP,DOWN,LEFT,RIGHT,ALL_KEYS,COUNT
-};
-
 
 class Engine {
 public:
-    int32_t init();
+    int32_t init(const EngineCfg& cfg);
     void deinit();
     void start();
     void draw();
@@ -31,15 +29,11 @@ private:
     void handleEvent();
 
     void limitFPS(int64_t elapsedTimeMicroseconds);
-    int32_t loadResources();
-        
-
+    
     MonitorWindow _window;
     InputEvent _event;
-    SDL_Surface* _screenSurface=nullptr;
-    // game specific logic - in theory this has no place inside the Engine
-    SDL_Surface* _currChosenImage=nullptr;
-    SDL_Surface* _imageSurfaces[COUNT]{};
+    Game _game;
+    Renderer _renderer;
 };
 
 

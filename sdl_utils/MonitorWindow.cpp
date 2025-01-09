@@ -42,22 +42,8 @@ void MonitorWindow::deinit(){
     }
 }
 
-int32_t MonitorWindow::updateWindowSurface(){
-    if(EXIT_SUCCESS!=SDL_UpdateWindowSurface(_window)){
-        std::cerr<<"SDL_UpdateWindowSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
-
-SDL_Surface* MonitorWindow::getWindowSurface(){
-    // according to the documentation: This surface will be freed when the window is destroyed.
-    SDL_Surface* screenSurface=SDL_GetWindowSurface(_window);
-    if((nullptr==screenSurface)){
-        std::cerr<<"SDL_GetWindowSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
-        return nullptr;
-    }
-    return screenSurface;
+SDL_Window* MonitorWindow::getWindow() const {
+    return _window;
 }
 
 

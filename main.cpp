@@ -7,12 +7,13 @@
 // Own includes
 #include "engine/Engine.h"
 #include "sdl_utils/SDLLoader.h"
+#include "engine/EngineCfgLoader.h"
 
 static int32_t runApplication() {
 
     Engine engine;
 
-    if(EXIT_SUCCESS!=engine.init()){
+    if(EXIT_SUCCESS!=engine.init(EngineCfgLoader::loadCfg())){
         std::cerr<<"engine.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }

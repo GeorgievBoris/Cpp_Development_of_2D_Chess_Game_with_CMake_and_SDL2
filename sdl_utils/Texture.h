@@ -6,6 +6,7 @@
 // C++ system headers
 // Third-party headers
 // Own headers
+#include "utils/drawing/DrawParams.h"
 // Forward declarations
 struct SDL_Surface;
 struct SDL_Texture;
@@ -29,7 +30,10 @@ public:
     static int32_t createTextureFromSurface(SDL_Surface*& inOutSurface, SDL_Texture*& outTexture);
     static void freeSurface(SDL_Surface*& outSurface);
     static void freeTexture(SDL_Texture*& outTexture);
-    static void setRenderer(SDL_Renderer* renderer); // a helper method    
+    static void setRenderer(SDL_Renderer* renderer); // a helper method
+
+    static int32_t setBlendModeTexture(SDL_Texture* texture, BlendMode blendMode); // blendMode is the type of algorithm used !!!
+    static int32_t setAlphaTexture(SDL_Texture* texture, int32_t alpha);
 };
 
 #endif // SDL_UTILS_TEXTURE_H_

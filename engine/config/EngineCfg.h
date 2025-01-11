@@ -7,11 +7,13 @@
 // Third-party headers
 // Own headers
 #include "sdl_utils/config/MonitorWindowCfg.h"
+#include "sdl_utils/config/ImageContainerCfg.h"
 #include "game/config/GameCfg.h"
 // Forward Declarations
 
 struct EngineCfg {
     MonitorWindowCfg windowCfg;
+    ImageContainerCfg imgContainerCfg;
     GameCfg gameCfg;
 };
 

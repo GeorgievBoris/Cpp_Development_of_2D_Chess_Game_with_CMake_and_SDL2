@@ -7,75 +7,84 @@
 #include <SDL_render.h>
 // Own headers
 #include "sdl_utils/InputEvent.h"
-#include "sdl_utils/Texture.h"
+#include "sdl_utils/containers/ImageContainer.h"
 
-
-int32_t Game::init(const GameCfg& cfg){
-
-    if(EXIT_SUCCESS!=loadResources(cfg.imgPaths)){
-        std::cerr<<"Game::loadResources() failed."<<std::endl;
+int32_t Game::init(const GameCfg& cfg, const ImageContainer* imageContainerInterface){
+    if(nullptr==imageContainerInterface){
+        std::cerr<<"Error, nullptr provided for imageContainerInterface"<<std::endl;
         return EXIT_FAILURE;
     }
+    _imageContainer=imageContainerInterface;
 
-    _currChosenImage=_imageSurfaces[PRESS_KEYS];
+    _layer2Img.rsrcId=cfg.layer2RsrcId;
+    Rectangle rect = _imageContainer->getImageFrame(_layer2Img.rsrcId);
+    _layer2Img.width=rect.w;
+    _layer2Img.height=rect.h;
+    _layer2Img.pos=Point::ZERO;
+
+    _pressKeysImg.rsrcId=cfg.pressKeysRsrcId;
+    rect=_imageContainer->getImageFrame(_pressKeysImg.rsrcId);
+    _pressKeysImg.width=rect.w;
+    _pressKeysImg.height=rect.h;
+    _pressKeysImg.pos=Point::ZERO;
+    // _pressKeysImg.pos.y+=20;
+
+    _pressKeysImgDuplicate=_pressKeysImg; // for testing purposes - to check if opacity changes for the created SDL_Texture  
 
     return EXIT_SUCCESS;
 }
 
 void Game::deinit(){
-    for(int32_t i=0;i<COUNT;++i){
-        Texture::freeTexture(_imageSurfaces[i]);
-    }
+    
 }
 
-void Game::draw(std::vector<SDL_Texture*>& outImages){
-    outImages.push_back(_currChosenImage);
-    // outImages.push_back(_imageSurfaces[LAYER_2]);
+void Game::draw(std::vector<DrawParams>& outImages){
+    // outImages.push_back(_pressKeysImg);
+    outImages.push_back(_pressKeysImgDuplicate); // for testing purposes - to check if opacity changes for the created SDL_Texture
+    outImages.push_back(_pressKeysImg);
+    // outImages.push_back(_layer2Img);
 }
 
 
 
 void Game::handleEvent(const InputEvent& e){
 
-    // if(TouchEvent::KEYBOARD_RELEASE==_event.type){
-    //     _currChosenImage=_imageSurfaces[ALL_KEYS];
-    //     return;
-    // }
-
-    if(TouchEvent::KEYBOARD_PRESS!=e.type){
-        TouchEvent::KEYBOARD_RELEASE==e.type ? _currChosenImage=_imageSurfaces[PRESS_KEYS] : (void*)_currChosenImage;
+    if(TouchEvent::KEYBOARD_RELEASE!=e.type){
         return;
     }
 
     switch(e.key){
         case Keyboard::KEY_UP:
-            _currChosenImage=_imageSurfaces[UP];
+            _pressKeysImg.pos.y-=10;
             break;
         case Keyboard::KEY_DOWN:
-            _currChosenImage=_imageSurfaces[DOWN];
+            _pressKeysImg.pos.y+=10;
             break;
         case Keyboard::KEY_LEFT:
-            _currChosenImage=_imageSurfaces[LEFT];
+            _pressKeysImg.pos.x-=10;
             break;
         case Keyboard::KEY_RIGHT:
-            _currChosenImage=_imageSurfaces[RIGHT];
+            _pressKeysImg.pos.x+=10;
+            break;
+        case Keyboard::KEY_Q:
+            _pressKeysImg.width-=10;
+            break;
+        case Keyboard::KEY_W:
+            _pressKeysImg.width+=10;
+            break;
+        case Keyboard::KEY_E:
+            _pressKeysImg.height-=10;
+            break;
+        case Keyboard::KEY_R:
+            _pressKeysImg.height+=10;
+            break;
+        case Keyboard::KEY_T:
+            _pressKeysImg.opacity-=10;
+            break;
+        case Keyboard::KEY_Y:
+            _pressKeysImg.opacity+=10;
             break;
         default:
-            // (void*)_currChosenImage;
             break;
     }
-}
-
-int32_t Game::loadResources(const std::unordered_map<GameImages,std::string>& res){
-
-    for(const auto& pair:res){
-        const auto resId=pair.first;
-        const auto& resLocation=pair.second;
-        if(EXIT_SUCCESS!=Texture::createTextureFromFile(resLocation.c_str(),_imageSurfaces[resId])){
-            std::cerr<<"Texture::createTextureFromFile() failed for file: "<<resLocation<<std::endl;
-            return EXIT_FAILURE;            
-        }
-    }
-    
-    return EXIT_SUCCESS;
 }

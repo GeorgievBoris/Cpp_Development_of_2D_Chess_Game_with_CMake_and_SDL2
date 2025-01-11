@@ -42,6 +42,14 @@ void MonitorWindow::deinit(){
     }
 }
 
+int32_t MonitorWindow::updateWindowSurface(){
+    if(EXIT_SUCCESS!=SDL_UpdateWindowSurface(_window)){
+        std::cerr<<"SDL_UpdateWindowSurface() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
 SDL_Window* MonitorWindow::getWindow() const {
     return _window;
 }

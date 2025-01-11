@@ -9,24 +9,24 @@
 // Third-party headers
 // Own headers
 #include "game/config/GameCfg.h"
+#include "utils/drawing/DrawParams.h"
 // Forward Declarations
 class InputEvent;
-struct SDL_Texture;
-
-
+class ImageContainer;
 
 class Game {
 public:
-    int32_t init(const GameCfg& cfg);
+    int32_t init(const GameCfg& cfg,const ImageContainer* imageContainerInterface);
     void deinit();
-    void draw(std::vector<SDL_Texture*>& outImages);
+    void draw(std::vector<DrawParams>& outImages);
     void handleEvent(const InputEvent& e);
 
 private:
-
-    int32_t loadResources(const std::unordered_map<GameImages,std::string>& res);
-    SDL_Texture* _currChosenImage=nullptr;
-    SDL_Texture* _imageSurfaces[COUNT];
+    DrawParams _pressKeysImg;
+    DrawParams _pressKeysImgDuplicate; // for testing purposes - to check if opacity changes for the created SDL_Texture
+    DrawParams _layer2Img;
+    // TODO remove me!!!
+    const ImageContainer* _imageContainer=nullptr;
 };
 
 

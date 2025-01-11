@@ -10,12 +10,9 @@
 // Own headers
 // Foward Declarations
 
-enum GameImages{
-    UP,DOWN,LEFT,RIGHT,PRESS_KEYS,LAYER_2,COUNT
-};
-
 struct GameCfg{
-    std::unordered_map<GameImages,std::string> imgPaths;
+    int32_t pressKeysRsrcId;
+    int32_t layer2RsrcId;
 };
 
 #endif // GAME_CONFIG_GAMECFG_H_

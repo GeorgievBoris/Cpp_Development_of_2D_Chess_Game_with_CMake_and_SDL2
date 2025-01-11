@@ -5,10 +5,20 @@
 #include <iostream>
 // Third-party headers
 #include <SDL_render.h>
+#include <SDL_hints.h>
 // Own headers
 #include "sdl_utils/Texture.h"
 
 int32_t Renderer::init(SDL_Window* window){
+
+    // implement renderer hints to enable linear interpolation
+    // renderer hints must be enabled before the renderer is actually created !!!
+
+    if(!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"1")){ // read the description in "SDL_hints.h"
+        std::cerr<<"Warning: Linear texture filtering not enabled!"
+        "SDL_SetHint() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
 
     // SDL_RENDERER_SOFTWARE // allows to use the CPU for rendering - added for legacy reasons
 
@@ -60,10 +70,28 @@ void Renderer::finishFrame(){
     SDL_RenderPresent(_sdlRenderer);
 }
 
-void Renderer::renderTexture(SDL_Texture* texture){
+void Renderer::renderTexture(SDL_Texture* texture, const DrawParams& drawParams){
     // first "nullptr" means take the entire image and second "nullptr" means to draw it on the entire window
-    const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
+    // const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
+
+    const SDL_Rect destRect={.x=drawParams.pos.x, .y=drawParams.pos.y, .w=drawParams.width, .h=drawParams.height}; 
+
+    int32_t err=EXIT_SUCCESS;
+    if(FULL_OPACITY==drawParams.opacity){
+        err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
+    } else {
+        if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,drawParams.opacity)){
+            std::cerr<<"Texture::setAlphaTexture() failed for rsrcId: "<<drawParams.rsrcId<<std::endl;
+            return;
+        }
+        err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
+
+        if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,FULL_OPACITY)){
+            std::cerr<<"Texture::setAlphaTexture() failed for rsrcId: "<<drawParams.rsrcId<<std::endl;
+            return;
+        }
+    }
     if(EXIT_SUCCESS!=err){
-        std::cerr<<"SDL_RenderCopy() failed. Reason: "<<SDL_GetError()<<std::endl;
+        std::cerr<<"SDL_RenderCopy() failed for rsrcId: "<<drawParams.rsrcId<<". Reason: "<<SDL_GetError()<<std::endl;
     }
 }

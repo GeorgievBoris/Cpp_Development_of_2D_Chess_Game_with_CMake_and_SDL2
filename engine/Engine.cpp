@@ -23,12 +23,17 @@ int32_t Engine::init(const EngineCfg& cfg){
         return EXIT_FAILURE;
     }
 
+    if(EXIT_SUCCESS!=_imgContainer.init(cfg.imgContainerCfg)){
+        std::cerr<<"_imageContainer::init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
     if(EXIT_SUCCESS!=_event.init()){
         std::cerr<<"_event.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg)){
+    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg,&_imgContainer)){
         std::cerr<<"_game.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -43,6 +48,7 @@ void Engine::deinit(){
     // Texture::freeSurface(_screenSurface); // not 100% mandatory !!!
     _game.deinit();
     _event.deinit();
+    _imgContainer.deinit();
     _renderer.deinit();
     _window.deinit();
 }
@@ -69,11 +75,13 @@ void Engine::drawFrame(){
 
     _renderer.clearScreen();
 
-    std::vector<SDL_Texture*> images;
+    std::vector<DrawParams> images;
     _game.draw(images);
 
-    for(const auto& image:images){
-        _renderer.renderTexture(image);
+    SDL_Texture* texture=nullptr;
+    for(const DrawParams& image:images){
+        texture=_imgContainer.getImageTexture(image.rsrcId);
+        _renderer.renderTexture(texture,image);
     }
 
     _renderer.finishFrame();

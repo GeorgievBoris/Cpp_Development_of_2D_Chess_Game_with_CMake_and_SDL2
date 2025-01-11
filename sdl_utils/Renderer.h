@@ -6,6 +6,7 @@
 // C++ system headers
 // Third-party headers
 // Own headers
+#include "utils/drawing/DrawParams.h"
 // Forward Declarations
 struct SDL_Renderer;
 struct SDL_Texture; // this is the GPU primitive that is used to upload data on the GPU !!! SDL_Surface is a CPU primitive !!!
@@ -26,7 +27,7 @@ public:
     void deinit();
     void clearScreen();
     void finishFrame();
-    void renderTexture(SDL_Texture* texture);
+    void renderTexture(SDL_Texture* texture, const DrawParams& drawParams);
 
 
 private:

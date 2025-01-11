@@ -6,10 +6,11 @@
 // C++ system headers
 // Third-party headers
 // Own headers
+#include "game/Game.h"
 #include "sdl_utils/MonitorWindow.h"
 #include "sdl_utils/InputEvent.h"
-#include "game/Game.h"
 #include "sdl_utils/Renderer.h"
+#include "sdl_utils/containers/ImageContainer.h"
 // Forward Declarations
 struct EngineCfg;
 struct SDL_Surface;
@@ -22,7 +23,6 @@ public:
     void draw();
 
 private:
-
     void mainLoop();
     void drawFrame();
     bool processFrame();
@@ -32,8 +32,9 @@ private:
     
     MonitorWindow _window;
     InputEvent _event;
-    Game _game;
     Renderer _renderer;
+    ImageContainer _imgContainer;
+    Game _game;
 };
 
 

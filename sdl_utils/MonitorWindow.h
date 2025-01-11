@@ -29,6 +29,8 @@ public:
     void deinit();
     void destroyWindow();
 
+    int32_t updateWindowSurface();
+
     SDL_Window* getWindow() const;
 
 private:

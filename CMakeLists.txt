@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(hardware_rendering LANGUAGES CXX)
+project(scaling_and_alpha_blending LANGUAGES CXX)
 #project(sdl_runtime) # LANGUAGES CXX could be important in some caes
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -25,6 +25,8 @@ find_package(${SDL2_ttf_name} REQUIRED)
 find_package(${SDL2_mixer_name} REQUIRED)
 
 add_executable(${PROJECT_NAME}
+                ${_BASE_DIR}/common/CommonDefines.h
+
                 ${_BASE_DIR}/engine/config/EngineCfg.h
                 ${_BASE_DIR}/engine/Engine.h
                 ${_BASE_DIR}/engine/Engine.cpp
@@ -39,14 +41,16 @@ add_executable(${PROJECT_NAME}
                 ${_BASE_DIR}/utils/drawing/Rectangle.cpp
                 ${_BASE_DIR}/utils/drawing/Point.h
                 ${_BASE_DIR}/utils/drawing/Point.cpp
+                ${_BASE_DIR}/utils/drawing/DrawParams.h
                 ${_BASE_DIR}/utils/thread/ThreadUtils.h
                 ${_BASE_DIR}/utils/thread/ThreadUtils.cpp
                 ${_BASE_DIR}/utils/time/Time.h
                 ${_BASE_DIR}/utils/time/Time.cpp
                 
+                ${_BASE_DIR}/sdl_utils/config/MonitorWindowCfg.h
+                ${_BASE_DIR}/sdl_utils/config/ImageContainerCfg.h
                 ${_BASE_DIR}/sdl_utils/SDLLoader.cpp
                 ${_BASE_DIR}/sdl_utils/SDLLoader.h
-                ${_BASE_DIR}/sdl_utils/config/MonitorWindowCfg.h
                 ${_BASE_DIR}/sdl_utils/MonitorWindow.cpp
                 ${_BASE_DIR}/sdl_utils/MonitorWindow.h
                 ${_BASE_DIR}/sdl_utils/Texture.cpp
@@ -55,6 +59,8 @@ add_executable(${PROJECT_NAME}
                 ${_BASE_DIR}/sdl_utils/InputEvent.h
                 ${_BASE_DIR}/sdl_utils/Renderer.cpp
                 ${_BASE_DIR}/sdl_utils/Renderer.h
+                ${_BASE_DIR}/sdl_utils/containers/ImageContainer.cpp
+                ${_BASE_DIR}/sdl_utils/containers/ImageContainer.h
                 
                 ${_BASE_DIR}/main.cpp
 )

@@ -6,131 +6,106 @@
 // Third-party headers
 // Own headers
 #include "sdl_utils/InputEvent.h"
-#include "sdl_utils/containers/ImageContainer.h"
-#include "sdl_utils/containers/TextContainer.h"
 #include "utils/drawing/Color.h"
 
-static int32_t gFontId;
+int32_t Game::init(const GameCfg& cfg){
 
-int32_t Game::init(const GameCfg& cfg, const ImageContainer* imageContainerInterface, 
-                                                TextContainer* textContainerInterface){
-    if(nullptr==imageContainerInterface){
-        std::cerr<<"Error, nullptr provided for imageContainerInterface"<<std::endl;
-        return EXIT_FAILURE;
-    }
-    _imageContainer=imageContainerInterface;
+    _layer2Img.create(cfg.layer2RsrcId);
+    _pressKeysImg.create(cfg.pressKeysRsrcId);
+    _pressKeysImg.activateAlphaModulation();
 
-    gFontId=cfg.textFontId;
-    if(nullptr==textContainerInterface){
-        std::cerr<<"Error, nullptr provided for textContainerInterface"<<std::endl;
-        return EXIT_FAILURE;
-    }
-    _textContainer=textContainerInterface;
+    _helloText.create("Hello, C++ dudes",cfg.textFontId,Colors::GREEN);
+    _pressText.create("Press M to hide",cfg.textFontId,Colors::GREEN,Point(100,100));
+    _hideText.create("Press N to show",cfg.textFontId,Colors::PURPLE,Point(200,200));
+    _hideText.hide();
 
-    _layer2Img.rsrcId=cfg.layer2RsrcId;
-    Rectangle rect = _imageContainer->getImageFrame(_layer2Img.rsrcId);
-    _layer2Img.width=rect.w;
-    _layer2Img.height=rect.h;
-    _layer2Img.pos=Point::ZERO;
-    _layer2Img.widgetType=WidgetType::IMAGE;
-
-    _pressKeysImg.rsrcId=cfg.pressKeysRsrcId;
-    rect=_imageContainer->getImageFrame(_pressKeysImg.rsrcId);
-    _pressKeysImg.width=rect.w;
-    _pressKeysImg.height=rect.h;
-    _pressKeysImg.pos=Point::ZERO;
-    _pressKeysImg.widgetType=WidgetType::IMAGE;
-    _pressKeysImg.pos.y+=20;
-
-    // _helloText.textId=cfg.textFontId;
-    _helloText.widgetType=WidgetType::TEXT;
-    _textContainer->createText("Hello, C++ dudes",Colors::GREEN,gFontId,_helloText.textId,
-                                                    _helloText.width,_helloText.height);
-    _helloText.pos=Point::ZERO;
-
-    _textContainer->createText("Press M to hide", Colors::GREEN,gFontId,_pressText.textId,
-                                                    _pressText.width,_pressText.height);
-    _pressText.pos=Point::ZERO;
-    _pressText.pos.x+=100;
-    _pressText.pos.y+=100;
-    _pressText.widgetType=WidgetType::TEXT;
-
-    _textContainer->createText("Press N to show",Colors::PURPLE,gFontId,_hideText.textId,
-                                                    _hideText.width,_hideText.height);
-    
-    _hideText.pos=Point::ZERO;
-    _hideText.pos.x+=200;
-    _hideText.pos.y+=200;
-    _hideText.widgetType=WidgetType::TEXT;
+    _mousePosText.create("_",cfg.textFontId,Colors::RED);
+    _mousePosText.hide();
 
     return EXIT_SUCCESS;
 }
 
 void Game::deinit(){
-    _textContainer->unloadText(_helloText.textId);
+
 }
 
-void Game::draw(std::vector<DrawParams>& outImages){
-    outImages.push_back(_pressKeysImg);
-    outImages.push_back(_layer2Img);
-    outImages.push_back(_helloText);
+void Game::draw(){
+    // _pressKeysImg.draw();
+    // _layer2Img.draw();
+    // _helloText.draw();
 
-    if(isPressTextHidden){
-        outImages.push_back(_hideText);
-    } else {
-        outImages.push_back(_pressText);
-    }
+    // _hideText.draw();
+    // _pressText.draw();
+    _mousePosText.draw();
 }
 
 void Game::handleEvent(const InputEvent& e){
 
-    if(TouchEvent::KEYBOARD_RELEASE!=e.type){
+    if(TouchEvent::TOUCH_RELEASE!=e.type){
         return;
     }
 
-    switch(e.key){
-        case Keyboard::KEY_UP:
-            _pressKeysImg.pos.y-=10;
-            break;
-        case Keyboard::KEY_DOWN:
-            _pressKeysImg.pos.y+=10;
-            break;
-        case Keyboard::KEY_LEFT:
-            _pressKeysImg.pos.x-=10;
-            break;
-        case Keyboard::KEY_RIGHT:
-            _pressKeysImg.pos.x+=10;
-            break;
-        case Keyboard::KEY_Q:
-            _pressKeysImg.width-=10;
-            break;
-        case Keyboard::KEY_W:
-            _pressKeysImg.width+=10;
-            break;
-        case Keyboard::KEY_E:
-            _pressKeysImg.height-=10;
-            break;
-        case Keyboard::KEY_R:
-            _pressKeysImg.height+=10;
-            break;
-        case Keyboard::KEY_T:
-            _pressKeysImg.opacity-=10;
-            break;
-        case Keyboard::KEY_Y:
-            _pressKeysImg.opacity+=10;
-            break;
-        case Keyboard::KEY_B:
-            _textContainer->reloadText("Kak ste, kolegi?",Colors::GREEN,gFontId,_helloText.textId,
-                                                            _helloText.width,_helloText.height);
-            break;
-        case Keyboard::KEY_M:
-            isPressTextHidden=true;
-            break;
-        case Keyboard::KEY_N:
-            isPressTextHidden=false;
-            break;
-        default:
-            // (void*)_currChosenImage;
-            break;
-    }
+    setMousePosText(e.pos);
 }
+    
+
+    // if(TouchEvent::KEYBOARD_RELEASE!=e.type){
+    //     return;
+    // }
+
+    // switch(e.key){
+    //     case Keyboard::KEY_UP:
+    //         _pressKeysImg.moveUp(10);
+    //         break;
+    //     case Keyboard::KEY_DOWN:
+    //         _pressKeysImg.moveDown(10);
+    //         break;
+    //     case Keyboard::KEY_LEFT:
+    //         _pressKeysImg.moveLeft(10);
+    //         break;
+    //     case Keyboard::KEY_RIGHT:
+    //         _pressKeysImg.moveRight(10);
+    //         break;
+    //     case Keyboard::KEY_Q:
+    //         _pressKeysImg.setWidth(_pressKeysImg.getWidth()-10);
+    //         break;
+    //     case Keyboard::KEY_W:
+    //         _pressKeysImg.setWidth(_pressKeysImg.getWidth()+10);
+    //         break;
+    //     case Keyboard::KEY_E:
+    //         _pressKeysImg.setHeight(_pressKeysImg.getHeight()-10);
+    //         break;
+    //     case Keyboard::KEY_R:
+    //         _pressKeysImg.setHeight(_pressKeysImg.getHeight()+10);
+    //         break;
+    //     case Keyboard::KEY_T:
+    //         _pressKeysImg.setOpacity(_pressKeysImg.getOpacity()-10);
+    //         break;
+    //     case Keyboard::KEY_Y:
+    //         _pressKeysImg.setOpacity(_pressKeysImg.getOpacity()+10);
+    //         break;
+    //     case Keyboard::KEY_B:
+    //         _helloText.setText("Kak ste, kolegi?");
+    //         break;
+    //     case Keyboard::KEY_M:
+    //         _pressText.hide();
+    //         _hideText.show();
+    //         break;
+    //     case Keyboard::KEY_N:
+    //         _pressText.show();
+    //         _hideText.hide();
+    //         break;
+    //     default:
+    //         // (void*)_currChosenImage;
+    //         break;
+    // }
+
+    void Game::setMousePosText(const Point& mousePos){
+        _mousePosText.show();
+        _mousePosText.setPosition(mousePos);
+        std::string textContent="X: ";
+        textContent.append(std::to_string(mousePos.x))
+                    .append(", Y: ")
+                    .append(std::to_string(mousePos.y));
+        _mousePosText.setText(textContent);
+    }

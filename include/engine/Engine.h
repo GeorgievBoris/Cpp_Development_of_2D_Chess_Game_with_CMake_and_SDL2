@@ -7,11 +7,8 @@
 // Third-party headers
 // Own headers
 #include "game/Game.h"
-#include "sdl_utils/MonitorWindow.h"
 #include "sdl_utils/InputEvent.h"
-#include "sdl_utils/Renderer.h"
-#include "sdl_utils/containers/ImageContainer.h"
-#include "sdl_utils/containers/TextContainer.h"
+#include "manager_utils/managers/ManagerHandler.h"
 // Forward Declarations
 struct EngineCfg;
 
@@ -30,12 +27,9 @@ private:
 
     void limitFPS(int64_t elapsedTimeMicroseconds);
     
-    MonitorWindow _window;
     InputEvent _event;
-    Renderer _renderer;
-    ImageContainer _imgContainer;
-    TextContainer _textContainer;
     Game _game;
+    ManagerHandler _managerHandler;
 };
 
 

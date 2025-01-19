@@ -19,6 +19,8 @@ class Color{
 public:
     Color(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha=255);
     Color()=delete;
+    bool operator==(const Color& other) const;
+    bool operator!=(const Color& other) const;
 
     RGBA rgba;
 };

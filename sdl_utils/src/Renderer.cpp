@@ -81,6 +81,19 @@ void Renderer::renderTexture(SDL_Texture* texture, const DrawParams& drawParams)
                 <<" for rsrcId: "<<drawParams.rsrcId<<std::endl;
     }
 }
+
+void Renderer::setWidgetBlendMode(SDL_Texture* texture, BlendMode blendMode){
+    if(EXIT_SUCCESS!=Texture::setBlendModeTexture(texture,blendMode)){
+        std::cerr<<"Texture::setBlendModeTexture() failed"<<std::endl;
+    }
+}
+
+void Renderer::setWidgetOpacity(SDL_Texture* texture, int32_t opacity){
+    if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,opacity)){
+        std::cerr<<"Texture::setAlphaTexture() failed"<<std::endl;
+    }
+}
+
 void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture){
     // first "nullptr" means take the entire image and second "nullptr" means to draw it on the entire window
     // const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
@@ -108,10 +121,6 @@ void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture){
 void Renderer::drawText(const DrawParams& drawParams, SDL_Texture* texture){
     const SDL_Rect destRect={.x=drawParams.pos.x, .y=drawParams.pos.y, .w=drawParams.width, .h=drawParams.height};
 
-    // TODO handle properly - do not set alpha every time
-    if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,drawParams.opacity)){
-        std::cerr<<"Texture::setAlphaTexture() failed for rsrcId: "<<drawParams.rsrcId<<std::endl;
-    }
     const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
 
     if(EXIT_SUCCESS!=err){

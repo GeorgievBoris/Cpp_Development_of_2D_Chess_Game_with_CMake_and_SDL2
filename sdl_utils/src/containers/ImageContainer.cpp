@@ -55,12 +55,6 @@ int32_t ImageContainer::loadSingleResource(const ImageCfg& resCfg, int32_t rsrcI
         return EXIT_FAILURE;
     }
 
-    // TODO remove me later - temporary enable alpha blending for all existing SDL_Textures
-    if(EXIT_SUCCESS!=Texture::setBlendModeTexture(texture,BlendMode::BLEND)){
-        std::cerr<<"Texture::setBlendModeTexture() failed for file: "<<resCfg.location<<std::endl;
-        return EXIT_FAILURE;
-    }
-
     _textures[rsrcId]=texture;
 
     Rectangle& rect = _textureFrames[rsrcId];

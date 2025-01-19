@@ -10,7 +10,6 @@
 #include "engine/EngineCfgLoader.h"
 
 static int32_t runApplication() {
-
     Engine engine;
 
     if(EXIT_SUCCESS!=engine.init(EngineCfgLoader::loadCfg())){

@@ -16,9 +16,6 @@ class Color;
 
 class TextContainer{
 public:
-    int32_t init(const TextContainerCfg& cfg);
-    void deinit();
-
     void createText(const char* text, const Color& color, int32_t fontId,
                             int32_t& outTextId, int32_t& outTextWidth,
                             int32_t& outTextHeight);
@@ -29,6 +26,11 @@ public:
     
     void unloadText(int32_t textId);
     SDL_Texture* getTextTexture(int32_t textId) const;
+
+protected:
+    int32_t init(const TextContainerCfg& cfg);
+    void deinit();
+    
 private:
     void occupyFreeSlotIndex(int32_t& outIdx, SDL_Texture* texture);
     // the textures we will be drawing

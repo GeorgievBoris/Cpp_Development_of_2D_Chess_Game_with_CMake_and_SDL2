@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(texts LANGUAGES CXX)
+project(managers LANGUAGES CXX)
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(_INC_DIR ${_BASE_DIR}/include)
@@ -37,7 +37,7 @@ target_include_directories(
 target_link_libraries(
     ${PROJECT_NAME}
         PRIVATE
-            sdl_utils # write this down in the book: the moment we link to the "sdl_utils" library, we will take everything that is PUBLIC in the "target_include_directories()" of sdl_utils
+            manager_utils # write this down in the book: the moment we link to the "manager_utils" library, we will take everything that is PUBLIC in the "target_include_directories()" of "manager_utils"
 )
 
 
@@ -57,5 +57,6 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
     )
 endif()
 
-add_subdirectory(utils)
-add_subdirectory(${_BASE_DIR}/sdl_utils)
+add_subdirectory(utils) # here the name of the folder must be added, NOT the name of the binary
+add_subdirectory(${_BASE_DIR}/sdl_utils) # here the name of the folder must be added, NOT the name of the binary
+add_subdirectory(${_BASE_DIR}/manager_utils) # here the name of the folder must be added, NOT the name of the binary

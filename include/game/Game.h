@@ -5,36 +5,31 @@
 #include <cstdint>
 // C++ system headers
 #include <unordered_map>
-#include <vector>
 // Third-party headers
 // Own headers
 #include "game/config/GameCfg.h"
-#include "utils/drawing/DrawParams.h"
+#include "manager_utils/drawing/Image.h"
+#include "manager_utils/drawing/Text.h"
 // Forward Declarations
 class InputEvent;
-class ImageContainer;
-class TextContainer;
 
 class Game {
 public:
-    int32_t init(const GameCfg& cfg,const ImageContainer* imageContainerInterface,
-                                            TextContainer* textContainerInterface);
+    int32_t init(const GameCfg& cfg);
     void deinit();
-    void draw(std::vector<DrawParams>& outImages);
+    void draw();
     void handleEvent(const InputEvent& e);
 
 private:
-    DrawParams _pressKeysImg;
-    DrawParams _layer2Img;
+    Image _pressKeysImg;
+    Image _layer2Img;
     
-    DrawParams _helloText;
-    DrawParams _pressText;
-    DrawParams _hideText;
+    Text _helloText;
+    Text _pressText;
+    Text _hideText;
 
-    bool isPressTextHidden=false;
-    // TODO remove us!!!
-    const ImageContainer* _imageContainer=nullptr;
-    TextContainer* _textContainer=nullptr;
+    void setMousePosText(const Point& mousePos);
+    Text _mousePosText;
 };
 
 

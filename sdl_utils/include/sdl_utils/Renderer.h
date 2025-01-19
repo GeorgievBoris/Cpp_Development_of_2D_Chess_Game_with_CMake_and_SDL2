@@ -29,7 +29,8 @@ public:
     void finishFrame();
     void renderTexture(SDL_Texture* texture, const DrawParams& drawParams);
 
-    void drawWidget(const DrawParams& drawParams, SDL_Texture* texture);
+    void setWidgetBlendMode(SDL_Texture* texture, BlendMode blendMode);
+    void setWidgetOpacity(SDL_Texture* texture, int32_t opacity);
 
 
 private:

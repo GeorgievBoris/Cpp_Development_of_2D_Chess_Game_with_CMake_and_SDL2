@@ -6,16 +6,12 @@
 // C++ system headers
 // Third-party headers
 // Own headers
-#include "sdl_utils/config/MonitorWindowCfg.h"
-#include "sdl_utils/config/ImageContainerCfg.h"
-#include "sdl_utils/config/TextContainerCfg.h"
+#include "manager_utils/config/ManagerHandlerCfg.h"
 #include "game/config/GameCfg.h"
 // Forward Declarations
 
 struct EngineCfg {
-    MonitorWindowCfg windowCfg;
-    ImageContainerCfg imgContainerCfg;
-    TextContainerCfg textContainerCfg;
+    ManagerHandlerCfg managerHandlerCfg;
     GameCfg gameCfg;
 };
 

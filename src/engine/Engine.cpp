@@ -9,27 +9,13 @@
 #include "utils/thread/ThreadUtils.h"
 #include "utils/time/Time.h"
 #include "sdl_utils/Texture.h"
+#include "utils/drawing/Color.h"
+#include "manager_utils/managers/DrawMgr.h"
 
 int32_t Engine::init(const EngineCfg& cfg){
 
-
-    if(EXIT_SUCCESS!=_window.init(cfg.windowCfg)){
-        std::cerr<<"_window.init() failed"<<std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if(EXIT_SUCCESS!=_renderer.init(_window.getWindow())){
-        std::cerr<<"_renderer.init() failed"<<std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if(EXIT_SUCCESS!=_imgContainer.init(cfg.imgContainerCfg)){
-        std::cerr<<"_imageContainer::init() failed"<<std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if(EXIT_SUCCESS!=_textContainer.init(cfg.textContainerCfg)){
-        std::cerr<<"_textContainer.init() failed"<<std::endl;
+    if(EXIT_SUCCESS!=_managerHandler.init(cfg.managerHandlerCfg)){
+        std::cerr<<"_managerHandler.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
@@ -38,7 +24,7 @@ int32_t Engine::init(const EngineCfg& cfg){
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg,&_imgContainer,&_textContainer)){
+    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg)){
         std::cerr<<"_game.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -52,10 +38,7 @@ void Engine::deinit(){
 
     _game.deinit();
     _event.deinit();
-    _textContainer.deinit();
-    _imgContainer.deinit();
-    _renderer.deinit();
-    _window.deinit();
+    _managerHandler.deinit();
 }
 
 void Engine::start(){
@@ -77,28 +60,11 @@ void Engine::mainLoop(){
 }
 
 void Engine::drawFrame(){
+    gDrawMgr->clearScreen();
 
-    _renderer.clearScreen();
+    _game.draw();
 
-    std::vector<DrawParams> images;
-    _game.draw(images);
-
-    SDL_Texture* texture=nullptr;
-    for(const DrawParams& image:images){
-        if(WidgetType::IMAGE==image.widgetType){
-            texture=_imgContainer.getImageTexture(image.rsrcId);
-        } else if (WidgetType::TEXT==image.widgetType){
-            texture=_textContainer.getTextTexture(image.textId);
-        } else {
-            std::cerr<<"Error, received unsupported WidgetType: "
-            <<static_cast<int32_t>(image.widgetType)<<" for rsrcId: "
-            <<image.rsrcId<<std::endl;
-            continue;
-        }
-        _renderer.renderTexture(texture,image);
-    }
-
-    _renderer.finishFrame();
+    gDrawMgr->finishFrame();
 }
 
 bool Engine::processFrame(){

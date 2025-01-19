@@ -32,6 +32,9 @@ enum class BlendMode:uint8_t {
 
 
 struct DrawParams{
+    // despite the fact that this is POD (=Plain Old Data), not a problem at all to have one function
+    void reset();
+
     // Top left position of texture
     Point pos=Point::UNDEFINED;
 

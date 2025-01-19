@@ -20,6 +20,8 @@ static constexpr auto LAYER_2_IMG_WIDTH_HEIGHT=150;
 
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=80;
 
+static constexpr auto MAX_FRAMERATE=30;
+
 static std::string getFilePath(const std::string& relativePath) {
     
     // NDEBUG == true -> means that we are in Release mode !!!
@@ -38,13 +40,11 @@ static void populateMonitorCfg(MonitorWindowCfg& outCfg){
     outCfg.windowFlags=WINDOW_SHOWN;
 }
 
-static void populateGameCfg(GameCfg& cfg){
-    cfg.layer2RsrcId=TextureId::LAYER_2;
-    cfg.pressKeysRsrcId=TextureId::PRESS_KEYS;
+static void populateDrawMgrCfg(DrawMgrCfg& cfg){
+    populateMonitorCfg(cfg.windowCfg);
+    cfg.maxFrameRate=MAX_FRAMERATE;
 
-    cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 }
-
 
 static void populateImageContainerCfg(ImageContainerCfg& cfg){
 
@@ -70,11 +70,26 @@ static void populateTextContainerCfg(TextContainerCfg& cfg){
     cfg.fontConfigs.insert(std::make_pair(FontId::ANGELINE_VINTAGE_40,fontCfg));
 }
 
-EngineCfg EngineCfgLoader::loadCfg(){
-    EngineCfg cfg;
-    populateMonitorCfg(cfg.windowCfg);
+static void populateRsrcMgrCfg(RsrcMgrCfg& cfg){
     populateImageContainerCfg(cfg.imgContainerCfg);
     populateTextContainerCfg(cfg.textContainerCfg);
+}
+
+static void populateManagerHandlerCfg(ManagerHandlerCfg& cfg){
+    populateDrawMgrCfg(cfg.drawMgrCfg);
+    populateRsrcMgrCfg(cfg.rsrcMgrCfg);
+}
+
+static void populateGameCfg(GameCfg& cfg){
+    cfg.layer2RsrcId=TextureId::LAYER_2;
+    cfg.pressKeysRsrcId=TextureId::PRESS_KEYS;
+
+    cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
+}
+
+EngineCfg EngineCfgLoader::loadCfg(){
+    EngineCfg cfg;
+    populateManagerHandlerCfg(cfg.managerHandlerCfg);
     populateGameCfg(cfg.gameCfg);
 
     return cfg;

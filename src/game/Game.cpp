@@ -9,15 +9,19 @@
 #include "utils/drawing/Color.h"
 
 int32_t Game::init(const GameCfg& cfg){
+    if(EXIT_SUCCESS!=_hero.init(cfg.runningGirlRsrcId)){
+        std::cerr<<"_hero.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
 
-    _layer2Img.create(cfg.layer2RsrcId);
-    _pressKeysImg.create(cfg.pressKeysRsrcId);
-    _pressKeysImg.activateAlphaModulation();
+    if(EXIT_SUCCESS!=_wheel.init(cfg.wheelRsrcId)){
+        std::cerr<<"_wheel.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
 
-    _helloText.create("Hello, C++ dudes",cfg.textFontId,Colors::GREEN);
-    _pressText.create("Press M to hide",cfg.textFontId,Colors::GREEN,Point(100,100));
-    _hideText.create("Press N to show",cfg.textFontId,Colors::PURPLE,Point(200,200));
-    _hideText.hide();
+    _blackBackgroundImg.create(cfg.blackBackgroundRsrcId); // added by Zhivko at the end of the lecture for demonstration purposes
+    _blackBackgroundImg.activateAlphaModulation();
+    _blackBackgroundImg.setOpacity(ZERO_OPACITY);
 
     _mousePosText.create("_",cfg.textFontId,Colors::RED);
     _mousePosText.hide();
@@ -26,20 +30,37 @@ int32_t Game::init(const GameCfg& cfg){
 }
 
 void Game::deinit(){
-
+    _mousePosText.destroy();
+    _blackBackgroundImg.destroy();
+    _wheel.deinit();
+    _hero.deinit();
 }
 
 void Game::draw(){
-    // _pressKeysImg.draw();
-    // _layer2Img.draw();
-    // _helloText.draw();
-
-    // _hideText.draw();
-    // _pressText.draw();
+    _wheel.draw();
+    _hero.draw();
     _mousePosText.draw();
+    _blackBackgroundImg.draw(); // added by Zhivko at the end of the lecture for demonstration purposes
 }
 
 void Game::handleEvent(const InputEvent& e){
+    _hero.handleEvent(e);
+    _wheel.handleEvent(e);
+
+    if(TouchEvent::KEYBOARD_PRESS==e.type){
+        if(Keyboard::KEY_A==e.key){
+            _mousePosText.rotateRight(30);
+        } else if(Keyboard::KEY_K==e.key){ // this if statement is added for testing purposes by me, NOT by Zhivko !!!
+            _mousePosText.setRotationCenter(Point::ZERO);
+        } else if(Keyboard::KEY_L==e.key){ // this if statement is added for testing purposes by me, NOT by Zhivko !!!
+            Point rotCenter(_mousePosText.getWidth()/2,_mousePosText.getHeight()/2);
+            _mousePosText.setRotationCenter(rotCenter);
+        } else if(Keyboard::KEY_LEFT_BRACKET==e.key){ // added by Zhivko at the end of the lecture for demonstration purposes
+            _blackBackgroundImg.setOpacity(_blackBackgroundImg.getOpacity()-5);
+        } else if(Keyboard::KEY_RIGHT_BRACKET==e.key){ // added by Zhivko at the end of the lecture for demonstration purposes
+            _blackBackgroundImg.setOpacity(_blackBackgroundImg.getOpacity()+5);
+        }
+    }    
 
     if(TouchEvent::TOUCH_RELEASE!=e.type){
         return;
@@ -47,65 +68,13 @@ void Game::handleEvent(const InputEvent& e){
 
     setMousePosText(e.pos);
 }
-    
 
-    // if(TouchEvent::KEYBOARD_RELEASE!=e.type){
-    //     return;
-    // }
-
-    // switch(e.key){
-    //     case Keyboard::KEY_UP:
-    //         _pressKeysImg.moveUp(10);
-    //         break;
-    //     case Keyboard::KEY_DOWN:
-    //         _pressKeysImg.moveDown(10);
-    //         break;
-    //     case Keyboard::KEY_LEFT:
-    //         _pressKeysImg.moveLeft(10);
-    //         break;
-    //     case Keyboard::KEY_RIGHT:
-    //         _pressKeysImg.moveRight(10);
-    //         break;
-    //     case Keyboard::KEY_Q:
-    //         _pressKeysImg.setWidth(_pressKeysImg.getWidth()-10);
-    //         break;
-    //     case Keyboard::KEY_W:
-    //         _pressKeysImg.setWidth(_pressKeysImg.getWidth()+10);
-    //         break;
-    //     case Keyboard::KEY_E:
-    //         _pressKeysImg.setHeight(_pressKeysImg.getHeight()-10);
-    //         break;
-    //     case Keyboard::KEY_R:
-    //         _pressKeysImg.setHeight(_pressKeysImg.getHeight()+10);
-    //         break;
-    //     case Keyboard::KEY_T:
-    //         _pressKeysImg.setOpacity(_pressKeysImg.getOpacity()-10);
-    //         break;
-    //     case Keyboard::KEY_Y:
-    //         _pressKeysImg.setOpacity(_pressKeysImg.getOpacity()+10);
-    //         break;
-    //     case Keyboard::KEY_B:
-    //         _helloText.setText("Kak ste, kolegi?");
-    //         break;
-    //     case Keyboard::KEY_M:
-    //         _pressText.hide();
-    //         _hideText.show();
-    //         break;
-    //     case Keyboard::KEY_N:
-    //         _pressText.show();
-    //         _hideText.hide();
-    //         break;
-    //     default:
-    //         // (void*)_currChosenImage;
-    //         break;
-    // }
-
-    void Game::setMousePosText(const Point& mousePos){
-        _mousePosText.show();
-        _mousePosText.setPosition(mousePos);
-        std::string textContent="X: ";
-        textContent.append(std::to_string(mousePos.x))
-                    .append(", Y: ")
-                    .append(std::to_string(mousePos.y));
-        _mousePosText.setText(textContent);
-    }
+void Game::setMousePosText(const Point& mousePos){
+    _mousePosText.show();
+    _mousePosText.setPosition(mousePos);
+    std::string textContent="X: ";
+    textContent.append(std::to_string(mousePos.x))
+                .append(", Y: ")
+                .append(std::to_string(mousePos.y));
+    _mousePosText.setText(textContent);
+}

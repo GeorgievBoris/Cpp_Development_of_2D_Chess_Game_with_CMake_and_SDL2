@@ -5,16 +5,17 @@
 #include <cstdint>
 // C++ system headers
 #include <unordered_map>
+#include <vector>
 // Third-party headers
 // Own headers
+#include "utils/drawing/Rectangle.h"
 // Forward Declarations
 
 
 struct ImageCfg{
     // const char* location;
     std::string location;
-    int32_t width=0;
-    int32_t height=0;
+    std::vector<Rectangle> frames;
 };
 
 

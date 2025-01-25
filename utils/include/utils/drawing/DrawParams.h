@@ -7,6 +7,7 @@
 // Third-party headers
 // Own headers
 #include "utils/drawing/Point.h"
+#include "utils/drawing/Rectangle.h"
 // Forward Declarations
 
 // "inline" tells us that this variable, even located in a header file...
@@ -16,6 +17,14 @@
 inline constexpr auto INVALID_RSRC_ID=-1;
 inline constexpr auto FULL_OPACITY=255;
 inline constexpr auto ZERO_OPACITY=0;
+
+enum class WidgetFlip:uint8_t{
+    // the purpose of this enum is to have equivalent values to "SDL_RendererFlip"
+    NONE,
+    HORIZONTAL,
+    VERTICAL,
+    HORIZONTAL_AND_VERTICAL // equivalent to HORIZONTAL | VERTICAL -> bitwise OR-ing
+};
 
 enum class WidgetType:uint8_t {
     IMAGE,
@@ -35,8 +44,13 @@ struct DrawParams{
     // despite the fact that this is POD (=Plain Old Data), not a problem at all to have one function
     void reset();
 
+    Rectangle frameRect=Rectangle::ZERO;
+
     // Top left position of texture
     Point pos=Point::UNDEFINED;
+
+    double rotationAngle=0.0;
+    Point rotationCenter=Point::ZERO;
 
     // Draw dimensions of the texture
     int32_t width=0;
@@ -56,6 +70,7 @@ struct DrawParams{
     };
 
     WidgetType widgetType=WidgetType::UNKNOWN;
+    WidgetFlip flipType=WidgetFlip::NONE;
 };
 
 #endif // UTILS_DRAWING_DRAWPARAMS_H_

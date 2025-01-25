@@ -20,10 +20,14 @@ void Image::create(int32_t rsrcId, const Point& pos){
     }
     _isCreated=true;
     _isDestroyed=false;
-    const Rectangle& rect=gRsrcMgr->getImageFrame(rsrcId);
+    // TODO: an optimization will be to have a "const" pointer to "frames" and in this way do not call each time "gRsrcMgr" 
+    const Frames& frames=gRsrcMgr->getImageFrame(rsrcId);
+    _maxFrames=static_cast<int32_t>(frames.size());
+    const Rectangle& firstFrame=frames.front();
+    _drawParams.frameRect=firstFrame;
     _drawParams.rsrcId=rsrcId;
-    _drawParams.width=rect.w;
-    _drawParams.height=rect.h;
+    _drawParams.width=firstFrame.w;
+    _drawParams.height=firstFrame.h;
     _drawParams.pos=pos;
     _drawParams.widgetType=WidgetType::IMAGE;
 }
@@ -36,4 +40,37 @@ void Image::destroy(){
         return;
     }
     std::cerr<<"Error, image was already destroyed."<<std::endl;
+}
+
+void Image::setFrame(int32_t frameIdx){
+    if(0>frameIdx || _maxFrames<=frameIdx){
+        std::cerr<<"Error, trying to set invalid frameIdx: "<<frameIdx
+                    <<" for Image with rsrcId: "<<_drawParams.rsrcId <<std::endl;
+        return;
+    }
+    _currFrame=frameIdx;
+    const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
+    _drawParams.frameRect=frames[_currFrame];
+}
+
+void Image::setNextFrame(){
+    ++_currFrame;
+    if(_maxFrames==_currFrame){
+        _currFrame=0;
+    }
+    const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
+    _drawParams.frameRect=frames[_currFrame];    
+}
+
+void Image::setPrevFrame(){
+    --_currFrame;
+    if(-1==_currFrame){
+        _currFrame=_maxFrames-1;
+    }
+     const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
+    _drawParams.frameRect=frames[_currFrame];
+}
+
+int32_t Image::getFrame()const{
+    return _currFrame;
 }

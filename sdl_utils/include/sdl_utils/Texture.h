@@ -27,6 +27,7 @@ class Texture{
 public:
     Texture()=delete;
     ~Texture();
+    
     static int32_t createSurfaceFromFile(const char* filePath, SDL_Surface*& outSurface); // try with "const char*&"
     static int32_t createTextureFromFile(const char* filePath, SDL_Texture*& outTexture);
     static int32_t createTextureFromSurface(SDL_Surface*& inOutSurface, SDL_Texture*& outTexture);

@@ -25,8 +25,8 @@ int32_t RsrcMgr::init(const RsrcMgrCfg& cfg){
 }
 
 void RsrcMgr::deinit(){
-    ImageContainer::deinit();
     TextContainer::deinit();
+    ImageContainer::deinit();
 }
 
 void RsrcMgr::process(){

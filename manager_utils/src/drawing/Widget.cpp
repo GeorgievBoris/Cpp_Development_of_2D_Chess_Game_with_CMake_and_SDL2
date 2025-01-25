@@ -21,12 +21,24 @@ void Widget::reset(){
     _drawParams.reset();
 }
 
+void Widget::setFlipType(WidgetFlip flipType){
+    _drawParams.flipType=flipType;
+}
+
 void Widget::setWidth(int32_t width){
     _drawParams.width=width;
 }
 
 void Widget::setHeight(int32_t height){
     _drawParams.height=height;
+}
+
+void Widget::setRotationCenter(const Point& rotCenter){
+    _drawParams.rotationCenter=rotCenter;
+}
+
+void Widget::setRotationAngle(double angle){
+    _drawParams.rotationAngle=angle;
 }
 
 void Widget::setPosition(const Point& pos){
@@ -54,6 +66,10 @@ int32_t Widget::getWidth() const{
 
 int32_t Widget::getHeight() const{
     return _drawParams.height;
+}
+
+double Widget::getRotationAngle() const{
+    return _drawParams.rotationAngle;
 }
 
 int32_t Widget::getOpacity() const{
@@ -104,4 +120,12 @@ void Widget::moveUp(int32_t delta){
 
 void Widget::moveDown(int32_t delta){
     _drawParams.pos.y+=delta;
+}
+
+void Widget::rotateLeft(double delta){
+    _drawParams.rotationAngle-=delta;
+}
+
+void Widget::rotateRight(double delta){
+    _drawParams.rotationAngle+=delta;
 }

@@ -8,6 +8,8 @@
 // Own headers
 #include "sdl_utils/Texture.h"
 
+static const Frames EMPTY_FRAMES {Rectangle::ZERO}; // here we put "const" because "getImageFrame()" method returns "const Frames&"
+
 int32_t ImageContainer::init(const ImageContainerCfg& cfg){
 
     for(const auto& pair:cfg.imageConfigs){
@@ -38,11 +40,11 @@ SDL_Texture* ImageContainer::getImageTexture(int32_t rsrcId) const{
     return it->second;
 }
 
-Rectangle ImageContainer::getImageFrame(int32_t rsrcId) const{
+const Frames& ImageContainer::getImageFrame(int32_t rsrcId) const{
     auto it=_textureFrames.find(rsrcId);
     if(_textureFrames.end()==it){
-        std::cerr<<"Error, invalid rsrcId: "<<rsrcId<<" requested. Returning Rectangle::ZERO"<<std::endl;
-        return Rectangle::ZERO;
+        std::cerr<<"Error, invalid rsrcId: "<<rsrcId<<" requested. Returning EMPTY_FRAMES"<<std::endl;
+        return EMPTY_FRAMES;
     }
     // return (*it).second;
     return it->second;
@@ -57,11 +59,7 @@ int32_t ImageContainer::loadSingleResource(const ImageCfg& resCfg, int32_t rsrcI
 
     _textures[rsrcId]=texture;
 
-    Rectangle& rect = _textureFrames[rsrcId];
-    rect.x=0;
-    rect.y=0;
-    rect.w=resCfg.width;
-    rect.h=resCfg.height;
+    _textureFrames[rsrcId]=resCfg.frames; // can remove the "const" from resCfg and move the content of the std::vector
 
     return EXIT_SUCCESS;
 }

@@ -9,14 +9,18 @@
 #include "common/CommonDefines.h"
 
 // constants
-static constexpr auto WINDOW_WIDTH=800;
-static constexpr auto WINDOW_HEIGHT=600;
+static constexpr auto WINDOW_WIDTH=1024;
+static constexpr auto WINDOW_HEIGHT=800;
 static constexpr auto WINDOW_NAME="Hardware_Rendering";
 
-static constexpr auto PRESS_KEYS_WIDTH=640;
-static constexpr auto PRESS_KEYS_HEIGHT=480;
+static constexpr auto RUNNING_GIRL_FRAMES=6;
+static constexpr auto RUNNING_GIRL_IMG_WIDTH=256;
+static constexpr auto RUNNING_GIRL_IMG_HEIGHT=220;
 
-static constexpr auto LAYER_2_IMG_WIDTH_HEIGHT=150;
+static constexpr auto BLACK_BACKGROUND_IMG_WIDTH=1024;
+static constexpr auto BLACK_BACKGROUND_IMG_HEIGHT=800;
+
+static constexpr auto WHEEL_IMG_WIDTH_HEIGHT=695;
 
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=80;
 
@@ -49,16 +53,24 @@ static void populateDrawMgrCfg(DrawMgrCfg& cfg){
 static void populateImageContainerCfg(ImageContainerCfg& cfg){
 
     ImageCfg imageCfg;
-    imageCfg.location=getFilePath("resources/p/press_keys.png");
-    imageCfg.height=PRESS_KEYS_HEIGHT;
-    imageCfg.width=PRESS_KEYS_WIDTH;
-    // cfg.imageConfigs.insert({TextureId::UP,imageCfg}); // possible - an alternative to std::make_pair
-    cfg.imageConfigs.insert(std::make_pair(TextureId::PRESS_KEYS,imageCfg));
+    imageCfg.location=getFilePath("resources/p/sprites/running_girl_small.png");
+    for(auto i=0;i<RUNNING_GIRL_FRAMES;++i){
+        imageCfg.frames.emplace_back(i*RUNNING_GIRL_IMG_WIDTH,0,256,220); // x, y, w, h
+    }
+    // cfg.imageConfigs.insert({TextureId::RUNNING_GIRL,imageCfg}); // possible - an alternative to std::make_pair
+    // cfg.imageConfigs.insert(std::make_pair(TextureId::RUNNING_GIRL,imageCfg));
+    cfg.imageConfigs.emplace(TextureId::RUNNING_GIRL,imageCfg);
+    imageCfg.frames.clear();
 
-    imageCfg.location=getFilePath("resources/p/layer_2.png");
-    imageCfg.height=LAYER_2_IMG_WIDTH_HEIGHT;
-    imageCfg.width=LAYER_2_IMG_WIDTH_HEIGHT;
-    cfg.imageConfigs.insert(std::make_pair(TextureId::LAYER_2,imageCfg));
+    imageCfg.location=getFilePath("resources/p/wheel.png");
+    imageCfg.frames.emplace_back(0,0,WHEEL_IMG_WIDTH_HEIGHT,WHEEL_IMG_WIDTH_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::WHEEL,imageCfg);
+    imageCfg.frames.clear(); 
+
+    imageCfg.location=getFilePath("resources/p/black_background.png");
+    imageCfg.frames.emplace_back(0,0,BLACK_BACKGROUND_IMG_WIDTH,BLACK_BACKGROUND_IMG_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::BLACK_BACKGROUND,imageCfg);
+    imageCfg.frames.clear(); // important-clean it for the next element of the "unordered_map" that is going to use it!!!
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -81,8 +93,9 @@ static void populateManagerHandlerCfg(ManagerHandlerCfg& cfg){
 }
 
 static void populateGameCfg(GameCfg& cfg){
-    cfg.layer2RsrcId=TextureId::LAYER_2;
-    cfg.pressKeysRsrcId=TextureId::PRESS_KEYS;
+    cfg.runningGirlRsrcId=TextureId::RUNNING_GIRL;
+    cfg.wheelRsrcId=TextureId::WHEEL;
+    cfg.blackBackgroundRsrcId=TextureId::BLACK_BACKGROUND;
 
     cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 }

@@ -10,6 +10,8 @@
 #include "game/config/GameCfg.h"
 #include "manager_utils/drawing/Image.h"
 #include "manager_utils/drawing/Text.h"
+#include "game/entities/Hero.h"
+#include "game/entities/Wheel.h"
 // Forward Declarations
 class InputEvent;
 
@@ -21,14 +23,12 @@ public:
     void handleEvent(const InputEvent& e);
 
 private:
-    Image _pressKeysImg;
-    Image _layer2Img;
-    
-    Text _helloText;
-    Text _pressText;
-    Text _hideText;
 
     void setMousePosText(const Point& mousePos);
+
+    Hero _hero;
+    Wheel _wheel;
+    Image _blackBackgroundImg; // added by Zhivko at the end of the lecture for demonstration purposes
     Text _mousePosText;
 };
 

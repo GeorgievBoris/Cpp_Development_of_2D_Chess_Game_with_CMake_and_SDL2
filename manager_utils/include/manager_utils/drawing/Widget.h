@@ -14,14 +14,18 @@ public:
     void draw();
 
     void reset();
+    void setFlipType(WidgetFlip flipType);
     void setWidth(int32_t width);
     void setHeight(int32_t height);
+    void setRotationCenter(const Point& rotCenter);
+    void setRotationAngle(double angle);
     void setPosition(const Point& pos);
     void setPosition(int32_t x, int32_t y);
     void setOpacity(int32_t opacity);
     
     int32_t getWidth() const;
     int32_t getHeight() const;
+    double getRotationAngle() const;
     int32_t getOpacity() const;
     Point getPosition() const;
 
@@ -35,6 +39,9 @@ public:
     void moveLeft(int32_t delta);
     void moveUp(int32_t delta);
     void moveDown(int32_t delta);
+
+    void rotateRight(double delta);
+    void rotateLeft(double delta);
 
 protected:
     DrawParams _drawParams;

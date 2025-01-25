@@ -95,33 +95,35 @@ void Renderer::setWidgetOpacity(SDL_Texture* texture, int32_t opacity){
 }
 
 void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture){
-    // first "nullptr" means take the entire image and second "nullptr" means to draw it on the entire window
-    // const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
-
-    const SDL_Rect destRect={.x=drawParams.pos.x, .y=drawParams.pos.y, .w=drawParams.width, .h=drawParams.height};
-    int32_t err=EXIT_SUCCESS;
-
     if(FULL_OPACITY==drawParams.opacity){
-        err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
+        drawTextureInternal(drawParams,texture);
     } else {
         if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,drawParams.opacity)){
             std::cerr<<"Texture::setAlphaTexture() failed for rsrcId: "<<drawParams.rsrcId<<std::endl;
         }
-        err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
+        drawTextureInternal(drawParams,texture);
 
         if(EXIT_SUCCESS!=Texture::setAlphaTexture(texture,FULL_OPACITY)){
             std::cerr<<"Texture::setAlphaTexture() failed for rsrcId: "<<drawParams.rsrcId<<std::endl;
         }
-    }
-
-    if(EXIT_SUCCESS!=err){
-        std::cerr<<"SDL_RenderCopy() failed for rsrcId: "<<drawParams.rsrcId<<". Reason: "<<SDL_GetError()<<std::endl;
-    }    
+    }  
 }
 void Renderer::drawText(const DrawParams& drawParams, SDL_Texture* texture){
-    const SDL_Rect destRect={.x=drawParams.pos.x, .y=drawParams.pos.y, .w=drawParams.width, .h=drawParams.height};
+    drawTextureInternal(drawParams,texture);
+}
 
-    const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,&destRect);
+void Renderer::drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture){
+    // first "nullptr" means take the entire image and second "nullptr" means to draw it on the entire window
+    // const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
+       
+    const SDL_Rect destRect={.x=drawParams.pos.x, .y=drawParams.pos.y, .w=drawParams.width, .h=drawParams.height};
+    // reinterpret_cast<>() is equivalent to C-style cast !!!
+    const SDL_Rect* sourceRect=reinterpret_cast<const SDL_Rect*>(&drawParams.frameRect);
+
+    const SDL_RendererFlip sdlRenderFlip=static_cast<const SDL_RendererFlip>(drawParams.flipType);
+    const SDL_Point* sdlCenterPoint=reinterpret_cast<const SDL_Point*>(&drawParams.rotationCenter);
+    const int32_t err=SDL_RenderCopyEx(_sdlRenderer,texture,sourceRect,&destRect,
+                                                drawParams.rotationAngle,sdlCenterPoint,sdlRenderFlip);
 
     if(EXIT_SUCCESS!=err){
         std::cerr<<"SDL_RenderCopy() failed for rsrcId: "<<drawParams.rsrcId<<". Reason: "<<SDL_GetError()<<std::endl;

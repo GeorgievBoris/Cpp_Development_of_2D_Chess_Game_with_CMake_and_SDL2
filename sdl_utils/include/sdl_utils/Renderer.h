@@ -36,6 +36,7 @@ public:
 private:
     void drawImage(const DrawParams& drawParams, SDL_Texture* texture);
     void drawText(const DrawParams& drawParams, SDL_Texture* texture);
+    void drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture);
     // each window that we create, can have only one "SDL_Renderer" assigned to it !!!
     // an image that is loaded in one Renderer, CANNOT be used in another Renderer !!!
     SDL_Renderer* _sdlRenderer=nullptr;

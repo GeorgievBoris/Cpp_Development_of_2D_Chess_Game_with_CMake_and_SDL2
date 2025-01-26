@@ -62,7 +62,6 @@ void Renderer::clearScreen(){
     if(EXIT_SUCCESS!=SDL_RenderClear(_sdlRenderer)){
         std::cerr<<"SDL_RenderClear() failed. Reason: "<<SDL_GetError()<<std::endl;
     }
-
 }
 
 void Renderer::finishFrame(){

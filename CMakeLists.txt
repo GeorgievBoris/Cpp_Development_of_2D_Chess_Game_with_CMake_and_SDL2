@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(animations LANGUAGES CXX)
+project(buttons_and_timers LANGUAGES CXX)
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(_INC_DIR ${_BASE_DIR}/include)
@@ -20,12 +20,15 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/Game.h
                 ${_INC_DIR}/game/entities/Hero.h
                 ${_INC_DIR}/game/entities/Wheel.h
+                ${_INC_DIR}/game/proxies/GameProxy.h
+                ${_INC_DIR}/game/buttons/WheelButton.h
 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
                 ${_SRC_DIR}/game/entities/Hero.cpp
                 ${_SRC_DIR}/game/entities/Wheel.cpp
+                ${_SRC_DIR}/game/buttons/WheelButton.cpp
                 ${_SRC_DIR}/main.cpp
 )
 

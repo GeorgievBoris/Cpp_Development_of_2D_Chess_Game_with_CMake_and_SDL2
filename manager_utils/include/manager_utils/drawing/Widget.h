@@ -43,6 +43,8 @@ public:
     void rotateRight(double delta);
     void rotateLeft(double delta);
 
+    bool containsPoint(const Point& pos) const;
+
 protected:
     DrawParams _drawParams;
     bool _isCreated=false;

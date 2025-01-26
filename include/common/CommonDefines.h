@@ -14,6 +14,8 @@ enum ResourceId{
     RUNNING_GIRL,
     WHEEL,
     BLACK_BACKGROUND,
+    START_BUTTON,
+    STOP_BUTTON,
     COUNT
 };
 
@@ -26,6 +28,17 @@ enum FontIdKeys{
 };
 
 } // namespace FontId
+
+namespace TimerId {
+    
+enum Keys{
+    WHEEL_ROT_ANIM_TIMER_ID,
+    WHEEL_SCALE_TIMER_ID,
+    GIRL_MOVE_TIMER_ID,
+    COUNT
+};
+
+} // namespace TimerId
 
 
 

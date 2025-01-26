@@ -11,6 +11,7 @@
 #include "sdl_utils/Texture.h"
 #include "utils/drawing/Color.h"
 #include "manager_utils/managers/DrawMgr.h"
+#include "manager_utils/managers/TimerMgr.h"
 
 int32_t Engine::init(const EngineCfg& cfg){
 
@@ -28,6 +29,8 @@ int32_t Engine::init(const EngineCfg& cfg){
         std::cerr<<"_game.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
+
+    gTimerMgr->onInitEnd(); // listed to this part of lecture "Buttons_and_Timers" again -> around time 2:19:00 
 
     return EXIT_SUCCESS;
 }
@@ -68,6 +71,7 @@ void Engine::drawFrame(){
 }
 
 bool Engine::processFrame(){
+    _managerHandler.process();
 
     while(_event.pollEvent()){
         if(_event.checkForExitRequest()){

@@ -7,9 +7,10 @@
 // Own headers
 #include "sdl_utils/InputEvent.h"
 
-int32_t Hero::init(int32_t heroRsrcId){
+int32_t Hero::init(int32_t heroRsrcId, int32_t moveTimerId){
 
     _heroImg.create(heroRsrcId);
+    _moveTimerId=moveTimerId;
     return EXIT_SUCCESS;
 }
 
@@ -19,6 +20,10 @@ void Hero::deinit(){
 
 void Hero::draw(){
     _heroImg.draw();
+}
+
+void Hero::startMoveAnim(){
+    startTimer(50,_moveTimerId,TimerType::PULSE);
 }
 
 void Hero::handleEvent(const InputEvent& e){
@@ -48,5 +53,23 @@ void Hero::handleEvent(const InputEvent& e){
         break;
     default:
         break;
+    }
+}
+
+void Hero::onTimeout(int32_t timerId){
+    if(timerId==_moveTimerId){
+        processMoveAnim();
+    } else {
+        std::cerr<<"Received unsupported timerId: "<<timerId<<std::endl;
+    }
+}
+
+void Hero::processMoveAnim(){
+    --_moveSteps;
+    _heroImg.moveRight(5);
+    _heroImg.setNextFrame();
+    if(0==_moveSteps){
+        stopTimer(_moveTimerId);
+        _moveSteps=50;
     }
 }

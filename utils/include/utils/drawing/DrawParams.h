@@ -17,6 +17,7 @@
 inline constexpr auto INVALID_RSRC_ID=-1;
 inline constexpr auto FULL_OPACITY=255;
 inline constexpr auto ZERO_OPACITY=0;
+inline constexpr auto FULL_ROTATION=360.0;
 
 enum class WidgetFlip:uint8_t{
     // the purpose of this enum is to have equivalent values to "SDL_RendererFlip"

@@ -124,8 +124,20 @@ void Widget::moveDown(int32_t delta){
 
 void Widget::rotateLeft(double delta){
     _drawParams.rotationAngle-=delta;
+    while(0>_drawParams.rotationAngle){
+        _drawParams.rotationAngle+=FULL_ROTATION;
+    }
 }
 
 void Widget::rotateRight(double delta){
     _drawParams.rotationAngle+=delta;
+
+    while(FULL_ROTATION<_drawParams.rotationAngle){
+        _drawParams.rotationAngle-=FULL_ROTATION;
+    }
+}
+
+bool Widget::containsPoint(const Point& pos) const{
+    const Rectangle bound(_drawParams.pos.x,_drawParams.pos.y,_drawParams.width,_drawParams.height);
+    return bound.isPointInside(pos);
 }

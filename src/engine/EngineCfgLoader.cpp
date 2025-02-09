@@ -9,24 +9,18 @@
 #include "common/CommonDefines.h"
 
 // constants
-static constexpr auto WINDOW_WIDTH=1024;
-static constexpr auto WINDOW_HEIGHT=800;
+static constexpr auto WINDOW_WIDTH=900;
+static constexpr auto WINDOW_HEIGHT=900;
 static constexpr auto WINDOW_NAME="Hardware_Rendering";
 
-static constexpr auto RUNNING_GIRL_FRAMES=6;
-static constexpr auto RUNNING_GIRL_IMG_WIDTH=256;
-static constexpr auto RUNNING_GIRL_IMG_HEIGHT=220;
+static constexpr auto CHESS_PIECES_FRAMES=6;
+static constexpr auto CHESS_PIECES_WIDTH_HEIGHT=96;
 
-static constexpr auto BUTTON_FRAMES=3;
-static constexpr auto BUTTON_WIDTH=150;
-static constexpr auto BUTTON_HEIGHT=50;
+static constexpr auto CHESS_BOARD_WIDTH_HEIGHT=900;
 
-static constexpr auto BLACK_BACKGROUND_IMG_WIDTH=1024;
-static constexpr auto BLACK_BACKGROUND_IMG_HEIGHT=800;
+static constexpr auto TARGET_IMG_WIDTH_HEIGHT=98;
 
-static constexpr auto WHEEL_IMG_WIDTH_HEIGHT=695;
-
-static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=80;
+static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
 
 static constexpr auto MAX_FRAMERATE=30;
 
@@ -37,6 +31,7 @@ static std::string getFilePath(const std::string& relativePath) {
         return relativePath;
     #else
         return std::string("../")+relativePath;
+        // return "../"+relativePath; // another possible option
     #endif
 }
 
@@ -51,42 +46,38 @@ static void populateMonitorCfg(MonitorWindowCfg& outCfg){
 static void populateDrawMgrCfg(DrawMgrCfg& cfg){
     populateMonitorCfg(cfg.windowCfg);
     cfg.maxFrameRate=MAX_FRAMERATE;
-
 }
 
 static void populateImageContainerCfg(ImageContainerCfg& cfg){
 
     ImageCfg imageCfg;
-    imageCfg.location=getFilePath("resources/p/sprites/running_girl_small.png");
-    for(auto i=0;i<RUNNING_GIRL_FRAMES;++i){
-        imageCfg.frames.emplace_back(i*RUNNING_GIRL_IMG_WIDTH,0,256,220); // x, y, w, h
-    }
-    // cfg.imageConfigs.insert({TextureId::RUNNING_GIRL,imageCfg}); // possible - an alternative to std::make_pair
-    // cfg.imageConfigs.insert(std::make_pair(TextureId::RUNNING_GIRL,imageCfg));
-    cfg.imageConfigs.emplace(TextureId::RUNNING_GIRL,imageCfg);
-    imageCfg.frames.clear();
 
-    imageCfg.location=getFilePath("resources/p/wheel.png");
-    imageCfg.frames.emplace_back(0,0,WHEEL_IMG_WIDTH_HEIGHT,WHEEL_IMG_WIDTH_HEIGHT);
-    cfg.imageConfigs.emplace(TextureId::WHEEL,imageCfg);
+    constexpr int32_t numOfChessPlayers=2;
+    const std::string chessPiecesPaths[numOfChessPlayers]={"resources/p/whitePieces.png", "resources/p/blackPieces.png"};
+    constexpr TextureId::ResourceId chessResources[numOfChessPlayers]={TextureId::WHITE_PIECES,TextureId::BLACK_PIECES};
+    for(int32_t i=0;i<numOfChessPlayers;++i){
+        imageCfg.location=getFilePath(chessPiecesPaths[i]);
+        for(auto j=0;j<CHESS_PIECES_FRAMES;++j){
+            imageCfg.frames.emplace_back(j*CHESS_PIECES_WIDTH_HEIGHT,0,CHESS_PIECES_WIDTH_HEIGHT,CHESS_PIECES_WIDTH_HEIGHT);
+        }
+        cfg.imageConfigs.emplace(chessResources[i],imageCfg);
+        // cfg.imageConfigs.insert({TextureId::RUNNING_GIRL,imageCfg}); // possible - an alternative to std::make_pair
+        // cfg.imageConfigs.insert(std::make_pair(TextureId::RUNNING_GIRL,imageCfg));
+
+        imageCfg.frames.clear();
+    }
+
+
+    // the board does not have transparency, so it is ".jpg" -> no point in using ".png", therefore it saves some information
+    imageCfg.location=getFilePath("resources/p/chessBoard.jpg");
+    imageCfg.frames.emplace_back(0,0,CHESS_BOARD_WIDTH_HEIGHT,CHESS_BOARD_WIDTH_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::CHESS_BOARD,imageCfg);
     imageCfg.frames.clear(); 
 
-    imageCfg.location=getFilePath("resources/p/black_background.png");
-    imageCfg.frames.emplace_back(0,0,BLACK_BACKGROUND_IMG_WIDTH,BLACK_BACKGROUND_IMG_HEIGHT);
-    cfg.imageConfigs.emplace(TextureId::BLACK_BACKGROUND,imageCfg);
+    imageCfg.location=getFilePath("resources/p/target.png");
+    imageCfg.frames.emplace_back(0,0,TARGET_IMG_WIDTH_HEIGHT,TARGET_IMG_WIDTH_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::TARGET,imageCfg);
     imageCfg.frames.clear();
-
-    constexpr int32_t buttonsCnt=2;
-    const std::string buttonPaths[buttonsCnt]={"resources/p/buttons/button_start.png", "resources/p/buttons/button_stop.png"};
-    constexpr TextureId::ResourceId buttonRsrcIds[buttonsCnt]={TextureId::START_BUTTON, TextureId::STOP_BUTTON};
-    for(int32_t i=0;i<buttonsCnt;++i){
-        imageCfg.location=getFilePath(buttonPaths[i]);
-        for(int32_t frameId=0;frameId<BUTTON_FRAMES;++frameId){
-            imageCfg.frames.emplace_back(frameId*BUTTON_WIDTH,0,BUTTON_WIDTH,BUTTON_HEIGHT);
-        }
-        cfg.imageConfigs.emplace(buttonRsrcIds[i],imageCfg);
-        imageCfg.frames.clear(); // important-clean it for the next element of the "unordered_map" that is going to use it!!!
-    }
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -109,23 +100,21 @@ static void populateManagerHandlerCfg(ManagerHandlerCfg& cfg){
 }
 
 static void populateGameCfg(GameCfg& cfg){
-    cfg.runningGirlRsrcId=TextureId::RUNNING_GIRL;
-    cfg.wheelRsrcId=TextureId::WHEEL;
-    cfg.blackBackgroundRsrcId=TextureId::BLACK_BACKGROUND;
-    cfg.startButtonRsrcId=TextureId::START_BUTTON;
-    cfg.stopButtonRsrcId=TextureId::STOP_BUTTON;
+    cfg.chessBoardRsrcId=TextureId::CHESS_BOARD;
+    cfg.whitePiecesRsrcId=TextureId::WHITE_PIECES;
+    cfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;
+    cfg.targetRsrcId=TextureId::TARGET;
 
-    cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
+    cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
 
-    cfg.wheelRotAnimTimerId=TimerId::WHEEL_ROT_ANIM_TIMER_ID;
-    cfg.wheelScaleAnimTimerId=TimerId::WHEEL_SCALE_TIMER_ID;
-    cfg.girlMoveTimerId=TimerId::GIRL_MOVE_TIMER_ID;
+    // cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 }
 
 EngineCfg EngineCfgLoader::loadCfg(){
     EngineCfg cfg;
     populateManagerHandlerCfg(cfg.managerHandlerCfg);
     populateGameCfg(cfg.gameCfg);
+    cfg.debugConsoleFontId=FontId::ANGELINE_VINTAGE_40;
 
     return cfg;
 }

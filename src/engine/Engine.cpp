@@ -30,7 +30,12 @@ int32_t Engine::init(const EngineCfg& cfg){
         return EXIT_FAILURE;
     }
 
-    gTimerMgr->onInitEnd(); // listed to this part of lecture "Buttons_and_Timers" again -> around time 2:19:00 
+    if(EXIT_SUCCESS!=_debugConsole.init(cfg.managerHandlerCfg.drawMgrCfg.maxFrameRate,cfg.debugConsoleFontId)){
+        std::cerr<<"_debugConsole.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    gTimerMgr->onInitEnd(); // listen to this part of lecture "Buttons_and_Timers" again -> around time 2:19:00 
 
     return EXIT_SUCCESS;
 }
@@ -57,8 +62,11 @@ void Engine::mainLoop(){
         if(shouldExit){
             break;
         }
-        const int64_t timeElapsedMicroseconds=time.getElapsed().toMicroseconds();
-        limitFPS(timeElapsedMicroseconds);
+        const auto elapsedTime=time.getElapsed().toMicroseconds();
+        if(_debugConsole.isActive()){
+            _debugConsole.update(elapsedTime,gTimerMgr->getActiveTimersCount());
+        }
+        limitFPS(elapsedTime);
     }
 }
 
@@ -66,6 +74,9 @@ void Engine::drawFrame(){
     gDrawMgr->clearScreen();
 
     _game.draw();
+    if(_debugConsole.isActive()){
+        _debugConsole.draw();
+    }
 
     gDrawMgr->finishFrame();
 }
@@ -87,13 +98,13 @@ bool Engine::processFrame(){
 
 void Engine::handleEvent(){
     _game.handleEvent(_event);
+    _debugConsole.handleEvent(_event);
 }
 
 void Engine::limitFPS(int64_t elapsedTimeMicroseconds){
 
-    constexpr auto maxFramesPerSecond=30;
     constexpr auto microsecondsInASecond=1000000;
-    constexpr auto microsecondsPerFrame=microsecondsInASecond/maxFramesPerSecond;
+    const auto microsecondsPerFrame=microsecondsInASecond/gDrawMgr->getMaxFrameRate();
 
     const int64_t sleepDurationMicroseconds=microsecondsPerFrame-elapsedTimeMicroseconds;
     if(0<sleepDurationMicroseconds){

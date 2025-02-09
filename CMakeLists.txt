@@ -4,7 +4,7 @@ message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_helpers/helpers.cmake)
 message("CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
-project(buttons_and_timers LANGUAGES CXX)
+project(chess LANGUAGES CXX)
 
 set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(_INC_DIR ${_BASE_DIR}/include)
@@ -18,17 +18,21 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/engine/EngineCfgLoader.h
                 ${_INC_DIR}/game/config/GameCfg.h
                 ${_INC_DIR}/game/Game.h
-                ${_INC_DIR}/game/entities/Hero.h
-                ${_INC_DIR}/game/entities/Wheel.h
-                ${_INC_DIR}/game/proxies/GameProxy.h
-                ${_INC_DIR}/game/buttons/WheelButton.h
-
+                ${_INC_DIR}/game/board/GameBoard.h
+                ${_INC_DIR}/game/utils/BoardPos.h
+                ${_INC_DIR}/game/utils/BoardUtils.h
+                ${_INC_DIR}/game/pieces/types/ChessPiece.h
+                ${_INC_DIR}/game/pieces/PieceHandler.h
+                ${_INC_DIR}/game/defines/ChessDefines.h
+                ${_INC_DIR}/game/proxies/GameBoardProxy.h
+                
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
-                ${_SRC_DIR}/game/entities/Hero.cpp
-                ${_SRC_DIR}/game/entities/Wheel.cpp
-                ${_SRC_DIR}/game/buttons/WheelButton.cpp
+                ${_SRC_DIR}/game/board/GameBoard.cpp
+                ${_SRC_DIR}/game/utils/BoardUtils.cpp
+                ${_SRC_DIR}/game/pieces/types/ChessPiece.cpp
+                ${_SRC_DIR}/game/pieces/PieceHandler.cpp
                 ${_SRC_DIR}/main.cpp
 )
 

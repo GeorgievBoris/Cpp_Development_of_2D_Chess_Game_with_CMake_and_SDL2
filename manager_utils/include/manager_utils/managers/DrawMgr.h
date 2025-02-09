@@ -35,10 +35,12 @@ public:
 
     void clearScreen();
     void finishFrame();
-    void addDrawCmd(const DrawParams& drawParams);
+    void addDrawCmd(const DrawParams& drawParams) const;
 
     void setWidgetBlendMode(const DrawParams& drawParams, BlendMode blendMode);
     void setWidgetOpacity(const DrawParams& drawParams, int32_t opacity);
+
+    int64_t getMaxFrameRate() const;
 
 private:
     SDL_Texture* getTextureInternal(const DrawParams& drawParams) const;

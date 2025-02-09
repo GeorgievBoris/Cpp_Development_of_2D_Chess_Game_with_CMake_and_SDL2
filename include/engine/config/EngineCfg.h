@@ -13,6 +13,8 @@
 struct EngineCfg {
     ManagerHandlerCfg managerHandlerCfg;
     GameCfg gameCfg;
+
+    int32_t debugConsoleFontId;
 };
 
 

@@ -22,7 +22,7 @@ int32_t DrawMgr::init(const DrawMgrCfg& cfg){
         return EXIT_FAILURE;
     }
 
-    _maxFrames=cfg.maxFrameRate; // probably Zhivko forgot to perform this assignment in his code
+    _maxFrames=cfg.maxFrameRate;
 
     return EXIT_SUCCESS;
 }
@@ -46,7 +46,7 @@ void DrawMgr::finishFrame(){
     _renderer.finishFrame();
 }
 
-void DrawMgr::addDrawCmd(const DrawParams& drawParams){
+void DrawMgr::addDrawCmd(const DrawParams& drawParams) const{
     SDL_Texture* texture=getTextureInternal(drawParams);
     _renderer.renderTexture(texture,drawParams);
 }
@@ -62,6 +62,10 @@ void DrawMgr::setWidgetOpacity(const DrawParams& drawParams, int32_t opacity){
     }
     SDL_Texture* texture=getTextureInternal(drawParams);
     _renderer.setWidgetOpacity(texture,opacity);
+}
+
+int64_t DrawMgr::getMaxFrameRate() const {
+    return _maxFrames;
 }
 
 SDL_Texture* DrawMgr::getTextureInternal(const DrawParams& drawParams) const {

@@ -7,7 +7,7 @@
 // Own headers
 #include "manager_utils/managers/DrawMgr.h"
 
-void Widget::draw(){
+void Widget::draw() const{
     if(_isVisible){
         gDrawMgr->addDrawCmd(_drawParams);
     }
@@ -78,6 +78,10 @@ int32_t Widget::getOpacity() const{
 
 Point Widget::getPosition() const{
     return _drawParams.pos;
+}
+
+bool Widget::isVisible() const{
+    return _isVisible;
 }
 
 void Widget::activateAlphaModulation(){

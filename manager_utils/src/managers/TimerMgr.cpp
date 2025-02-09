@@ -19,6 +19,8 @@ void TimerMgr::deinit(){
 }
 
 void TimerMgr::process(){
+    removeTimersInternal(); // added here as an improvement - Zhivko mentions it at the beginning of Lecture Game 2/4
+
     const int64_t msElapsed=_elapsedTime.getElapsed().toMilliseconds();
 
     for(auto it=_timerMap.begin();it!=_timerMap.end();++it){
@@ -56,6 +58,10 @@ bool TimerMgr::isActiveTimerId(int32_t timerId) const{
 
 void TimerMgr::onInitEnd(){
     _elapsedTime.getElapsed();
+}
+
+size_t TimerMgr::getActiveTimersCount() const{
+    return _timerMap.size();
 }
 
 void TimerMgr::removeTimersInternal(){

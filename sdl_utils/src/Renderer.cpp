@@ -69,7 +69,7 @@ void Renderer::finishFrame(){
     SDL_RenderPresent(_sdlRenderer);
 }
 
-void Renderer::renderTexture(SDL_Texture* texture, const DrawParams& drawParams){
+void Renderer::renderTexture(SDL_Texture* texture, const DrawParams& drawParams) const{
     if(WidgetType::IMAGE==drawParams.widgetType){
         drawImage(drawParams,texture);
     } else if(WidgetType::TEXT==drawParams.widgetType){
@@ -93,7 +93,7 @@ void Renderer::setWidgetOpacity(SDL_Texture* texture, int32_t opacity){
     }
 }
 
-void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture){
+void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture) const{
     if(FULL_OPACITY==drawParams.opacity){
         drawTextureInternal(drawParams,texture);
     } else {
@@ -107,11 +107,11 @@ void Renderer::drawImage(const DrawParams& drawParams, SDL_Texture* texture){
         }
     }  
 }
-void Renderer::drawText(const DrawParams& drawParams, SDL_Texture* texture){
+void Renderer::drawText(const DrawParams& drawParams, SDL_Texture* texture) const{
     drawTextureInternal(drawParams,texture);
 }
 
-void Renderer::drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture){
+void Renderer::drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture) const{
     // first "nullptr" means take the entire image and second "nullptr" means to draw it on the entire window
     // const int32_t err=SDL_RenderCopy(_sdlRenderer,texture,nullptr,nullptr);
        

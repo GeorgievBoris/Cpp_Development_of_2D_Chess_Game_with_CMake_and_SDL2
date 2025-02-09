@@ -11,7 +11,7 @@
 
 class Widget{
 public:
-    void draw();
+    void draw() const;
 
     void reset();
     void setFlipType(WidgetFlip flipType);
@@ -28,6 +28,7 @@ public:
     double getRotationAngle() const;
     int32_t getOpacity() const;
     Point getPosition() const;
+    bool isVisible() const;
 
     void activateAlphaModulation();
     void deactivateAlphaModulation();

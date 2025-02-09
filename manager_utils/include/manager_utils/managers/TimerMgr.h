@@ -22,6 +22,7 @@ public:
     void stopTimer(int32_t timerId);
     bool isActiveTimerId(int32_t timerId) const;
     void onInitEnd();
+    size_t getActiveTimersCount() const;
 
 private:
     void removeTimersInternal();

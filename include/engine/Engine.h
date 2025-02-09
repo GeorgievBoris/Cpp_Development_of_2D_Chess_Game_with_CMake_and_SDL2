@@ -9,6 +9,7 @@
 #include "game/Game.h"
 #include "sdl_utils/InputEvent.h"
 #include "manager_utils/managers/ManagerHandler.h"
+#include "manager_utils/debug/DebugConsole.h"
 // Forward Declarations
 struct EngineCfg;
 
@@ -30,6 +31,7 @@ private:
     InputEvent _event;
     Game _game;
     ManagerHandler _managerHandler;
+    DebugConsole _debugConsole;
 };
 
 

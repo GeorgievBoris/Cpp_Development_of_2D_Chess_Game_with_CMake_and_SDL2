@@ -8,8 +8,7 @@
 #include "manager_utils/managers/TimerMgr.h"
 
 void TimerClient::startTimer(int64_t interval, int32_t timerId, TimerType timerType){
-
-    if(!gTimerMgr){ // this is a fix and was added by Zhivko at a later stage in Lecture 11 Game 2/4
+    if(!gTimerMgr){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
         return;
     }
 
@@ -26,7 +25,7 @@ void TimerClient::startTimer(int64_t interval, int32_t timerId, TimerType timerT
 }
 
 void TimerClient::stopTimer(int32_t timerId){
-    if(!gTimerMgr){ // this is a fix and was added by Zhivko at a later stage in Lecture 11 Game 2/4
+    if(!gTimerMgr){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
         return;
     }
 
@@ -34,8 +33,9 @@ void TimerClient::stopTimer(int32_t timerId){
 }
 
 bool TimerClient::isActiveTimerId(int32_t timerId) const {
-    if(!gTimerMgr){ // this is a fix and was added by Zhivko at a later stage in Lecture 11 Game 2/4
+    if(!gTimerMgr){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
         return false;
     }
+
     return gTimerMgr->isActiveTimerId(timerId);
 }

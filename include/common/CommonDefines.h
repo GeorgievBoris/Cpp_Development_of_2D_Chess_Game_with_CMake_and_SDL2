@@ -11,11 +11,10 @@
 namespace TextureId{
 
 enum ResourceId{
-    RUNNING_GIRL,
-    WHEEL,
-    BLACK_BACKGROUND,
-    START_BUTTON,
-    STOP_BUTTON,
+    CHESS_BOARD,
+    TARGET,
+    WHITE_PIECES,
+    BLACK_PIECES,
     COUNT
 };
 
@@ -32,9 +31,7 @@ enum FontIdKeys{
 namespace TimerId {
     
 enum Keys{
-    WHEEL_ROT_ANIM_TIMER_ID,
-    WHEEL_SCALE_TIMER_ID,
-    GIRL_MOVE_TIMER_ID,
+    BLINK_TARGET_TIMER_ID,
     COUNT
 };
 

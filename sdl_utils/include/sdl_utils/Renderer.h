@@ -27,16 +27,16 @@ public:
     void deinit();
     void clearScreen();
     void finishFrame();
-    void renderTexture(SDL_Texture* texture, const DrawParams& drawParams);
+    void renderTexture(SDL_Texture* texture, const DrawParams& drawParams) const;
 
     void setWidgetBlendMode(SDL_Texture* texture, BlendMode blendMode);
     void setWidgetOpacity(SDL_Texture* texture, int32_t opacity);
 
 
 private:
-    void drawImage(const DrawParams& drawParams, SDL_Texture* texture);
-    void drawText(const DrawParams& drawParams, SDL_Texture* texture);
-    void drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture);
+    void drawImage(const DrawParams& drawParams, SDL_Texture* texture) const;
+    void drawText(const DrawParams& drawParams, SDL_Texture* texture) const;
+    void drawTextureInternal(const DrawParams& drawParams, SDL_Texture* texture) const;
     // each window that we create, can have only one "SDL_Renderer" assigned to it !!!
     // an image that is loaded in one Renderer, CANNOT be used in another Renderer !!!
     SDL_Renderer* _sdlRenderer=nullptr;

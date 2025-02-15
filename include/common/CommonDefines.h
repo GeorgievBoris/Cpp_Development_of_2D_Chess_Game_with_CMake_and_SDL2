@@ -15,6 +15,7 @@ enum ResourceId{
     TARGET,
     WHITE_PIECES,
     BLACK_PIECES,
+    MOVE_TILES,
     COUNT
 };
 

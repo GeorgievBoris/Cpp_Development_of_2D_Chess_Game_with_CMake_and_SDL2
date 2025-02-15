@@ -11,6 +11,12 @@
 struct BoardPos{
     BoardPos(int32_t inputRow, int32_t inputCol) : row(inputRow), col(inputCol) {}
     BoardPos()=default;
+    bool operator==(const BoardPos& other) const{
+        return row==other.row && col==other.col;
+    }
+    bool operator!=(const BoardPos& other) const{
+        return !BoardPos::operator==(other);
+    }
     int32_t row{};
     int32_t col{};
 };

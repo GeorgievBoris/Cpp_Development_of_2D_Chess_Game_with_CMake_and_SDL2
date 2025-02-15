@@ -16,7 +16,8 @@ class GameBoardProxy;
 
 class PieceHandler{
 public:
-    int32_t init(GameBoardProxy* gameBoardProxy, int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId);
+    int32_t init(GameBoardProxy* gameBoardProxy, int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, 
+                                                                                    int32_t unfinishedPieceFontId);
     void draw() const;
     void handleEvent(const InputEvent& e);
 
@@ -25,16 +26,11 @@ private:
     void handlePieceGrabbedEvent(const InputEvent& e);
     void handlePieceUngrabbedEvent(const InputEvent& e);
 
-    int32_t populateWhitePieces(int32_t rsrcId);
-    int32_t populateBlackPieces(int32_t rsrcId);
-// since we will very often access the chess figures, this access must happen fast...
-// ... therefore use random_access_iterator -> std::vector...Furthermore,...
-// ... we use std::vector<> when the number/count of the elements inside it is dynamic (i.e. the count reduces/increases)
-    using PlayerPieces=std::vector<ChessPiece>;
+    void doMovePiece(const BoardPos& boardPos);
 
     GameBoardProxy* _gameBoardProxy=nullptr;
 
-    std::array<PlayerPieces,Defines::PLAYERS_COUNT> _pieces;
+    std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT> _pieces;
     int32_t _selectedPieceId=0;
     int32_t _selectedPiecePlayerId=0;
     bool _isPieceGrabbed=false;

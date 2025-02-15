@@ -8,21 +8,27 @@
 // Own headers
 // Forward Declarations
 #include "manager_utils/drawing/Image.h"
+#include "game/board/MoveSelector.h"
 #include "game/proxies/GameBoardProxy.h"
 #include "manager_utils/time/TimerClient.h"
+
 class GameBoard : public GameBoardProxy , public TimerClient {
 public:
     ~GameBoard();
-    int32_t init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t blinkTimerId);
+    int32_t init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId);
     void draw() const;
 private:
-    void onPieceGrabbed(const BoardPos& boardPos) final;
+    void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;
     void onTimeout(int32_t timerId) final;
+    bool isMoveAllowed(const BoardPos& pos) const final;
 
     Image _boardImg;
     Image _targetImg;
     int32_t _blinkTimerId;
+
+    MoveSelector _moveSelector;
+    std::vector<TileData> _currMoveTiles;
 };
 
 

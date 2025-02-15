@@ -10,6 +10,10 @@ set(_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(_INC_DIR ${_BASE_DIR}/include)
 set(_SRC_DIR ${_BASE_DIR}/src)
 
+# to siplify the current content, the game can be "placed" in a library...
+# ... but in this case we will enforce the strong rule that ...
+# ... the game cannot use functionalities related to the Engine class
+
 add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/common/CommonDefines.h
 
@@ -19,20 +23,31 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/config/GameCfg.h
                 ${_INC_DIR}/game/Game.h
                 ${_INC_DIR}/game/board/GameBoard.h
+                ${_INC_DIR}/game/board/MoveSelector.h
                 ${_INC_DIR}/game/utils/BoardPos.h
                 ${_INC_DIR}/game/utils/BoardUtils.h
                 ${_INC_DIR}/game/pieces/types/ChessPiece.h
+                ${_INC_DIR}/game/pieces/types/UnfinishedPiece.h
+                ${_INC_DIR}/game/pieces/types/Rook.h
+                ${_INC_DIR}/game/pieces/types/Pawn.h
                 ${_INC_DIR}/game/pieces/PieceHandler.h
+                ${_INC_DIR}/game/pieces/PieceHandlerPopulator.h
                 ${_INC_DIR}/game/defines/ChessDefines.h
+                ${_INC_DIR}/game/defines/ChessStructs.h
                 ${_INC_DIR}/game/proxies/GameBoardProxy.h
                 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
                 ${_SRC_DIR}/game/board/GameBoard.cpp
+                ${_SRC_DIR}/game/board/MoveSelector.cpp
                 ${_SRC_DIR}/game/utils/BoardUtils.cpp
                 ${_SRC_DIR}/game/pieces/types/ChessPiece.cpp
+                ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
+                ${_SRC_DIR}/game/pieces/types/Rook.cpp
+                ${_SRC_DIR}/game/pieces/types/Pawn.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandler.cpp
+                ${_SRC_DIR}/game/pieces/PieceHandlerPopulator.cpp
                 ${_SRC_DIR}/main.cpp
 )
 

@@ -13,12 +13,17 @@ GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture
     }
 }
 
-int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t blinkTimerId){
+int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId){
     _boardImg.create(boardRsrcId);
     _targetImg.create(targetRsrcId);
     _targetImg.hide();
 
     _blinkTimerId=blinkTimerId;
+
+    if(EXIT_SUCCESS!=_moveSelector.init(moveTilesRsrcId)){
+        std::cerr<<"_moveSelector.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
     
     return EXIT_SUCCESS;
 }
@@ -26,15 +31,22 @@ int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t blink
 void GameBoard::draw() const{
     _boardImg.draw();
     _targetImg.draw();
+    _moveSelector.draw();
 }
 
-void GameBoard::onPieceGrabbed(const BoardPos& boardPos){
+void GameBoard::onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles){
+    _currMoveTiles=moveTiles;
+    _moveSelector.markTiles(_currMoveTiles);
+    
     _targetImg.setPosition(BoardUtils::getAbsPos(boardPos));
     _targetImg.show();
     startTimer(500,_blinkTimerId,TimerType::PULSE);
 }
 
 void GameBoard::onPieceUngrabbed(){
+    _moveSelector.unmarkTiles();
+
+    _currMoveTiles.clear();
     _targetImg.hide();
     if(isActiveTimerId(_blinkTimerId)){
         stopTimer(_blinkTimerId);
@@ -52,4 +64,16 @@ void GameBoard::onTimeout(int32_t timerId){
         return;
     }
     _targetImg.show();
+}
+
+bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
+    // the below for loop can be alternatively replaced with "std::find_if()" algorithm - try it later!
+    for(const TileData& moveTile:_currMoveTiles){
+        if(pos==moveTile.boardPos){
+            if(TileType::GUARD!=moveTile.tileType){
+                return true;
+            } 
+        }
+    }
+    return false;
 }

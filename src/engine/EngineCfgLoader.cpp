@@ -20,6 +20,9 @@ static constexpr auto CHESS_BOARD_WIDTH_HEIGHT=900;
 
 static constexpr auto TARGET_IMG_WIDTH_HEIGHT=98;
 
+static constexpr auto MOVE_TILES_FRAMES=3;
+static constexpr auto MOVE_TILES_IMG_WIDTH_HEIGHT=98;
+
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
 
 static constexpr auto MAX_FRAMERATE=30;
@@ -31,7 +34,6 @@ static std::string getFilePath(const std::string& relativePath) {
         return relativePath;
     #else
         return std::string("../")+relativePath;
-        // return "../"+relativePath; // another possible option
     #endif
 }
 
@@ -46,6 +48,7 @@ static void populateMonitorCfg(MonitorWindowCfg& outCfg){
 static void populateDrawMgrCfg(DrawMgrCfg& cfg){
     populateMonitorCfg(cfg.windowCfg);
     cfg.maxFrameRate=MAX_FRAMERATE;
+
 }
 
 static void populateImageContainerCfg(ImageContainerCfg& cfg){
@@ -78,6 +81,14 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.frames.emplace_back(0,0,TARGET_IMG_WIDTH_HEIGHT,TARGET_IMG_WIDTH_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::TARGET,imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/moveTiles.png");
+    for(int32_t frameId=0;frameId<MOVE_TILES_FRAMES;++frameId){
+        imageCfg.frames.emplace_back(frameId*MOVE_TILES_IMG_WIDTH_HEIGHT,0,
+                                    MOVE_TILES_IMG_WIDTH_HEIGHT,MOVE_TILES_IMG_WIDTH_HEIGHT);
+    }
+    cfg.imageConfigs.emplace(TextureId::MOVE_TILES,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -104,10 +115,11 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.whitePiecesRsrcId=TextureId::WHITE_PIECES;
     cfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;
     cfg.targetRsrcId=TextureId::TARGET;
+    cfg.moveTilesRsrcId=TextureId::MOVE_TILES;
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
 
-    // cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
+    cfg.unfinishedPieceFontId=FontId::ANGELINE_VINTAGE_40;
 }
 
 EngineCfg EngineCfgLoader::loadCfg(){

@@ -3,6 +3,7 @@
 // C system headers
 // C++ system headers
 #include <cstdlib>
+#include <iostream>
 // Third-party headers
 // Own headers
 #include "utils/drawing/Rectangle.h"
@@ -36,4 +37,77 @@ bool BoardUtils::isInsideBoard(const Point& absPos){
     const Rectangle bound(FIRST_TILE_X_POS, FIRST_TILE_Y_POS, BOARD_SIZE*TILE_SIZE, BOARD_SIZE*TILE_SIZE);
 
     return bound.isPointInside(absPos);
+}
+
+int32_t BoardUtils::getOpponentId(int32_t activePlayerId){
+    if(Defines::WHITE_PLAYER_ID==activePlayerId){
+        return Defines::BLACK_PLAYER_ID;
+    }
+    return Defines::WHITE_PLAYER_ID;
+}
+
+BoardPos BoardUtils::getAdjacentPos(Defines::Directions dir,const BoardPos& currPos){
+    BoardPos pos=currPos;
+    switch(dir){
+    case Defines::UP_LEFT:
+        --pos.row;
+        --pos.col;
+        break;
+    case Defines::UP:
+        --pos.row;
+        break;
+    case Defines::UP_RIGHT:
+        --pos.row;
+        ++pos.col;
+        break;
+    case Defines::RIGHT:
+        ++pos.col;
+        break;
+    case Defines::DOWN_RIGHT:
+        ++pos.row;
+        ++pos.col;
+        break;
+    case Defines::DOWN:
+        ++pos.row;
+        break;
+    case Defines::DOWN_LEFT:
+        ++pos.row;
+        --pos.col;
+        break;
+    case Defines::LEFT:
+        --pos.col;
+        break;
+    default:
+        std::cerr<<"Received invalid dir: "<<dir<<std::endl;
+        break;
+    }
+    return pos;
+}
+
+bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiece::PlayerPieces& pieces,
+                                            int32_t& outCollisionRelativeId){
+    const size_t size=pieces.size();
+    for(size_t i=0;i<size;++i){
+        if(pieces[i]->getBoardPos()==selectedPos){
+             // important ... write this down in the book, if "outCollisionRelativeId" was of type "int32_t*" !!!
+            // *outCollisionRelativeId=static_cast<int32_t>(i);
+            outCollisionRelativeId=static_cast<int32_t>(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
+                                                            const ChessPiece::PlayerPieces& enemyPieces){
+    int32_t collisionIdx=-1;
+    if(doCollideWithPiece(boardPos,playerPieces,collisionIdx)){
+        return TileType::GUARD;
+    }
+
+    if(doCollideWithPiece(boardPos,enemyPieces,collisionIdx)){
+        return TileType::TAKE;
+    }
+
+    return TileType::MOVE;
 }

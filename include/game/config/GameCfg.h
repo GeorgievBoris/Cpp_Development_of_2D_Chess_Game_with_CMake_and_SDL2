@@ -8,9 +8,12 @@
 #include <string>
 // Third-party headers
 // Own headers
+#include "game/panels/config/PiecePromotionPanelCfg.h"
 // Foward Declarations
 
 struct GameCfg{
+    PiecePromotionPanelCfg piecePromotionPanelCfg;
+
     int32_t chessBoardRsrcId;
     int32_t whitePiecesRsrcId;
     int32_t blackPiecesRsrcId;

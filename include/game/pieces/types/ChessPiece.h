@@ -30,16 +30,17 @@ public:
     // since we will very often access the chess figures, this access must happen fast...
     // ... therefore use random_access_iterator -> std::vector...Furthermore,...
     // ... we use std::vector<> when the number/count of the elements inside it is dynamic (i.e. the count reduces/increases)    
-    using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>;
+    using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>; // the location of this using is correct here (Lecture Game 3/4 2:28:15 time)
 
     virtual int32_t init(const ChessPieceCfg& cfg);
     virtual void draw() const;
-    virtual std::vector<TileData> getMoveTiles(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const=0; // a pure-virtual method
-    bool containsEvent(const InputEvent& e) const;
-
     virtual void setBoardPos(const BoardPos& boardPos);
+    virtual std::vector<TileData> getMoveTiles(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const=0; // a pure-virtual method
+    
+    bool containsEvent(const InputEvent& e) const;
     BoardPos getBoardPos() const;
     int32_t getPlayerId() const;
+    void setWidgetFlip(WidgetFlip flipType);
 protected:
     Image _pieceImg;
     BoardPos _boardPos;

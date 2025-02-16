@@ -9,9 +9,11 @@
 // Own headers
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
-
+class GameProxy;
 class Pawn : public ChessPiece {
 public:
+    Pawn(GameProxy* gameProxy);
+    void setBoardPos(const BoardPos& boardPos) final;
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                         Defines::PLAYERS_COUNT>& activePieces) const final;
 
@@ -23,6 +25,8 @@ private:
 
     std::unordered_map<Defines::Directions,MoveDirection> getWhiteBoardMoves() const;
     std::unordered_map<Defines::Directions,MoveDirection> getBlackBoardMoves() const;
+
+    GameProxy* _gameProxy;
 };
 
 

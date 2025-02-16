@@ -13,7 +13,8 @@ GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture
     }
 }
 
-int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId){
+int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId,
+                                int32_t moveTilesRsrcId, int32_t blinkTimerId){
     _boardImg.create(boardRsrcId);
     _targetImg.create(targetRsrcId);
     _targetImg.hide();
@@ -32,6 +33,11 @@ void GameBoard::draw() const{
     _boardImg.draw();
     _targetImg.draw();
     _moveSelector.draw();
+}
+
+Image& GameBoard::getBoardImg(){
+    // good to think about an alternative way of how to expose _boardImg
+    return _boardImg;
 }
 
 void GameBoard::onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles){

@@ -23,6 +23,9 @@ static constexpr auto TARGET_IMG_WIDTH_HEIGHT=98;
 static constexpr auto MOVE_TILES_FRAMES=3;
 static constexpr auto MOVE_TILES_IMG_WIDTH_HEIGHT=98;
 
+static constexpr auto PROMOTION_BTN_FRAMES=2;
+static constexpr auto PROMOTION_BTN_WIDTH_HEIGHT=104;
+
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
 
 static constexpr auto MAX_FRAMERATE=30;
@@ -89,6 +92,14 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     }
     cfg.imageConfigs.emplace(TextureId::MOVE_TILES,imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/piecePromoteButtonBgr.png");
+    for(int32_t frameId=0;frameId<PROMOTION_BTN_FRAMES;++frameId){
+        imageCfg.frames.emplace_back(frameId*PROMOTION_BTN_WIDTH_HEIGHT,0,
+                                        PROMOTION_BTN_WIDTH_HEIGHT,PROMOTION_BTN_WIDTH_HEIGHT);
+    }
+    cfg.imageConfigs.emplace(TextureId::PROMOTION_BUTTON,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -120,6 +131,17 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
 
     cfg.unfinishedPieceFontId=FontId::ANGELINE_VINTAGE_40;
+
+    auto& panelCfg=cfg.piecePromotionPanelCfg;
+    panelCfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;
+    panelCfg.whitePiecesRsrcId=TextureId::WHITE_PIECES;
+    panelCfg.buttonBgrRsrcId=TextureId::PROMOTION_BUTTON;
+    panelCfg.gameBoardWidth=CHESS_BOARD_WIDTH_HEIGHT;
+    panelCfg.gameBoardHeight=CHESS_BOARD_WIDTH_HEIGHT;
+    panelCfg.buttonHeight=CHESS_PIECES_WIDTH_HEIGHT; // the normal size of 1 tile
+    panelCfg.buttonWidth=CHESS_PIECES_WIDTH_HEIGHT; // the normal size of 1 tile
+    panelCfg.buttonBgrHeight=PROMOTION_BTN_WIDTH_HEIGHT; // a bit bigger size that surrounds each chess figure/tile
+    panelCfg.buttonBgrWidth=PROMOTION_BTN_WIDTH_HEIGHT; // a bit bigger size that surrounds each chess figure/tile
 }
 
 EngineCfg EngineCfgLoader::loadCfg(){

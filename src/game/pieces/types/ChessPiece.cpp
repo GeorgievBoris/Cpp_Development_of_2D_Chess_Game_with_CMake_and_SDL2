@@ -55,3 +55,7 @@ BoardPos ChessPiece::getBoardPos() const{
 int32_t ChessPiece::getPlayerId() const{
     return _playerId;
 }
+
+void ChessPiece::setWidgetFlip(WidgetFlip flipType){
+    _pieceImg.setFlipType(flipType);
+}

@@ -36,11 +36,9 @@ void Text::destroy(){
     if(_isCreated){
         // _isCreated=false; // added by Zhivko, but probably not needed because Widget::reset() does the same job
         // _isDestroyed=true; // added by Zhivko, but probably not needed because Widget::reset() does the same job
-        
         if(gRsrcMgr){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
             gRsrcMgr->unloadText(_drawParams.textId); // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
         }
-        
         Widget::reset();
         return;
     }

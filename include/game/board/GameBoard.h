@@ -17,6 +17,7 @@ public:
     ~GameBoard();
     int32_t init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId);
     void draw() const;
+    Image& getBoardImg(); // good to think about an alternative way of how to expose _boardImg
 private:
     void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;

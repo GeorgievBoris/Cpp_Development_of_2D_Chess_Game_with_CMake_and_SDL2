@@ -24,6 +24,7 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/Game.h
                 ${_INC_DIR}/game/board/GameBoard.h
                 ${_INC_DIR}/game/board/MoveSelector.h
+                ${_INC_DIR}/game/board/GameBoardAnimator.h
                 ${_INC_DIR}/game/utils/BoardPos.h
                 ${_INC_DIR}/game/utils/BoardUtils.h
                 ${_INC_DIR}/game/pieces/types/ChessPiece.h
@@ -35,12 +36,20 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/defines/ChessDefines.h
                 ${_INC_DIR}/game/defines/ChessStructs.h
                 ${_INC_DIR}/game/proxies/GameBoardProxy.h
+                ${_INC_DIR}/game/proxies/GameProxy.h
+                ${_INC_DIR}/game/logic/GameLogic.h
+                ${_INC_DIR}/game/logic/InputInverter.h
+                ${_INC_DIR}/game/panels/PiecePromotionPanel.h
+                ${_INC_DIR}/game/panels/buttons/PiecePromotionButton.h
+                ${_INC_DIR}/game/panels/config/PiecePromotionPanelCfg.h
+                ${_INC_DIR}/game/panels/config/PiecePromotionButtonCfg.h
                 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
                 ${_SRC_DIR}/game/board/GameBoard.cpp
                 ${_SRC_DIR}/game/board/MoveSelector.cpp
+                ${_SRC_DIR}/game/board/GameBoardAnimator.cpp
                 ${_SRC_DIR}/game/utils/BoardUtils.cpp
                 ${_SRC_DIR}/game/pieces/types/ChessPiece.cpp
                 ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
@@ -48,6 +57,10 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/pieces/types/Pawn.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandler.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandlerPopulator.cpp
+                ${_SRC_DIR}/game/logic/GameLogic.cpp
+                ${_SRC_DIR}/game/logic/InputInverter.cpp
+                ${_SRC_DIR}/game/panels/PiecePromotionPanel.cpp
+                ${_SRC_DIR}/game/panels/buttons/PiecePromotionButton.cpp
                 ${_SRC_DIR}/main.cpp
 )
 

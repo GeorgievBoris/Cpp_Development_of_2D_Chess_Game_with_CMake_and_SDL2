@@ -28,12 +28,11 @@ enum Directions{
     DIRECTION_COUNT
 };
 
-enum PawnDefines{
+enum PawnDefines {
     WHITE_PLAYER_START_PAWN_ROW=6,
     WHITE_PLAYER_START_END_ROW=0,
     BLACK_PLAYER_START_PAWN_ROW=1,
     BLACK_PLAYER_START_END_ROW=7,
-
     PAWNS_COUNT=8
 };
 

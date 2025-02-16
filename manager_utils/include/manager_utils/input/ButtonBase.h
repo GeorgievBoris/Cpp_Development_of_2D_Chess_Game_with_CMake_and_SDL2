@@ -23,12 +23,13 @@ public:
     virtual ~ButtonBase()=default;
     virtual void handleEvent(const InputEvent& e) =0; // a pure-virtual method
     // void create(int32_t rsrcId, const Point& pos=Point::ZERO); // must be used if Variant 1 is used
-    virtual void draw();
+    virtual void draw() const;
     void lockInput();
     void unlockInput();
+    void destroy();
 
     bool isInputUnlocked() const;
-    bool containsEvent(const InputEvent& e);
+    bool containsEvent(const InputEvent& e) const;
 
 private:
     // Image _buttonTexture; // this is related to Variant 1 as described above

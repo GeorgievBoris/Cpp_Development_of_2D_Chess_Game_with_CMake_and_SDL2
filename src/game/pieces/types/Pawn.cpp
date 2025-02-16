@@ -6,6 +6,30 @@
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
+#include "game/proxies/GameProxy.h"
+
+Pawn::Pawn(GameProxy* gameProxy) :_gameProxy(gameProxy) {
+    // TO DO !!!
+    // IMPORTANT - listen to Lecture Game 3/4 at time 51:00 and write it down in the book !!!
+
+    if(nullptr==gameProxy){
+        std::cerr<<"Error, nullptr provided for gameProxy"<<std::endl;
+    }
+}
+
+void Pawn::setBoardPos(const BoardPos& boardPos) {
+    ChessPiece::setBoardPos(boardPos);
+    if(Defines::WHITE_PLAYER_ID==_playerId){
+        if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row){
+            _gameProxy->onPawnPromotion();
+            return;
+        }
+        return;
+    }
+    if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row){
+        _gameProxy->onPawnPromotion();
+    }
+}
 
 std::vector<TileData> Pawn::getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                                 Defines::PLAYERS_COUNT>& activePieces) const{

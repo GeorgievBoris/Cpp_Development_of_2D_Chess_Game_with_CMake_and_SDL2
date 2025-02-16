@@ -16,6 +16,7 @@ enum ResourceId{
     WHITE_PIECES,
     BLACK_PIECES,
     MOVE_TILES,
+    PROMOTION_BUTTON,
     COUNT
 };
 

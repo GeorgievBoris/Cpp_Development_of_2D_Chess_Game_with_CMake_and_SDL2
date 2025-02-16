@@ -90,9 +90,8 @@ bool Engine::processFrame(){
         }
         handleEvent();
     }
-
+    
     drawFrame();
-
     return false;
 }
 

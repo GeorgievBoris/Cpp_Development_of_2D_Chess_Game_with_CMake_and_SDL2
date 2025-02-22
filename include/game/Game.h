@@ -8,7 +8,6 @@
 // Third-party headers
 // Own headers
 
-#include "manager_utils/drawing/Image.h"
 #include "game/config/GameCfg.h"
 #include "game/board/GameBoard.h"
 #include "game/board/GameBoardAnimator.h"
@@ -17,6 +16,8 @@
 #include "game/proxies/GameProxy.h"
 #include "game/panels/PiecePromotionPanel.h"
 #include "game/logic/InputInverter.h"
+#include "manager_utils/drawing/Image.h"
+#include "manager_utils/drawing/Fbo.h"
 
 // Forward Declarations
 class InputEvent;
@@ -36,12 +37,15 @@ private:
     void onBoardAnimFinished() final;
     void setWidgetFlip(WidgetFlip flipType) final;
 
+    void regenerateGameFbo();
+
     GameBoard _gameBoard;
     PieceHandler _pieceHandler;
     GameLogic _gameLogic;
     PiecePromotionPanel _piecePromotionPanel;
     GameBoardAnimator _gameBoardAnimator;
     InputInverter _inputInverter;
+    Fbo _gameFbo;
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

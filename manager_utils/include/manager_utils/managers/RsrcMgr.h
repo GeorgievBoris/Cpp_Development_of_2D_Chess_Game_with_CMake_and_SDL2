@@ -9,10 +9,14 @@
 #include "manager_utils/managers/MgrBase.h"
 #include "sdl_utils/containers/ImageContainer.h"
 #include "sdl_utils/containers/TextContainer.h"
+#include "sdl_utils/containers/FboContainer.h"
 // Forward Declarations
 struct RsrcMgrCfg;
 
-class RsrcMgr : public MgrBase, public ImageContainer, public TextContainer {
+class RsrcMgr : public MgrBase,
+                public ImageContainer,
+                public TextContainer,
+                public FboContainer {
 public:
 
     RsrcMgr()=default; // NEVER forget to set explicitly the default Ctor in the base class (if any) as well

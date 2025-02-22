@@ -7,8 +7,10 @@
 // Third-party headers
 // Own headers
 #include "manager_utils/drawing/Image.h"
+#include "manager_utils/time/TimerClient.h"
 // Forward Declarations
 class GameProxy;
+class Fbo;
 
 // TODO: write this down in the book...
 // Zhivko: Two types of animators exist in general...
@@ -20,17 +22,22 @@ class GameProxy;
 // The benefit is that many different animators can exists and can access and modify the Image...
 // ... (rotate, flip, etc...)
 
-class GameBoardAnimator{
+class GameBoardAnimator : public TimerClient{
 public:
-    int32_t init(GameProxy* gameProxy, Image* boardImg);
+    ~GameBoardAnimator();
+    int32_t init(GameProxy* gameProxy, Fbo* gameFbo, int32_t gameFboRotTimerId);
     void startAnim(int32_t playerId);
-
+    bool isActive() const;
 private:
-    GameProxy* _gameProxy=nullptr;
-    Image* _boardImg=nullptr;
-    int32_t _currRotation{0};
-    WidgetFlip _targetFlipType=WidgetFlip::NONE;
+    void onTimeout(int32_t timerId) final;
+    void processRotAnim();
 
+    GameProxy* _gameProxy=nullptr;
+    Fbo* _gameFbo=nullptr;
+    int32_t _currRotation{0};
+    int32_t _targetRotation{0};
+    int32_t _gameFboRotTimerId=-1;
+    WidgetFlip _targetFlipType=WidgetFlip::NONE;
 };
 
 

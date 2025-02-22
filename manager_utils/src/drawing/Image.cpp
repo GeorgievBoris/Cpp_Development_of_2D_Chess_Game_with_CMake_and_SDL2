@@ -50,7 +50,8 @@ void Image::setFrame(int32_t frameIdx){
     }
     _currFrame=frameIdx;
     const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
-    _drawParams.frameRect=frames[_currFrame];
+    // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];
 }
 
 void Image::setNextFrame(){
@@ -59,7 +60,8 @@ void Image::setNextFrame(){
         _currFrame=0;
     }
     const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
-    _drawParams.frameRect=frames[_currFrame];    
+    // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];    
 }
 
 void Image::setPrevFrame(){
@@ -68,7 +70,8 @@ void Image::setPrevFrame(){
         _currFrame=_maxFrames-1;
     }
      const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
-    _drawParams.frameRect=frames[_currFrame];
+     // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];
 }
 
 int32_t Image::getFrame()const{

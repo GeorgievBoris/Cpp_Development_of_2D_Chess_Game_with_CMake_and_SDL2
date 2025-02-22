@@ -33,7 +33,8 @@ add_library(
     ${_INC_DIR}/InputEvent.h
     ${_INC_DIR}/Renderer.h
     ${_INC_DIR}/containers/ImageContainer.h
-    ${_INC_DIR}/containers/TextContainer.h   
+    ${_INC_DIR}/containers/TextContainer.h
+    ${_INC_DIR}/containers/FboContainer.h
 
     ${_SRC_DIR}/SDLLoader.cpp
     ${_SRC_DIR}/MonitorWindow.cpp
@@ -42,6 +43,7 @@ add_library(
     ${_SRC_DIR}/Renderer.cpp
     ${_SRC_DIR}/containers/ImageContainer.cpp
     ${_SRC_DIR}/containers/TextContainer.cpp
+    ${_SRC_DIR}/containers/FboContainer.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

@@ -80,7 +80,7 @@ target_link_libraries(
 )
 
 
-if(CMAKE_BUILD_TYPE MATCHES Release)
+if(${CMAKE_BUILD_TYPE} MATCHES Release)
     target_compile_definitions(
         ${PROJECT_NAME}
         PRIVATE
@@ -95,6 +95,8 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
     )
 endif()
+
+# any CMakeLists.txt that is added to this CMakeList.txt somewhere below, it will have access to the functions from helpers.cmake
 
 add_subdirectory(utils) # here the name of the folder must be added, NOT the name of the binary
 add_subdirectory(${_BASE_DIR}/sdl_utils) # here the name of the folder must be added, NOT the name of the binary

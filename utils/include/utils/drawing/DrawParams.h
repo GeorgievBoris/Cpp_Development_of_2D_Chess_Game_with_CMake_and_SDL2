@@ -30,6 +30,7 @@ enum class WidgetFlip:uint8_t{
 enum class WidgetType:uint8_t {
     IMAGE,
     TEXT,
+    FBO,
     UNKNOWN
 };
 
@@ -68,6 +69,7 @@ struct DrawParams{
         // Without the "union" the structure is forced to carry the two integers in the memory simultaneously 
         int32_t rsrcId=INVALID_RSRC_ID;
         int32_t textId;
+        int32_t fboId;
     };
 
     WidgetType widgetType=WidgetType::UNKNOWN;

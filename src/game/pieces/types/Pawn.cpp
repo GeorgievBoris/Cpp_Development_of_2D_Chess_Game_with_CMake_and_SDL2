@@ -19,15 +19,15 @@ Pawn::Pawn(GameProxy* gameProxy) :_gameProxy(gameProxy) {
 
 void Pawn::setBoardPos(const BoardPos& boardPos) {
     ChessPiece::setBoardPos(boardPos);
-    if(Defines::WHITE_PLAYER_ID==_playerId){
-        if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row){
+
+    if(Defines::WHITE_PLAYER_ID==_playerId) {
+        if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
             _gameProxy->onPawnPromotion();
-            return;
         }
-        return;
-    }
-    if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row){
-        _gameProxy->onPawnPromotion();
+    } else {
+        if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
+            _gameProxy->onPawnPromotion();
+        }
     }
 }
 
@@ -135,8 +135,8 @@ std::vector<TileData> Pawn::getWhiteMoveTiles(const std::array<ChessPiece::Playe
 }
 
 std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                            Defines::PLAYERS_COUNT>& activePieces) const{
-    const std::unordered_map<Defines::Directions,MoveDirection> boardMoves=getBlackBoardMoves();
+                            Defines::PLAYERS_COUNT>& activePiece) const{
+    std::unordered_map<Defines::Directions,MoveDirection> boardMoves=getBlackBoardMoves();
     std::vector<TileData> moveTiles;
     moveTiles.reserve(boardMoves.size());
     const int32_t opponentId=BoardUtils::getOpponentId(_playerId);
@@ -144,7 +144,7 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
     std::unordered_map<Defines::Directions,MoveDirection>::const_iterator it=boardMoves.find(Defines::DOWN);
     if(boardMoves.end()!=it){
         for(const BoardPos& pos:it->second){
-            const TileType tileType=BoardUtils::getTileType(pos,activePieces[_playerId],activePieces[opponentId]);
+            const TileType tileType=BoardUtils::getTileType(pos,activePiece[_playerId],activePiece[opponentId]);
             // if first possible move is TAKE or GUARD - second move will be impossible
             if(TileType::MOVE!=tileType){
                 break;
@@ -160,7 +160,7 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
         it=boardMoves.find(move);
         if(boardMoves.end()!=it){
             for(const BoardPos& pos:it->second){
-                const TileType tileType=BoardUtils::getTileType(pos,activePieces[_playerId],activePieces[opponentId]);
+                const TileType tileType=BoardUtils::getTileType(pos,activePiece[_playerId],activePiece[opponentId]);
                 if(TileType::MOVE!=tileType){
                     moveTiles.emplace_back(pos,tileType);
                 }

@@ -29,7 +29,12 @@ int32_t Game::init(const GameCfg& cfg){
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_gameBoardAnimator.init(static_cast<GameProxy*>(this),&_gameBoard.getBoardImg())){
+    _gameFbo.create(cfg.piecePromotionPanelCfg.gameBoardWidth, cfg.piecePromotionPanelCfg.gameBoardHeight,
+                                    Point::ZERO, Colors::FULL_TRANSPARENT);
+    _gameFbo.activateAlphaModulation();
+    regenerateGameFbo();
+
+    if(EXIT_SUCCESS!=_gameBoardAnimator.init(static_cast<GameProxy*>(this),&_gameFbo,cfg.gameFboRotTimerId)){
         std::cerr<<"_gameBoardAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -44,12 +49,13 @@ int32_t Game::init(const GameCfg& cfg){
 }
 
 void Game::deinit(){
-
+    // _gameFbo.destroy();
 }
 
 void Game::draw() const{
+    _gameBoard.drawGameBoardOnly();
+    _gameFbo.draw();
     _gameBoard.draw();
-    _pieceHandler.draw();
     if(_piecePromotionPanel.isActive()){
         _piecePromotionPanel.draw();
     }
@@ -67,17 +73,21 @@ void Game::handleEvent(InputEvent& e){
 
 void Game::onGameTurnFinished(){
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
+
     // "std::endl" performs flush of the stream as well
     // std::cout<<"player with id: "<<_gameLogic.getActivePlayerId()<<" is on turn"<<std::endl; 
+
 }
 
 void Game::onPawnPromotion(){
     _piecePromotionPanel.activate(_gameLogic.getActivePlayerId());
+
     // std::cout<<"Received piecePromotion from playerId: "<<_gameLogic.getActivePlayerId()<<std::endl;
 }
 
 void Game::promotePiece(PieceType pieceType){
     std::cout<<"Received piecePromotion for pieceType: "<<static_cast<int32_t>(pieceType)<<std::endl;
+
     // bonus for homework - finish the promotion !!! (listen again to the instructions of Zhivko)
 }
 
@@ -91,4 +101,21 @@ void Game::onBoardAnimFinished(){
 void Game::setWidgetFlip(WidgetFlip flipType){
     _pieceHandler.setWidgetFlip(flipType);
     _inputInverter.setBoardFlipType(flipType);
+    regenerateGameFbo();
+}
+
+void Game::regenerateGameFbo() {
+    // regenerating the sprite buffer (fbo is also called a sprite buffer)
+
+    _gameFbo.unlock();
+    _gameFbo.reset();
+
+    // Zhivko: "Should the _gameBoard be part of the _gameFbo? Both yes and no, but for the moment it should not be."
+    if(_gameBoardAnimator.isActive()){
+        _gameBoard.drawGameBoardOnFbo(_gameFbo);
+    }
+    _pieceHandler.drawOnFbo(_gameFbo);
+    
+    _gameFbo.update();
+    _gameFbo.lock();
 }

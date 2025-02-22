@@ -21,10 +21,16 @@ int32_t RsrcMgr::init(const RsrcMgrCfg& cfg){
         return EXIT_FAILURE;
     }
 
+    if(EXIT_SUCCESS!=FboContainer::init()){
+        std::cerr<<"FboContainer::init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
     return EXIT_SUCCESS;
 }
 
 void RsrcMgr::deinit(){
+    FboContainer::deinit();
     TextContainer::deinit();
     ImageContainer::deinit();
 }

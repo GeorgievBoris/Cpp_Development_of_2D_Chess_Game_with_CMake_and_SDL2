@@ -15,6 +15,7 @@
 #include "game/defines/ChessStructs.h"
 // Forward Declarations
 class InputEvent;
+class Fbo;
 
 struct ChessPieceCfg{
     BoardPos boardPos{}; // calling the default ctor of "boardPos"
@@ -24,15 +25,20 @@ struct ChessPieceCfg{
     int32_t unfinishedPieceFontId; // not entirely correct to add it here, but we do so, in order to save time 
 };
 
-class ChessPiece{
+class ChessPiece{ // NOTE: ChessPiece is a composition !!!
 public:
     virtual ~ChessPiece()=default;
     // since we will very often access the chess figures, this access must happen fast...
     // ... therefore use random_access_iterator -> std::vector...Furthermore,...
     // ... we use std::vector<> when the number/count of the elements inside it is dynamic (i.e. the count reduces/increases)    
-    using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>; // the location of this using is correct here (Lecture Game 3/4 2:28:15 time)
+    using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>;
+
+    // Note: write this down...
+    // Zhivko: "smart pointers are used mostly where you do not need to care/think about ..."
+    // "... the lifetime of the objects"
 
     virtual int32_t init(const ChessPieceCfg& cfg);
+    virtual void drawOnFbo(Fbo& fbo) const;
     virtual void draw() const;
     virtual void setBoardPos(const BoardPos& boardPos);
     virtual std::vector<TileData> getMoveTiles(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const=0; // a pure-virtual method

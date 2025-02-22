@@ -21,7 +21,7 @@ private:
     std::vector<TileData> getWhiteMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                                             Defines::PLAYERS_COUNT>& activePieces) const;
     std::vector<TileData> getBlackMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                                                            Defines::PLAYERS_COUNT>& activePieces) const;
+                                                            Defines::PLAYERS_COUNT>& activePiece) const;
 
     std::unordered_map<Defines::Directions,MoveDirection> getWhiteBoardMoves() const;
     std::unordered_map<Defines::Directions,MoveDirection> getBlackBoardMoves() const;

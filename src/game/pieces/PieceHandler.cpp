@@ -6,6 +6,7 @@
 // Third-party headers
 // Own headers
 #include "sdl_utils/InputEvent.h"
+#include "manager_utils/drawing/Fbo.h"
 #include "game/utils/BoardUtils.h"
 #include "game/proxies/GameBoardProxy.h"
 #include "game/proxies/GameProxy.h"
@@ -34,6 +35,15 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
     }
 
     return EXIT_SUCCESS;
+}
+
+void PieceHandler::drawOnFbo(Fbo& fbo) const {
+
+    for(const ChessPiece::PlayerPieces& playerPieces:_pieces){
+        for(const std::unique_ptr<ChessPiece>& piece:playerPieces){
+            piece->drawOnFbo(fbo);
+        }
+    }
 }
 
 void PieceHandler::draw() const{

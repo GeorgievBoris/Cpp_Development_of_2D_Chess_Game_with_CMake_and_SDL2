@@ -34,6 +34,7 @@ namespace TimerId {
     
 enum Keys{
     BLINK_TARGET_TIMER_ID,
+    GAME_FBO_ROT_TIMER_ID,
     COUNT
 };
 

@@ -42,6 +42,15 @@ public:
 
     int64_t getMaxFrameRate() const;
 
+    int32_t getActiveWidgets() const;
+
+    int32_t clearCurrentRendererTarget(const Color& color);
+    int32_t setRendererTarget(int32_t fboId);
+    int32_t resetRendererTarget();
+
+    int32_t lockRenderer();
+    int32_t unlockRenderer();
+
 private:
     SDL_Texture* getTextureInternal(const DrawParams& drawParams) const;
 

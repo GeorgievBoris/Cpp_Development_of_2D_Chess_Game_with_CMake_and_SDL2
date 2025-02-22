@@ -149,3 +149,7 @@ bool Widget::containsPoint(const Point& pos) const{
 bool Widget::isCreated() const{
     return _isCreated;
 }
+
+DrawParams Widget::getDrawParams() const {
+    return _drawParams;
+}

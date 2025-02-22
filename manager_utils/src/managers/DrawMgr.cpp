@@ -68,11 +68,38 @@ int64_t DrawMgr::getMaxFrameRate() const {
     return _maxFrames;
 }
 
+int32_t DrawMgr::getActiveWidgets() const{
+    return _renderer.getActiveWidgets();
+}
+
+int32_t DrawMgr::clearCurrentRendererTarget(const Color& color){
+    return _renderer.clearCurrentRendererTarget(color);
+}
+
+int32_t DrawMgr::setRendererTarget(int32_t fboId){
+    SDL_Texture* fboTexture=gRsrcMgr->getFboTexture(fboId);
+    return _renderer.setRendererTarget(fboTexture);
+}
+
+int32_t DrawMgr::resetRendererTarget(){
+    return _renderer.resetRendererTarget();
+}
+
+int32_t DrawMgr::lockRenderer(){
+    return _renderer.lockRenderer();
+}
+
+int32_t DrawMgr::unlockRenderer(){
+    return _renderer.unlockRenderer();
+}
+
 SDL_Texture* DrawMgr::getTextureInternal(const DrawParams& drawParams) const {
     if(WidgetType::IMAGE==drawParams.widgetType){
         return gRsrcMgr->getImageTexture(drawParams.rsrcId);
     } else if (WidgetType::TEXT==drawParams.widgetType){
         return gRsrcMgr->getTextTexture(drawParams.textId);
+    } else if(WidgetType::FBO==drawParams.widgetType){
+        return gRsrcMgr->getFboTexture(drawParams.fboId);
     } else {
         std::cerr<<"Error, received unsupported WidgetType: "
         <<static_cast<int32_t>(drawParams.widgetType)<<" for rsrcId: "

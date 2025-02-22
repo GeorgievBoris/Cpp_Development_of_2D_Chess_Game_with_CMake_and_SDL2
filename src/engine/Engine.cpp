@@ -75,6 +75,7 @@ void Engine::drawFrame(){
 
     _game.draw();
     if(_debugConsole.isActive()){
+        _debugConsole.updateActiveWidgets(gDrawMgr->getActiveWidgets());
         _debugConsole.draw();
     }
 

@@ -4,6 +4,7 @@
 // C system headers
 #include <cstdint>
 // C++ system headers
+#include <vector>
 // Third-party headers
 // Own headers
 #include "manager_utils/time/TimerData.h"
@@ -11,6 +12,9 @@
 
 class TimerClient{
 public:
+    // advice from Zhivko to use the dtor of the base class in order to stop all timers
+    // this is a smart way of stopping all active timers...
+    // ... compared to using the dtor of the class that inherits TimerClient
     virtual ~TimerClient()=default;
     virtual void onTimeout(int32_t timerId)=0;
     void startTimer(int64_t interval, int32_t timerId, TimerType timerType);

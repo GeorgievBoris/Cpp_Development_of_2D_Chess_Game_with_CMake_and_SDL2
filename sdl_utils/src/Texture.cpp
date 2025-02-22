@@ -90,6 +90,46 @@ int32_t Texture::createTextureFromText(const char* text, const Color& color, TTF
     return EXIT_SUCCESS;
 }
 
+int32_t Texture::createEmptyTexture(int32_t width, int32_t height, SDL_Texture*& outTexture){
+
+
+    // 1) RGBA8888 = red, green, blue, alpha (each represented by 8bits, so a 32bit pallete)...
+    // ... for reference, all the textures that we have used are RGBA8888
+
+    // 2) SDL_TEXTUREACCESS_STATIC -> any texture that we have created so far is of this type...
+    // ... when it is static, the low-level graphical backend is instructed that this texture will not change...
+    // ... so save it somewhere where you know that it will not change (somewhere at a convenient place for your...
+    // ... and in a convenient format). For example, all our .png, .jpg, etc... that we load from the SSD/HDD...
+    // ... they are loaded in this manner, because we do not modify them at all !
+
+    // 3) SDL_TEXTUREACCESS_STREAMING -> used when we want to stream in our texture...
+    // ... Used when, by definition, we will change the content of our texture at each frame...
+    // ... or at a specific interval of frames. Such a case may arise, when we implement a video feed...
+    // ... For example YouTube videos - the information arrives as a data stream (i.e. as pixels)...
+    // ... But if we attempt to just/directly draw these pixels, we will do it with the CPU...
+    // ... Of course we usually want to draw them with the GPU, so we need a texture...
+    // ... However to create and destroy a texture at each frame is super bad !!!
+    // ... So to avoid this problem, we create a texture, we tell it that "it is streaming"...
+    // ... and similarly to a multi-threading programming, we lock the texture (alike locking ...
+    // ... mutexes in multi-threading programming) update texture content and unlock it...
+    // ... That is how the texture is updated in the most optimal way provided by this API
+
+    // 4) SDL_TEXTUREACCESS_TARGET -> now we will modify our Frame Buffer Object...
+    // ... so we instruct the graphical low-level API to put it in a convenient for your place...
+    // ... yes maybe you will access it in a slower way compared to 2). It will not change very often...
+    // ... but still will change sometimes!
+
+    outTexture=SDL_CreateTexture(gRenderer,
+            SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_TARGET,width,height);
+
+    if(nullptr==outTexture){
+        std::cerr<<"SDL_CreateTexture() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    return EXIT_SUCCESS;
+}
+
 void Texture::freeSurface(SDL_Surface*& outSurface) {
 
     if(outSurface){
@@ -130,5 +170,38 @@ int32_t Texture::setAlphaTexture(SDL_Texture* texture, int32_t alpha){
         return EXIT_FAILURE;
     }
 
+    return EXIT_SUCCESS;
+}
+
+int32_t Texture::clearCurrentRendererTarget(const Color& color){
+
+    if(EXIT_SUCCESS!=SDL_SetRenderDrawColor(gRenderer, 
+                        color.rgba.r, color.rgba.g, color.rgba.b, color.rgba.a)){
+        std::cerr<<"SDL_SetRenderDrawColor() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if(EXIT_SUCCESS!=SDL_RenderClear(gRenderer)){
+        std::cerr<<"SDL_RenderClear() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    return EXIT_SUCCESS;
+}
+
+int32_t Texture::setRendererTarget(SDL_Texture* target){
+
+    if(EXIT_SUCCESS!=SDL_SetRenderTarget(gRenderer,target)){
+        std::cerr<<"SDL_SetRenderTarget() failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+int32_t Texture::resetRendererTarget(){
+    if(EXIT_SUCCESS!=SDL_SetRenderTarget(gRenderer,nullptr)){
+        std::cerr<<"SDL_SetRenderTarget(nullptr) failed. Reason: "<<SDL_GetError()<<std::endl;
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }

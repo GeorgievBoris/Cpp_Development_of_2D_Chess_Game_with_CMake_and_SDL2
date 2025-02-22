@@ -14,11 +14,13 @@
 class InputEvent;
 class GameBoardProxy;
 class GameProxy;
+class Fbo;
 
 class PieceHandler{
 public:
     int32_t init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
                         int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId);
+    void drawOnFbo(Fbo& fbo) const;
     void draw() const;
     void handleEvent(const InputEvent& e);
 

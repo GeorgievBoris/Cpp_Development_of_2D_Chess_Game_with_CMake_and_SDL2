@@ -33,6 +33,8 @@ void TextContainer::deinit(){
         pair.second=nullptr;
     }
 
+    // IMPORTANT - propagate the below range-based for loop back to the previos lectures...
+    // ... Zhivko spotted it in this Lecture !!!
     for(SDL_Texture*& texture:_textures){
         if(nullptr!=texture){
             Texture::freeTexture(texture);
@@ -81,8 +83,8 @@ void TextContainer::reloadText(const char* text, const Color& color, int32_t fon
         std::cerr<<"Error, Texture::createTextureFromText() failed for text: "<<text<<std::endl;
         return;
     }
-
-    _textures[textId]=textTexture;
+    // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    _textures[static_cast<size_t>(textId)]=textTexture;
 }
 
 void TextContainer::unloadText(int32_t textId){
@@ -99,18 +101,21 @@ SDL_Texture* TextContainer::getTextTexture(int32_t textId) const {
         std::cerr<<"Error, trying to get a non-existing textId: "<<textId<<std::endl;
         return nullptr;
     }
-    return _textures[textId];
+    // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    return _textures[static_cast<size_t>(textId)];
 }
 
 void TextContainer::occupyFreeSlotIndex(int32_t& outIdx, SDL_Texture* texture){
-    const int32_t size = static_cast<int32_t>(_textures.size());
-    for (int32_t i=0;i<size;++i){
+    const size_t size = _textures.size();
+    for (size_t i=0;i<size;++i){
         if(nullptr==_textures[i]){ // found free index
             _textures[i]=texture;
-            outIdx=i;
+            // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+            outIdx=static_cast<int32_t>(i);
             return;
         }
     }
     _textures.push_back(texture);
-    outIdx=size;
+    // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
+    outIdx=static_cast<int32_t>(size);
 }

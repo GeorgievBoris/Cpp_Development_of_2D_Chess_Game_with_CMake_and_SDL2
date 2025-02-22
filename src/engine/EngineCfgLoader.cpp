@@ -129,6 +129,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.moveTilesRsrcId=TextureId::MOVE_TILES;
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
+    cfg.gameFboRotTimerId=TimerId::GAME_FBO_ROT_TIMER_ID;
 
     cfg.unfinishedPieceFontId=FontId::ANGELINE_VINTAGE_40;
 

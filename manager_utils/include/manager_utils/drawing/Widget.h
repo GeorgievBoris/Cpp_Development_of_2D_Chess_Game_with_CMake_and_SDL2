@@ -47,6 +47,8 @@ public:
     bool containsPoint(const Point& pos) const;
     bool isCreated() const;
 
+    DrawParams getDrawParams() const;
+
 protected:
     DrawParams _drawParams;
     bool _isCreated=false;

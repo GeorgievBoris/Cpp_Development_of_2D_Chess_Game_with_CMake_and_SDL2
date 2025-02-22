@@ -13,11 +13,11 @@
 class UnfinishedPiece : public ChessPiece {
 public:
     int32_t init(const ChessPieceCfg& cfg) final;
+    void drawOnFbo(Fbo& fbo) const final;
     void draw() const final;
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                                     Defines::PLAYERS_COUNT>& activePieces) const final;
     void setBoardPos(const BoardPos& boardPos) final;
-
 private:
     Text _notReadyText;
 };

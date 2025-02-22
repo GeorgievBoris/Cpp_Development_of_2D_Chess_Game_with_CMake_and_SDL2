@@ -6,6 +6,8 @@
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
+#include "manager_utils/drawing/Fbo.h"
+
 
 GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
     if(isActiveTimerId(_blinkTimerId)){
@@ -29,23 +31,26 @@ int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId,
     return EXIT_SUCCESS;
 }
 
-void GameBoard::draw() const{
-    _boardImg.draw();
-    _targetImg.draw();
-    _moveSelector.draw();
+void GameBoard::drawGameBoardOnFbo(Fbo& fbo) const{
+    fbo.addWidget(_boardImg);
 }
 
-Image& GameBoard::getBoardImg(){
-    // good to think about an alternative way of how to expose _boardImg
-    return _boardImg;
+void GameBoard::drawGameBoardOnly() const{
+    _boardImg.draw();
+}
+
+void GameBoard::draw() const{
+    _targetImg.draw();
+    _moveSelector.draw();
 }
 
 void GameBoard::onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles){
     _currMoveTiles=moveTiles;
     _moveSelector.markTiles(_currMoveTiles);
-    
-    _targetImg.setPosition(BoardUtils::getAbsPos(boardPos));
+
     _targetImg.show();
+    _targetImg.setPosition(BoardUtils::getAbsPos(boardPos));
+    
     startTimer(500,_blinkTimerId,TimerType::PULSE);
 }
 

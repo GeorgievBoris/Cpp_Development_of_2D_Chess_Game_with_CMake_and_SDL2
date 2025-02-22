@@ -24,6 +24,7 @@ struct GameCfg{
     int32_t unfinishedPieceFontId;
 
     int32_t blinkTargetTimerId;
+    int32_t gameFboRotTimerId;
 };
 
 #endif // GAME_CONFIG_GAMECFG_H_

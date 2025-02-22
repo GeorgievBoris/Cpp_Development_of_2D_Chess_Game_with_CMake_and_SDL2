@@ -7,6 +7,7 @@
 // Own headers
 #include "game/utils/BoardUtils.h"
 #include "sdl_utils/InputEvent.h"
+#include "manager_utils/drawing/Fbo.h"
 
 int32_t ChessPiece::init(const ChessPieceCfg& cfg){
 
@@ -33,6 +34,10 @@ int32_t ChessPiece::init(const ChessPieceCfg& cfg){
     _pieceImg.setFrame(static_cast<int32_t>(_pieceType));
     
     return EXIT_SUCCESS;
+}
+
+void ChessPiece::drawOnFbo(Fbo& fbo) const{
+    fbo.addWidget(_pieceImg);
 }
 
 void ChessPiece::draw() const{

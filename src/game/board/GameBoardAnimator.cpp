@@ -6,24 +6,43 @@
 // Third-party headers
 // Own headers
 #include "game/proxies/GameProxy.h"
+#include "manager_utils/drawing/Fbo.h"
 
-int32_t GameBoardAnimator::init(GameProxy* gameProxy, Image* boardImg){
+
+// NOTE: write this down in the book: 
+// In C and C++ we can but we MUST NOT DIRECTLY compare floating point numbers...
+// ...this comes from the specifics of the standard for floating point numbers !!!
+
+namespace{
+constexpr auto ROT_ANIM_STEP_DEGREES=2;
+}
+
+GameBoardAnimator::~GameBoardAnimator(){
+    // advice from Zhivko to use the dtor of the base class in order to stop all timers
+    // this is a smart way of stopping all active timers...
+    // ... compared to using the dtor of the class that inherits TimerClient    
+    if(isActiveTimerId(_gameFboRotTimerId)){
+        stopTimer(_gameFboRotTimerId);
+    }
+}
+
+int32_t GameBoardAnimator::init(GameProxy* gameProxy, Fbo* gameFbo, int32_t gameFboRotTimerId){
     if(nullptr==gameProxy){
         std::cerr<<"Error, nullptr provided for gameProxy"<<std::endl;
         return EXIT_FAILURE;
     }
-
     _gameProxy=gameProxy;
 
-    if(nullptr==boardImg){
-        std::cerr<<"Error, nullptr provided for boardImg"<<std::endl;
+    if(nullptr==gameFbo){
+        std::cerr<<"Error, nullptr provided for gameFbo"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    _boardImg=boardImg;
+    _gameFbo=gameFbo;
+    _gameFboRotTimerId=gameFboRotTimerId;
 
-    const Point rotCenter(_boardImg->getWidth()/2,_boardImg->getHeight()/2);
-    _boardImg->setRotationCenter(rotCenter);
+    const Point rotCenter(_gameFbo->getWidth()/2,_gameFbo->getHeight()/2);
+    _gameFbo->setRotationCenter(rotCenter);
 
     return EXIT_SUCCESS;
 }
@@ -31,13 +50,37 @@ int32_t GameBoardAnimator::init(GameProxy* gameProxy, Image* boardImg){
 void GameBoardAnimator::startAnim(int32_t playerId){
     // Write this in the book: When we want to achieve mirroring effect - it is much better to perform flipping rather than rotation !!!
     if(Defines::WHITE_PLAYER_ID==playerId){
-        // _boardImg->setRotationAngle(FULL_ROTATION/2)
         _targetFlipType=WidgetFlip::HORIZONTAL_AND_VERTICAL;
+        _targetRotation=FULL_ROTATION/2;
     } else {
-        // _boardImg->setRotationAngle(0);
         _targetFlipType=WidgetFlip::NONE;
+        _targetRotation=FULL_ROTATION;
     }
-    _boardImg->setFlipType(_targetFlipType);
+    startTimer(20,_gameFboRotTimerId,TimerType::PULSE);
     _gameProxy->setWidgetFlip(_targetFlipType);
-    _gameProxy->onBoardAnimFinished();
+}
+
+bool GameBoardAnimator::isActive() const{
+    return isActiveTimerId(_gameFboRotTimerId);
+}
+
+void GameBoardAnimator::onTimeout(int32_t timerId){
+    if(timerId==_gameFboRotTimerId){
+        processRotAnim();
+    } else {
+        std::cerr<<"Received unsupported TimerId: "<<timerId<<std::endl;
+    }
+}
+
+void GameBoardAnimator::processRotAnim(){
+    _currRotation+=ROT_ANIM_STEP_DEGREES;
+    _gameFbo->setRotationAngle(_currRotation);
+
+    if(_targetRotation==_currRotation){
+        if(FULL_ROTATION==_targetRotation){
+            _currRotation=0;
+        }
+        stopTimer(_gameFboRotTimerId);
+        _gameProxy->onBoardAnimFinished();
+    }
 }

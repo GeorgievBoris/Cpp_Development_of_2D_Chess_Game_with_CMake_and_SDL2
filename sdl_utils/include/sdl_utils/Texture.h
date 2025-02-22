@@ -14,7 +14,7 @@ struct SDL_Renderer;
 typedef struct _TTF_Font TTF_Font;
 class Color;
 
-// // later on in complex project can use this "enum" in stead of returning "int32_t" -> i.e. in createSurfaceFromFile() and any other methods
+// // later on in complex projects can use this "enum" instead of returning "int32_t" -> i.e. in createSurfaceFromFile() and any other methods
 // enum class ErrorCodes{
 //     SUCCESS,
 //     FAILURE,
@@ -35,12 +35,18 @@ public:
                                             SDL_Texture*& outTexture,
                                             int32_t& outTextWidth, int32_t& outTextHeight);
 
+    static int32_t createEmptyTexture(int32_t width, int32_t height, SDL_Texture*& outTexture);
     static void freeSurface(SDL_Surface*& outSurface);
     static void freeTexture(SDL_Texture*& outTexture);
     static void setRenderer(SDL_Renderer* renderer); // a helper method
 
     static int32_t setBlendModeTexture(SDL_Texture* texture, BlendMode blendMode); // blendMode is the type of algorithm used !!!
     static int32_t setAlphaTexture(SDL_Texture* texture, int32_t alpha);
+
+    static int32_t clearCurrentRendererTarget(const Color& color);
+    // actually the Frame Buffer Object is nothing more but and "SDL_Texture" that is created in a specific way
+    static int32_t setRendererTarget(SDL_Texture* target);
+    static int32_t resetRendererTarget();
 };
 
 #endif // SDL_UTILS_TEXTURE_H_

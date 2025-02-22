@@ -6,6 +6,7 @@
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
+#include "manager_utils/drawing/Fbo.h"
 
 
 int32_t UnfinishedPiece::init(const ChessPieceCfg& cfg){
@@ -19,6 +20,11 @@ int32_t UnfinishedPiece::init(const ChessPieceCfg& cfg){
     _notReadyText.create(text,cfg.unfinishedPieceFontId,Colors::RED,pieceAbsPos);
 
     return EXIT_SUCCESS;
+}
+
+void UnfinishedPiece::drawOnFbo(Fbo& fbo) const {
+    ChessPiece::drawOnFbo(fbo);
+    fbo.addWidget(_notReadyText);
 }
 
 void UnfinishedPiece::draw() const {

@@ -10,12 +10,15 @@
 
 int32_t DebugConsole::init(int64_t maxFrames, int32_t fontId){
     _maxFrames=maxFrames;
-
+    
     Point textPos=Point(0,0);
     _debugTexts[FPS_TEXT_IDX].create("0",fontId,Colors::YELLOW,textPos);
 
     textPos.y+=40;
     _debugTexts[ACTIVE_TIMER_IDX].create("0",fontId,Colors::YELLOW,textPos);
+
+    textPos.y+=40;
+    _debugTexts[ACTIVE_WIDGETS_IDX].create("0",fontId,Colors::YELLOW,textPos);
 
     return EXIT_SUCCESS;
 }
@@ -45,6 +48,13 @@ void DebugConsole::update(int64_t elapsedMicroseconds, size_t activeTimers){
     textContent.append(std::to_string(activeTimers));
 
     _debugTexts[ACTIVE_TIMER_IDX].setText(textContent);
+}
+
+void DebugConsole::updateActiveWidgets(int32_t activeWidgets){
+    // How can this be optimized by using a Frame Buffer Object ?
+    std::string textContent="Active Widgets: ";
+    textContent.append(std::to_string(activeWidgets));
+    _debugTexts[ACTIVE_WIDGETS_IDX].setText(textContent);
 }
 
 void DebugConsole::draw() const{

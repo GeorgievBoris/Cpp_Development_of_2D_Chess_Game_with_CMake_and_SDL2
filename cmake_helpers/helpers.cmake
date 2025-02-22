@@ -47,7 +47,7 @@ function(enable_target_warnings target)
           -Wnon-virtual-dtor
           -Woverloaded-virtual
           -Wduplicated-cond
-          -Wduplicated-branches
+          -Wduplicated-branches          
           -Wnull-dereference
     )
 endfunction()

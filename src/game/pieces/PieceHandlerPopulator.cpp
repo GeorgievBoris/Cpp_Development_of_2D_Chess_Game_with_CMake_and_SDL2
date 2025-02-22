@@ -31,6 +31,7 @@ static std::unique_ptr<ChessPiece> createPiece(PieceType pieceType, GameProxy* g
     return nullptr;
 }
 
+
 static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId,
                                     ChessPiece::PlayerPieces& whites){
     whites.reserve(STARTING_PIECE_COUNT); // this calls the automatic default ctor (which we have NOT disabled) of "ChessPiece" - so no problem !

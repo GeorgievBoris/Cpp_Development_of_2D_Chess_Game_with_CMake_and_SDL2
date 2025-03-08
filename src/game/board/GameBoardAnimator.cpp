@@ -48,7 +48,6 @@ int32_t GameBoardAnimator::init(GameProxy* gameProxy, Fbo* gameFbo, int32_t game
 }
 
 void GameBoardAnimator::startAnim(int32_t playerId){
-    // Write this in the book: When we want to achieve mirroring effect - it is much better to perform flipping rather than rotation !!!
     if(Defines::WHITE_PLAYER_ID==playerId){
         _targetFlipType=WidgetFlip::HORIZONTAL_AND_VERTICAL;
         _targetRotation=FULL_ROTATION/2;

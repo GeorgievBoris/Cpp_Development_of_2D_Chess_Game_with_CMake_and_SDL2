@@ -26,6 +26,8 @@ set_target_properties(
 )
 endfunction()
 
+# The below function ENFORCES the below warnings to be treated as compilation erorrs !!!
+
 function(enable_target_warnings target)
     target_compile_options(
         ${target}
@@ -42,12 +44,19 @@ function(enable_target_warnings target)
           -Wcast-qual
           -Wconversion
           -Wunused-parameter
-          -Wlogical-op
           -Wdouble-promotion
           -Wnon-virtual-dtor
           -Woverloaded-virtual
-          -Wduplicated-cond
-          -Wduplicated-branches          
           -Wnull-dereference
     )
+
+    if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+        target_compile_options(
+            ${target}
+            PRIVATE
+                -Wlogical-op
+                -Wduplicated-cond
+                -Wduplicated-branches
+        )        
+    endif()
 endfunction()

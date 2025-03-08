@@ -10,6 +10,8 @@
 
 
 GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
+// check if the the bug of Lecture 11 Game 2/4 is fixed as shown in the ~GameBoard() below...
+// .. then delete the entire dtor here!!
     if(isActiveTimerId(_blinkTimerId)){
         stopTimer(_blinkTimerId);
     }

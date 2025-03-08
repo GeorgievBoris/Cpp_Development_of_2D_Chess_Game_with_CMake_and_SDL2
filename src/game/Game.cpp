@@ -73,25 +73,26 @@ void Game::handleEvent(InputEvent& e){
 
 void Game::onGameTurnFinished(){
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
-
-    // "std::endl" performs flush of the stream as well
-    // std::cout<<"player with id: "<<_gameLogic.getActivePlayerId()<<" is on turn"<<std::endl; 
-
 }
 
 void Game::onPawnPromotion(){
+    _isPromotionActive=true; // a quick fix by Zhivko done in the last lecture 14
     _piecePromotionPanel.activate(_gameLogic.getActivePlayerId());
-
-    // std::cout<<"Received piecePromotion from playerId: "<<_gameLogic.getActivePlayerId()<<std::endl;
 }
 
-void Game::promotePiece(PieceType pieceType){
-    std::cout<<"Received piecePromotion for pieceType: "<<static_cast<int32_t>(pieceType)<<std::endl;
+void Game::promotePiece(PieceType pieceType){    
+    // NOTE: Remove Game::promotePiece() only for the Game 4/4 lecture !!!!
 
     // bonus for homework - finish the promotion !!! (listen again to the instructions of Zhivko)
+    _pieceHandler.promotePiece(pieceType);
+    _isPromotionActive=false;
+    onBoardAnimFinished();
 }
 
 void Game::onBoardAnimFinished(){
+    if(_isPromotionActive){
+        return;
+    }
     // BONUS: for homework implement text in the upper right corner...
     /// ...to display the currently active player (WHITE or BLACK)    
     _gameLogic.finishTurn();

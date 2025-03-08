@@ -60,6 +60,10 @@ void Widget::setOpacity(int32_t opacity){
                 <<". Will not change opacity"<<std::endl;
 }
 
+int32_t Widget::getRsrcId() const{
+    return _drawParams.rsrcId;
+}
+
 int32_t Widget::getWidth() const{
     return _drawParams.width;
 }

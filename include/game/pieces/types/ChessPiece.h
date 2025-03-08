@@ -46,6 +46,7 @@ public:
     bool containsEvent(const InputEvent& e) const;
     BoardPos getBoardPos() const;
     int32_t getPlayerId() const;
+    int32_t getRsrcId() const;
     void setWidgetFlip(WidgetFlip flipType);
 protected:
     Image _pieceImg;

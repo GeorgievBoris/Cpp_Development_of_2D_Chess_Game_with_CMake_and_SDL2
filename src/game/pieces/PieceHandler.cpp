@@ -125,3 +125,25 @@ void PieceHandler::doMovePiece(const BoardPos& boardPos){
 
     _gameProxy->onGameTurnFinished();
 }
+
+void PieceHandler::promotePiece(PieceType pieceType){
+    const auto boardPos=_pieces[_currPlayerId][_selectedPieceId]->getBoardPos();
+    const auto piecePlayerId=_pieces[_currPlayerId][_selectedPieceId]->getPlayerId();
+    const auto pieceRsrcId=_pieces[_currPlayerId][_selectedPieceId]->getRsrcId();
+
+    _pieces[_currPlayerId][_selectedPieceId].reset();
+
+    ChessPieceCfg pieceCfg;
+    pieceCfg.boardPos=boardPos;
+    pieceCfg.playerId=piecePlayerId;
+    pieceCfg.pieceType=pieceType;
+    pieceCfg.rsrcId=pieceRsrcId;
+    // in general unfinishedPieceFont is a temporary "hack" that must be removed from everywhere, onece all chess pieces are implemented
+    pieceCfg.unfinishedPieceFontId=0; 
+
+    _pieces[_currPlayerId][_selectedPieceId]=PieceHandlerPopulator::createPiece(pieceType,_gameProxy);
+    if(EXIT_SUCCESS!=_pieces[_currPlayerId][_selectedPieceId]->init(pieceCfg)){
+        std::cerr<<""<<std::endl;
+        return;
+    }
+}

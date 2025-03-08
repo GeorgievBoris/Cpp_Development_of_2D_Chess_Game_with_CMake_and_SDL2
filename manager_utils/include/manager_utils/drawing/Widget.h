@@ -23,6 +23,7 @@ public:
     void setPosition(int32_t x, int32_t y);
     void setOpacity(int32_t opacity);
     
+    int32_t getRsrcId() const;
     int32_t getWidth() const;
     int32_t getHeight() const;
     double getRotationAngle() const;

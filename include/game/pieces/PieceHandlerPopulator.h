@@ -23,6 +23,7 @@ public:
     static int32_t populatePieceHandler(GameProxy* gameProxy,
                                         int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
                                         std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& outPieces);
+    static std::unique_ptr<ChessPiece> createPiece(PieceType pieceType, GameProxy* gameProxy);
 };
 
 

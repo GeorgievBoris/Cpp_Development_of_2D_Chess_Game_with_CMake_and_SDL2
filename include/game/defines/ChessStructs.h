@@ -12,8 +12,8 @@
 // Forward Declarations
 
 struct TileData{
-    TileData(BoardPos inputBoardPos, TileType inputTileType) : boardPos(inputBoardPos), tileType(inputTileType) {} // check if Zhivko has added this ??? (not present for Game2/4 1:29:40)
-    TileData()=default; // check if Zhivko has added this ??? (not present for Game2/4 1:29:40)
+    TileData(BoardPos inputBoardPos, TileType inputTileType) : boardPos(inputBoardPos), tileType(inputTileType) {} // check if Zhivko has added this ???
+    TileData()=default; // check if Zhivko has added this ???
     BoardPos boardPos;
     TileType tileType=TileType::MOVE;
 };

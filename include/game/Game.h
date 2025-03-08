@@ -47,6 +47,8 @@ private:
     InputInverter _inputInverter;
     Fbo _gameFbo;
 
+    bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
+
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...
     // ... so that eventually we do not get source files that contain many, many lines of code

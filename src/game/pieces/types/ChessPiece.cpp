@@ -61,6 +61,10 @@ int32_t ChessPiece::getPlayerId() const{
     return _playerId;
 }
 
+int32_t ChessPiece::getRsrcId() const{
+    return _pieceImg.getRsrcId();
+}
+
 void ChessPiece::setWidgetFlip(WidgetFlip flipType){
     _pieceImg.setFlipType(flipType);
 }

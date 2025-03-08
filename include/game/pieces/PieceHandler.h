@@ -26,6 +26,7 @@ public:
 
     void setCurrentPlayerId(int32_t currPlayerId);
     void setWidgetFlip(WidgetFlip flipType);
+    void promotePiece(PieceType pieceType);
 private:
     void handlePieceGrabbedEvent(const InputEvent& e);
     void handlePieceUngrabbedEvent(const InputEvent& e);

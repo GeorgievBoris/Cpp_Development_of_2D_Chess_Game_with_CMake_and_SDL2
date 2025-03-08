@@ -29,7 +29,7 @@ int32_t Renderer::init(SDL_Window* window){
     // load four normal images and unite them in one big image - can do all of this runtime...
     // this one big image that we get can be manipulated, moved, rotated, animated, do whatever we want with it runtime !!!
 
-    constexpr auto unspecifiedDriverId=-1; // -1 means that SDL decides for itself which back-end graphical library to use
+    const auto unspecifiedDriverId=-1; // -1 means that SDL decides for itself which back-end graphical library to use
 
     _sdlRenderer=SDL_CreateRenderer(window,unspecifiedDriverId,
                         SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);

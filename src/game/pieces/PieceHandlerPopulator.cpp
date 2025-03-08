@@ -8,6 +8,10 @@
 #include "game/pieces/types/UnfinishedPiece.h"
 #include "game/pieces/types/Rook.h"
 #include "game/pieces/types/Pawn.h"
+#include "game/pieces/types/Bishop.h"
+#include "game/pieces/types/Knight.h"
+#include "game/pieces/types/Queen.h"
+#include "game/pieces/types/King.h"
 
 namespace {
 constexpr auto STARTING_PIECE_COUNT=16;
@@ -112,16 +116,27 @@ int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy,
 }
 
 std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceType, GameProxy* gameProxy){
+
+    // Information about the Castling the King and the Rook:
+
+    // 1) Castling is permitted only if neither the king nor the rook has previously moved; 
+    // 2) the squares between the king and the rook are vacant; 
+    // 3) and the king does not leave, cross over, or finish on a square attacked by an enemy piece. 
+    // 4) Castling is the only move in chess in which two pieces are moved at once.[3]
+
     switch(pieceType){
     case PieceType::ROOK:
         return std::make_unique<Rook>();
     case PieceType::PAWN:
         return std::make_unique<Pawn>(gameProxy);
     case PieceType::BISHOP:
-    case PieceType::KING:
+        return std::make_unique<Bishop>();
     case PieceType::KNIGHT:
+        return std::make_unique<Knight>();
     case PieceType::QUEEN:
-        return std::make_unique<UnfinishedPiece>();
+        return std::make_unique<Queen>();
+    case PieceType::KING:
+        return std::make_unique<King>();
     default:
         std::cerr<<"Error, received unknown PieceType: "<<static_cast<int32_t>(pieceType)<<std::endl;
         break;

@@ -1,10 +1,11 @@
-#ifndef INCLUDE_GAME_PIECES_TYPES_ROOK_H_
-#define INCLUDE_GAME_PIECES_TYPES_ROOK_H_
+#ifndef INCLUDE_GAME_PIECES_TYPES_KING_H
+#define INCLUDE_GAME_PIECES_TYPES_KING_H
 
 // C system headers
 #include <cstdint>
 // C++ system headers
 #include <vector>
+#include <array>
 // Third-party headers
 // Own headers
 #include "game/pieces/types/ChessPiece.h"
@@ -17,13 +18,11 @@
     // 3) and the king does not leave, cross over, or finish on a square attacked by an enemy piece. 
     // 4) Castling is the only move in chess in which two pieces are moved at once.[3]
 
-class Rook : public ChessPiece{
+class King : public ChessPiece{
 public:
-    std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                                            Defines::PLAYERS_COUNT>& activePlayers) const final;
+    std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;
 private:
     std::vector<MoveDirection> getBoardMoves() const;
 };
 
-
-#endif // INCLUDE_GAME_PIECES_TYPES_ROOK_H_
+#endif // INCLUDE_GAME_PIECES_TYPES_KING_H

@@ -14,7 +14,7 @@
 // ...this comes from the specifics of the standard for floating point numbers !!!
 
 namespace{
-constexpr auto ROT_ANIM_STEP_DEGREES=2;
+constexpr auto ROT_ANIM_STEP_DEGREES=90;
 }
 
 GameBoardAnimator::~GameBoardAnimator(){

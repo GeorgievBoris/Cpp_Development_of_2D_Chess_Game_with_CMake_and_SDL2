@@ -29,9 +29,13 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/utils/BoardPos.h
                 ${_INC_DIR}/game/utils/BoardUtils.h
                 ${_INC_DIR}/game/pieces/types/ChessPiece.h
-                ${_INC_DIR}/game/pieces/types/UnfinishedPiece.h
+                # ${_INC_DIR}/game/pieces/types/UnfinishedPiece.h
                 ${_INC_DIR}/game/pieces/types/Rook.h
                 ${_INC_DIR}/game/pieces/types/Pawn.h
+                ${_INC_DIR}/game/pieces/types/Bishop.h
+                ${_INC_DIR}/game/pieces/types/Knight.h
+                ${_INC_DIR}/game/pieces/types/Queen.h
+                ${_INC_DIR}/game/pieces/types/King.h
                 ${_INC_DIR}/game/pieces/PieceHandler.h
                 ${_INC_DIR}/game/pieces/PieceHandlerPopulator.h
                 ${_INC_DIR}/game/defines/ChessDefines.h
@@ -53,9 +57,13 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/board/GameBoardAnimator.cpp
                 ${_SRC_DIR}/game/utils/BoardUtils.cpp
                 ${_SRC_DIR}/game/pieces/types/ChessPiece.cpp
-                ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
+                # ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
                 ${_SRC_DIR}/game/pieces/types/Rook.cpp
                 ${_SRC_DIR}/game/pieces/types/Pawn.cpp
+                ${_SRC_DIR}/game/pieces/types/Bishop.cpp
+                ${_SRC_DIR}/game/pieces/types/Knight.cpp
+                ${_SRC_DIR}/game/pieces/types/Queen.cpp
+                ${_SRC_DIR}/game/pieces/types/King.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandler.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandlerPopulator.cpp
                 ${_SRC_DIR}/game/logic/GameLogic.cpp
@@ -89,14 +97,14 @@ if(${CMAKE_BUILD_TYPE} MATCHES Release)
 )
 
     add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
+        TARGET ${PROJECT_NAME} POST_BUILD # POST_BUILD or PRE_BUILD are possible entries
         COMMAND ${CMAKE_COMMAND} -E copy_directory
 
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
     )
 else()
-    add_subdirectory(test)
+    # add_subdirectory(test) # commented temporarily while finishing the Chess
 endif()
 
 add_subdirectory(utils) # here the name of the folder must be added, NOT the name of the binary

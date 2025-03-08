@@ -48,6 +48,15 @@
         "map": "cpp",
         "set": "cpp",
         "functional": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "any": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "iomanip": "cpp",
+        "mutex": "cpp",
+        "variant": "cpp"
     }
 }

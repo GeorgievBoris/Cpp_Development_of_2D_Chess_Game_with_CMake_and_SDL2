@@ -48,7 +48,7 @@ int32_t main([[maybe_unused]]int32_t argc, [[maybe_unused]]char* argv[]){
 // Lecture "Final Project Assignment Preparation"
 
 // After the brake Zhivko explains about:
-// 1) How to debug our application in a better way 
+// 1) How to debug in a better way our application
 // 2) How to achieve a better error reporting (even compilational error reporting)
 // 3) How to benchmark our application
 

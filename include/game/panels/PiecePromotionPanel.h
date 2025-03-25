@@ -13,7 +13,6 @@
 class GameProxy;
 class InputEvent;
 
-
 class PiecePromotionPanel{
 public:
     int32_t init(const PiecePromotionPanelCfg& cfg, GameProxy* gameProxy);
@@ -21,6 +20,9 @@ public:
     void draw() const;
     void activate(int32_t playerId);
     bool isActive() const;
+    void restart(); // PiecePromotionPanel::restart() is NOT added by Zhivko
+    void show(); // PiecePromotionPanel::show() is NOT added by Zhivko
+    void hide(); // PiecePromotionPanel::hide() is NOT added by Zhivko
 
 private:
     void onButtonClicked(PieceType pieceType);

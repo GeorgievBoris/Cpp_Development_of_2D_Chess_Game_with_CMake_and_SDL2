@@ -38,3 +38,7 @@ void InputInverter::invertEvent(InputEvent& inputEvent){
         break;
     }
 }
+
+void InputInverter::restart(){
+    _flipType=WidgetFlip::NONE;
+}

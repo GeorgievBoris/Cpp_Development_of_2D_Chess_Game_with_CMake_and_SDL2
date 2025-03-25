@@ -12,6 +12,9 @@
 // boost and qt are third - party libraries -> remember them !!!
 // listen again around 1:40:00 -> Martin's Question !!!!!!!!
 
+extern const int32_t GAME_X_POS_SHIFT; // added by me
+extern const int32_t GAME_Y_POS_SHIFT; // added by me
+
 Fbo::~Fbo(){
     if(_isCreated && !_isDestroyed){
         destroy();
@@ -38,6 +41,9 @@ void Fbo::create(int32_t width, int32_t height, const Point& pos, const Color& c
 
     _drawParams.pos=pos;
     _drawParams.widgetType=WidgetType::FBO;
+
+    _drawParams.pos.x+=GAME_X_POS_SHIFT; // added by me
+    _drawParams.pos.y+=GAME_Y_POS_SHIFT; // added by me
 
     gRsrcMgr->createFbo(width,height,_drawParams.fboId);
 }

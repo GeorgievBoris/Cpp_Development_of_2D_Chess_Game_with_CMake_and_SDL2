@@ -21,7 +21,7 @@ enum ButtonStates{
 class ButtonBase : public Image {
 public:
     virtual ~ButtonBase()=default;
-    virtual void handleEvent(const InputEvent& e) =0; // a pure-virtual method
+    virtual void handleEvent(const InputEvent& e)=0; // a pure-virtual method
     // void create(int32_t rsrcId, const Point& pos=Point::ZERO); // must be used if Variant 1 is used
     virtual void draw() const;
     void lockInput();

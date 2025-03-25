@@ -17,8 +17,8 @@ namespace {
 constexpr auto STARTING_PIECE_COUNT=16;
 };
 
-static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId,
-                                    ChessPiece::PlayerPieces& whites){
+static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId, ChessPiece::PlayerPieces& whites){
+
     whites.reserve(STARTING_PIECE_COUNT); // this calls the automatic default ctor (which we have NOT disabled) of "ChessPiece" - so no problem !
 
     ChessPieceCfg pieceCfg;
@@ -56,6 +56,7 @@ static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
 
 static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId,
                                     ChessPiece::PlayerPieces& blacks){
+
     blacks.reserve(STARTING_PIECE_COUNT);
 
     ChessPieceCfg pieceCfg;
@@ -95,9 +96,9 @@ static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
     return EXIT_SUCCESS;
 }
 
-int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, 
-                            int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
-                            std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& outPieces){
+int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, int32_t whitePiecesRsrcId, 
+                                                        int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
+                                                        std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& outPieces){
 
     ChessPiece::PlayerPieces& whites=outPieces[Defines::WHITE_PLAYER_ID];
     ChessPiece::PlayerPieces& blacks=outPieces[Defines::BLACK_PLAYER_ID];
@@ -115,15 +116,7 @@ int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy,
     return EXIT_SUCCESS;
 }
 
-std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceType, GameProxy* gameProxy){
-
-    // Information about the Castling the King and the Rook:
-
-    // 1) Castling is permitted only if neither the king nor the rook has previously moved; 
-    // 2) the squares between the king and the rook are vacant; 
-    // 3) and the king does not leave, cross over, or finish on a square attacked by an enemy piece. 
-    // 4) Castling is the only move in chess in which two pieces are moved at once.[3]
-
+std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceType, GameProxy* gameProxy){ 
     switch(pieceType){
     case PieceType::ROOK:
         return std::make_unique<Rook>();

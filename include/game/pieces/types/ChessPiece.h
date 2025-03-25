@@ -28,10 +28,13 @@ struct ChessPieceCfg{
 class ChessPiece{ // NOTE: ChessPiece is a composition !!!
 public:
     virtual ~ChessPiece()=default;
+    
     // since we will very often access the chess figures, this access must happen fast...
     // ... therefore use random_access_iterator -> std::vector...Furthermore,...
     // ... we use std::vector<> when the number/count of the elements inside it is dynamic (i.e. the count reduces/increases)    
-    using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>;
+    
+    // using PlayerPieces=std::vector<std::unique_ptr<ChessPiece>>; // originally used by Zhivko
+    typedef std::vector<std::unique_ptr<ChessPiece>> PlayerPieces; // an alternative to "using" - NOT added by Zhivko
 
     // Note: write this down...
     // Zhivko: "smart pointers are used mostly where you do not need to care/think about ..."
@@ -48,11 +51,20 @@ public:
     int32_t getPlayerId() const;
     int32_t getRsrcId() const;
     void setWidgetFlip(WidgetFlip flipType);
+
+    PieceType getPieceType()const; // ChessPiece::getPieceType() is NOT added by Zhivko
+    bool isPieceFirstMoveNow() const; // ChessPiece::isPieceFirstMoveNow() is NOT added by Zhivko
+    void setPieceAsLastMovedPiece(bool isPieceTheLastMovedPiece); // ChessPiece::setPieceAsLastMovedPiece() is NOT added by Zhivko
+    bool isPieceTheLastMovedPiece() const; // ChessPiece::isPieceTheLastMovedPiece() is NOT added by Zhivko   
+
 protected:
     Image _pieceImg;
     BoardPos _boardPos;
     int32_t _playerId;
     PieceType _pieceType;
+
+    bool _isPieceTheLastMovedPiece=false; // NOT added by Zhivko
+    bool _isPieceFirstMoveNow=false;  // NOT added by Zhivko
 };
 
 

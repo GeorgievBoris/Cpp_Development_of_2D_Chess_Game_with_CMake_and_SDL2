@@ -24,6 +24,8 @@ public:
     void onInitEnd();
     size_t getActiveTimersCount() const;
 
+    void calculateTimerRemainingTime(int32_t timerId, int64_t& remainingTime) const; // TimerMgr::calculateTimerRemainingTime(int32_t timerId) method is NOT added by Zhivko
+
 private:
     void removeTimersInternal();
     void onTimerTimeout(int32_t timerId, TimerData& timer);

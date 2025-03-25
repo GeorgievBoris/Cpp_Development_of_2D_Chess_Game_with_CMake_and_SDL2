@@ -64,6 +64,17 @@ size_t TimerMgr::getActiveTimersCount() const{
     return _timerMap.size();
 }
 
+void TimerMgr::calculateTimerRemainingTime(int32_t timerId, int64_t& remainingTime) const { // TimerMgr::calculateTimerRemainingTime() method is NOT added by Zhivko
+    
+    std::map<int32_t, TimerData>::const_iterator mapIt=_timerMap.find(timerId);
+    if(_timerMap.end()==mapIt){
+        std::cerr<<"Error, timer with timerId: "<<timerId<<" not found. -1 sec returned as remaining time."<<std::endl;
+        remainingTime=-1;
+        return;
+    }
+    remainingTime=mapIt->second.remaining;
+}
+
 void TimerMgr::removeTimersInternal(){
     for(const int32_t timerId :_removeTimerSet){
         auto mapIt=_timerMap.find(timerId);

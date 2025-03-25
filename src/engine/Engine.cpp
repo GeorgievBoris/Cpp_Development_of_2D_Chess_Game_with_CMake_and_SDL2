@@ -25,7 +25,14 @@ int32_t Engine::init(const EngineCfg& cfg){
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg)){
+    if(EXIT_SUCCESS!=_startScreen.init(cfg.startScreenCfg,[&](){_game.hide();},
+                                                            [&](){_game.start();},
+                                                            [&](){_game.startPlayersTimer();})){ // _startScreen object is NOT added by Zhivko
+        std::cerr<<"_startScreen.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if(EXIT_SUCCESS!=_game.init(cfg.gameCfg, [&](){_startScreen.show();})){ // the "lambda funciton" is NOT added by Zhivko
         std::cerr<<"_game.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -45,6 +52,7 @@ void Engine::deinit(){
     // ... in a reverse order to the initialization
 
     _game.deinit();
+    _startScreen.deinit(); // NOT added by Zhivko
     _event.deinit();
     _managerHandler.deinit();
 }
@@ -74,9 +82,13 @@ void Engine::drawFrame(){
     gDrawMgr->clearScreen();
 
     _game.draw();
+
+    _startScreen.draw(); // NOT added by Zhivko
+
     if(_debugConsole.isActive()){
-        _debugConsole.updateActiveWidgets(gDrawMgr->getActiveWidgets());
+        // _debugConsole.updateActiveWidgets(gDrawMgr->getActiveWidgets()); // originally placed here by Zhivko
         _debugConsole.draw();
+        _debugConsole.updateActiveWidgets(gDrawMgr->getActiveWidgets()); // moved here by me, in order to "count" the "Active Widgets" in a more accurate way
     }
 
     gDrawMgr->finishFrame();
@@ -89,7 +101,12 @@ bool Engine::processFrame(){
         if(_event.checkForExitRequest()){
             return true;
         }
+
         handleEvent();
+
+        if(_startScreen.shouldExit()){ // this "if-statement" is NOT added by Zhivko
+            return true;
+        }
     }
     
     drawFrame();
@@ -97,7 +114,10 @@ bool Engine::processFrame(){
 }
 
 void Engine::handleEvent(){
-    _game.handleEvent(_event);
+    _startScreen.handleEvent(_event); // NOT added by Zhivko
+
+    _game.handleEvent(_event); // added by Zhivko
+
     _debugConsole.handleEvent(_event);
 }
 

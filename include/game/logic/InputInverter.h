@@ -10,14 +10,14 @@
 // Forward Declarations
 class InputEvent;
 
-// NOTE: top be 100% correct this class must be in the "sdl_utils" library because it is related to the input
+// NOTE: to be 100% correct this class must be in the "sdl_utils" library because it is related to the input
 
 class InputInverter{
 public:
     int32_t init(int32_t boardWidth, int32_t boardHeight);
     void setBoardFlipType(WidgetFlip flipType);
     void invertEvent(InputEvent& inputEvent);
-
+    void restart(); // added by me
 private:
     int32_t _boardWidth{0};
     int32_t _boardHeight{0};

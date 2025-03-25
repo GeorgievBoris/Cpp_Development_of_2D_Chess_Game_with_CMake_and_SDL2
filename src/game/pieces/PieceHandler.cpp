@@ -28,8 +28,7 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
     _gameBoardProxy=gameBoardProxy;
     _gameProxy=gameProxy;
 
-    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy, whitePiecesRsrcId,blackPiecesRsrcId, 
-                                                                unfinishedPieceFontId, _pieces)){
+    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy, whitePiecesRsrcId,blackPiecesRsrcId, unfinishedPieceFontId, _pieces)){
         std::cerr<<"PieceHandlerPopulator::populatePieceHandler() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -84,7 +83,7 @@ void PieceHandler::handlePieceGrabbedEvent(const InputEvent& e){
     }
 
 
-    const BoardPos boardPos=BoardUtils::getBoardPos(e.pos);
+    BoardPos boardPos=BoardUtils::getBoardPos(e.pos); // "const BoardPos& boardPos" originally added by Zhivko
     if(!_gameBoardProxy->isMoveAllowed(boardPos)){
         _gameBoardProxy->onPieceUngrabbed();
         return;
@@ -106,24 +105,65 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
             const std::vector<TileData> moveTiles = 
                                     _pieces[_currPlayerId][_selectedPieceId]->getMoveTiles(_pieces);
             _gameBoardProxy->onPieceGrabbed(BoardUtils::getBoardPos(e.pos),moveTiles);
+
+            PieceHandler::alertGameBoardIfEnPassant(BoardUtils::getBoardPos(e.pos),moveTiles,piece->getPieceType()); // NOT added by Zhivko
+
             return;
         }
         ++relativePieceId;
     }
 }
 
-void PieceHandler::doMovePiece(const BoardPos& boardPos){
-    _pieces[_currPlayerId][_selectedPieceId]->setBoardPos(boardPos);
+void PieceHandler::doMovePiece(BoardPos& boardPos){ // "const BoardPos& boardPos" originally added by Zhivko
 
-    const auto opponentId=BoardUtils::getOpponentId(_pieces[_currPlayerId][_selectedPieceId]->getPlayerId());
+    PieceHandler::unmarkPieces(); // NOT added by Zhivko
+
     int32_t collisionIdx=-1;
 
-    if(BoardUtils::doCollideWithPiece(boardPos,_pieces[opponentId],collisionIdx)){
+    const auto opponentId=BoardUtils::getOpponentId(_pieces[_currPlayerId][_selectedPieceId]->getPlayerId());
+
+    BoardUtils::checkForEnPassant(_pieces[_currPlayerId][_selectedPieceId],_pieces[opponentId],boardPos,collisionIdx); // NOT added by Zhivko
+
+    _pieces[_currPlayerId][_selectedPieceId]->setBoardPos(boardPos);
+
+    
+    if(-1!=collisionIdx || BoardUtils::doCollideWithPiece(boardPos,_pieces[opponentId],collisionIdx)){
+        // Note: In this "if" statement - only the " -1!=collisionIdx || " part is NOT added by Zhivko !!!
         _pieces[opponentId].erase(_pieces[opponentId].begin()+collisionIdx); // remmeber this - very important !!!
     }
+           
     _gameBoardProxy->onPieceUngrabbed();
 
     _gameProxy->onGameTurnFinished();
+}
+
+void PieceHandler::unmarkPieces(){ // PieceHandler::unmarkPieces() is NOT added by Zhivko
+    for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+        piece->setPieceAsLastMovedPiece(false);
+    }
+}
+
+void PieceHandler::alertGameBoardIfEnPassant(const BoardPos& boardPos, const std::vector<TileData>& moveTiles,
+                                                    PieceType pieceType) const {  // PieceHandler::alertGameBoardForEnPassant() is NOT added by Zhivko
+
+    if(PieceType::PAWN!=pieceType){
+        return;
+    }
+    
+    for(const TileData& tileData:moveTiles){
+        if(TileType::TAKE!=tileData.tileType){
+            continue;
+        }
+
+        constexpr Defines::Directions directions[2]={Defines::LEFT,Defines::RIGHT};
+        for(const Defines::Directions dir:directions){
+            const BoardPos enemyPawnPos=BoardUtils::getAdjacentPos(dir,boardPos);
+            if(tileData.boardPos==enemyPawnPos){
+                _gameBoardProxy->onEnPassant(enemyPawnPos);
+                return;
+            }
+        }
+    }
 }
 
 void PieceHandler::promotePiece(PieceType pieceType){
@@ -143,7 +183,36 @@ void PieceHandler::promotePiece(PieceType pieceType){
 
     _pieces[_currPlayerId][_selectedPieceId]=PieceHandlerPopulator::createPiece(pieceType,_gameProxy);
     if(EXIT_SUCCESS!=_pieces[_currPlayerId][_selectedPieceId]->init(pieceCfg)){
-        std::cerr<<""<<std::endl;
+        std::cerr<<"Error, PieceHandlerPopulator::createPiece() failed. Pawn promotion failed!"<<std::endl;
         return;
     }
+}
+
+
+int32_t PieceHandler::restart(const std::function<void()>& gameRegenerateFboCallBack){ // PieceHandler::restart() is NOT added by Zhivko
+
+    int32_t piecesWhitesRsrcId=INVALID_RSRC_ID;
+    int32_t piecesBlackRsrcId=INVALID_RSRC_ID;
+    for(ChessPiece::PlayerPieces& pieces:_pieces){
+        std::unique_ptr<ChessPiece>& firstPiece=pieces.front();
+
+        Defines::WHITE_PLAYER_ID==firstPiece->getPlayerId() ? piecesWhitesRsrcId=firstPiece->getRsrcId() : piecesBlackRsrcId=firstPiece->getRsrcId();
+   
+        pieces.clear(); // investigate further if the std::unique_ptr() will take care for deleting ChessPiece
+    }
+
+    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy,piecesWhitesRsrcId,piecesBlackRsrcId,INVALID_RSRC_ID,_pieces)){
+
+        std::cerr<<"PieceHandlerPopulator::populatePieceHandler() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    gameRegenerateFboCallBack();
+    setCurrentPlayerId(Defines::WHITE_PLAYER_ID);
+    
+    return EXIT_SUCCESS;
+}
+
+void PieceHandler::setIsPieceGrabbed(){  // PieceHandler::setIsPieceGrabbed() is NOT added by Zhivko
+    _isPieceGrabbed=false;
 }

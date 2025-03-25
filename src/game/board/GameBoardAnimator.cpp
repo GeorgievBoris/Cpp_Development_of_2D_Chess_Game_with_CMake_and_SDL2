@@ -14,7 +14,7 @@
 // ...this comes from the specifics of the standard for floating point numbers !!!
 
 namespace{
-constexpr auto ROT_ANIM_STEP_DEGREES=90;
+constexpr auto ROT_ANIM_STEP_DEGREES=10;
 }
 
 GameBoardAnimator::~GameBoardAnimator(){
@@ -61,6 +61,24 @@ void GameBoardAnimator::startAnim(int32_t playerId){
 
 bool GameBoardAnimator::isActive() const{
     return isActiveTimerId(_gameFboRotTimerId);
+}
+
+// GameBoardAnimator::restart() method is added by me
+void GameBoardAnimator::restart(){
+    _targetFlipType=WidgetFlip::NONE;
+    _targetRotation=0;
+    _currRotation=0;
+    _gameFbo->setRotationAngle(_currRotation);
+    
+    // about " _gameProxy->setWidgetFlip(_targetFlipType) "
+    // perhaps no point to call this method , because when ::restart() is performed either 1) new chessPieces are created...
+    // ... or 2) the "old" chessPieces have not changed at all
+
+    // _gameProxy->setWidgetFlip(_targetFlipType); 
+}
+
+int32_t GameBoardAnimator::getTargetRotation()const{ // // this method is NOT added by Zhivko !
+    return _targetRotation;
 }
 
 void GameBoardAnimator::onTimeout(int32_t timerId){

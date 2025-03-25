@@ -23,8 +23,13 @@ struct GameCfg{
     
     int32_t unfinishedPieceFontId;
 
+    int32_t quitGameButtonRsrcId; // NOT added by Zhivko
+
     int32_t blinkTargetTimerId;
     int32_t gameFboRotTimerId;
+    int32_t playerTurnCapTimerId; // NOT added by Zhivko
+    int32_t playerTurnCapTextTimerId; // NOT added by Zhivko
+    int32_t blinkEnPassantTimerId; // NOT added by Zhivko
 };
 
 #endif // GAME_CONFIG_GAMECFG_H_

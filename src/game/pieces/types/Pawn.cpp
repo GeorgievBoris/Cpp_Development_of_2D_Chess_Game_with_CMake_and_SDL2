@@ -18,6 +18,7 @@ Pawn::Pawn(GameProxy* gameProxy) :_gameProxy(gameProxy) {
 }
 
 void Pawn::setBoardPos(const BoardPos& boardPos) {
+
     ChessPiece::setBoardPos(boardPos);
 
     if(Defines::WHITE_PLAYER_ID==_playerId) {
@@ -126,6 +127,11 @@ std::vector<TileData> Pawn::getWhiteMoveTiles(const std::array<ChessPiece::Playe
         
                 if(TileType::MOVE!=tileType){
                     moveTiles.emplace_back(pos,tileType);
+                } else if(Pawn::isEnPassantValid(pos,activePieces[opponentId])){
+                    // this "else if()" part is added by me for the EnPassant check
+                    moveTiles.emplace_back(pos,tileType);
+                    const BoardPos enemyPawnPos=BoardUtils::getAdjacentPos(Defines::DOWN,pos);
+                    moveTiles.emplace_back(enemyPawnPos,TileType::TAKE);
                 }
             }
         }
@@ -163,10 +169,54 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
                 const TileType tileType=BoardUtils::getTileType(pos,activePiece[_playerId],activePiece[opponentId]);
                 if(TileType::MOVE!=tileType){
                     moveTiles.emplace_back(pos,tileType);
-                }
+                } else if(Pawn::isEnPassantValid(pos,activePiece[opponentId])){
+                    // this "else if()" part is added by me for the EnPassant check
+                    moveTiles.emplace_back(pos,tileType);
+                    const BoardPos enemyPawnPos=BoardUtils::getAdjacentPos(Defines::UP,pos);
+                    moveTiles.emplace_back(enemyPawnPos,TileType::TAKE);
+                }                
             }
         }
     }
 
     return moveTiles;
+}
+
+bool Pawn::isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces) const{ // Pawn::isEnPassantValid() method is NOT added by Zhivko
+    
+    const int32_t currPlayerId = BoardUtils::getOpponentId(enemyPieces.front()->getPlayerId());
+
+    const BoardPos pos = Defines::WHITE_PLAYER_ID==currPlayerId ? 
+                            BoardUtils::getAdjacentPos(Defines::DOWN, boardPos) : BoardUtils::getAdjacentPos(Defines::UP, boardPos);
+
+    if(Defines::WHITE_PLAYER_ID==currPlayerId){
+        if(Defines::WHITE_PLAYER_EN_PASSANT_ROW!=pos.row){
+            return false;
+        }
+    } else if(Defines::BLACK_PLAYER_ID==currPlayerId){
+        if(Defines::BLACK_PLAYER_EN_PASSANT_ROW!=pos.row){
+            return false;
+        }        
+    }
+
+    for(const std::unique_ptr<ChessPiece>& piece:enemyPieces){
+        if(PieceType::PAWN!=piece->getPieceType()){
+            continue;
+        }     
+
+        if(!piece->isPieceTheLastMovedPiece()){
+            continue;
+        }
+
+        if(pos!=piece->getBoardPos()){
+            continue;
+        }
+
+        if(!piece->isPieceFirstMoveNow()){
+            continue;
+        }
+
+        return true;
+    }
+    return false;
 }

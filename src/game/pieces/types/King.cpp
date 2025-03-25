@@ -49,7 +49,7 @@ std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPiec
             continue;
         }
 
-        const BoardPos& pos=moveDir.front();
+        BoardPos pos=moveDir.front();
         tileType=BoardUtils::getTileType(pos,activePlayers[activePlayerId],activePlayers[opponentId]);
         moveTiles.emplace_back(pos,tileType);
     }

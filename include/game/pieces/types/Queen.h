@@ -11,6 +11,7 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 
+
 class Queen : public ChessPiece {
 public:
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;

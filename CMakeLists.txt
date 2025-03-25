@@ -32,10 +32,6 @@ add_executable(${PROJECT_NAME}
                 # ${_INC_DIR}/game/pieces/types/UnfinishedPiece.h
                 ${_INC_DIR}/game/pieces/types/Rook.h
                 ${_INC_DIR}/game/pieces/types/Pawn.h
-                ${_INC_DIR}/game/pieces/types/Bishop.h
-                ${_INC_DIR}/game/pieces/types/Knight.h
-                ${_INC_DIR}/game/pieces/types/Queen.h
-                ${_INC_DIR}/game/pieces/types/King.h
                 ${_INC_DIR}/game/pieces/PieceHandler.h
                 ${_INC_DIR}/game/pieces/PieceHandlerPopulator.h
                 ${_INC_DIR}/game/defines/ChessDefines.h
@@ -48,7 +44,19 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/panels/buttons/PiecePromotionButton.h
                 ${_INC_DIR}/game/panels/config/PiecePromotionPanelCfg.h
                 ${_INC_DIR}/game/panels/config/PiecePromotionButtonCfg.h
+                # classes created by me:
+                ${_INC_DIR}/game/pieces/types/Bishop.h
+                ${_INC_DIR}/game/pieces/types/Knight.h
+                ${_INC_DIR}/game/pieces/types/Queen.h
+                ${_INC_DIR}/game/pieces/types/King.h
+                ${_INC_DIR}/StartScreen/StartScreen.h
+                ${_INC_DIR}/StartScreen/defines/StartScreenDefines.h
+                ${_INC_DIR}/StartScreen/config/StartScreenCfg.h
+                ${_INC_DIR}/StartScreen/buttons/StartScreenButton.h
+                ${_INC_DIR}/StartScreen/buttons/config/StartScreenButtonCfg.h
+                ${_INC_DIR}/game/buttons/QuitGameButton.h
                 
+
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
@@ -60,10 +68,6 @@ add_executable(${PROJECT_NAME}
                 # ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
                 ${_SRC_DIR}/game/pieces/types/Rook.cpp
                 ${_SRC_DIR}/game/pieces/types/Pawn.cpp
-                ${_SRC_DIR}/game/pieces/types/Bishop.cpp
-                ${_SRC_DIR}/game/pieces/types/Knight.cpp
-                ${_SRC_DIR}/game/pieces/types/Queen.cpp
-                ${_SRC_DIR}/game/pieces/types/King.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandler.cpp
                 ${_SRC_DIR}/game/pieces/PieceHandlerPopulator.cpp
                 ${_SRC_DIR}/game/logic/GameLogic.cpp
@@ -71,6 +75,14 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/panels/PiecePromotionPanel.cpp
                 ${_SRC_DIR}/game/panels/buttons/PiecePromotionButton.cpp
                 ${_SRC_DIR}/main.cpp
+                # classes created by me:
+                ${_SRC_DIR}/game/pieces/types/Bishop.cpp
+                ${_SRC_DIR}/game/pieces/types/Knight.cpp
+                ${_SRC_DIR}/game/pieces/types/Queen.cpp
+                ${_SRC_DIR}/game/pieces/types/King.cpp                
+                ${_SRC_DIR}/StartScreen/StartScreen.cpp
+                ${_SRC_DIR}/StartScreen/buttons/StartScreenButton.cpp
+                ${_SRC_DIR}/game/buttons/QuitGameButton.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

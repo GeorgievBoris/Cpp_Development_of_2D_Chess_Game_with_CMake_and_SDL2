@@ -20,21 +20,20 @@ std::vector<MoveDirection> Knight::getBoardMoves() const {
     };
 
     BoardPos currPos;
-    bool isInsideBoard=true;
     
     for(int32_t i=0;i<allowedDirs;++i){
         currPos=_boardPos;
-        isInsideBoard=true;
+        bool isNotInsideBoard=false;
         
         for(int32_t j=0;j<pairSize;++j){
             currPos=BoardUtils::getAdjacentPos(knightDirs[i].first,currPos);
             if(!BoardUtils::isInsideBoard(currPos)){
-                isInsideBoard=false;
+                isNotInsideBoard=true;
                 break;
             }
         }
 
-        if(!isInsideBoard){
+        if(isNotInsideBoard){
             continue;
         }
 

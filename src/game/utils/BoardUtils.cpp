@@ -16,6 +16,7 @@ static constexpr auto FIRST_TILE_X_POS=58;
 static constexpr auto FIRST_TILE_Y_POS=60;
 static constexpr auto TILE_SIZE=98;
 
+
 BoardPos BoardUtils::getBoardPos(const Point& absPos){
     return {(absPos.y-FIRST_TILE_Y_POS)/TILE_SIZE, (absPos.x-FIRST_TILE_X_POS)/TILE_SIZE};
 }
@@ -95,6 +96,7 @@ bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiec
             return true;
         }
     }
+
     return false;
 }
 
@@ -110,4 +112,59 @@ TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::Pla
     }
 
     return TileType::MOVE;
+}
+
+void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
+                                        BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() method is NOT added by Zhivko  
+    
+    if(PieceType::PAWN!=selectedPiece->getPieceType()){
+        return;
+    }
+
+    const BoardPos& selectedPieceBoardPos=selectedPiece->getBoardPos();
+    const int32_t currPlayerId=selectedPiece->getPlayerId();
+
+    constexpr Defines::PawnDefines enPassantRows[Defines::PLAYERS_COUNT] {Defines::WHITE_PLAYER_EN_PASSANT_ROW, Defines::BLACK_PLAYER_EN_PASSANT_ROW};
+
+    if(enPassantRows[currPlayerId]!=selectedPieceBoardPos.row){
+        return;
+    }    
+
+    int32_t i=-1;
+    
+    for(const std::unique_ptr<ChessPiece>& piece:enemyPieces){
+        ++i;
+
+        if(PieceType::PAWN!=piece->getPieceType()){
+            continue;
+        }
+     
+        if(enPassantRows[currPlayerId]!=piece->getBoardPos().row){
+            continue;
+        }
+
+        if(!piece->isPieceTheLastMovedPiece()){
+            continue;
+        }
+
+        if(!piece->isPieceFirstMoveNow()){
+            continue; 
+        }
+
+        if(selectedPieceBoardPos.row!=boardPos.row){
+            Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos) : 
+                                                    boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos);
+        }
+
+        if(piece->getBoardPos()==boardPos){
+            outCollisionRelativeId=i;
+        }
+
+        Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
+                                                boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);
+
+        if(outCollisionRelativeId==i){
+            break;
+        }       
+    }
 }

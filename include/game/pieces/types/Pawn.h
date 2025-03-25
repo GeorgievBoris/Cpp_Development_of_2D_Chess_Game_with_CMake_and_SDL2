@@ -10,14 +10,16 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 class GameProxy;
+
 class Pawn : public ChessPiece {
 public:
     Pawn(GameProxy* gameProxy);
     void setBoardPos(const BoardPos& boardPos) final;
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                         Defines::PLAYERS_COUNT>& activePieces) const final;
-
 private:
+    bool isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces) const; // Pawn::isEnPassantValid() method is NOT added by Zhivko
+
     std::vector<TileData> getWhiteMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                                             Defines::PLAYERS_COUNT>& activePieces) const;
     std::vector<TileData> getBlackMoveTiles(const std::array<ChessPiece::PlayerPieces,

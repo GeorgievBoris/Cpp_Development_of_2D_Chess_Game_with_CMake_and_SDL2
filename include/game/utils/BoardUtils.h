@@ -29,6 +29,9 @@ public:
                                         const ChessPiece::PlayerPieces& pieces, int32_t& outCollisionRelativeId);
     static TileType getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
                                                             const ChessPiece::PlayerPieces& enemyPieces);
+    
+    static void checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
+                                    BoardPos& boardPos, int32_t& outCollisionRelativeId); // BoardUtils::checkForEnPassant() method is NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_UTILS_BOARDUTILS_H_

@@ -18,6 +18,8 @@ public:
     void draw() const final;
     void handleEvent(const InputEvent& e) final;
     void activate(int32_t activePlayerId);
+    void showBtn(); // PiecePromotionButton::showBtn() is NOT added by Zhivko
+    void hideBtn(); // PiecePromotionButton::hideBtn() is NOT added by Zhivko
 private:
     Image _bgrImg;
     PiecePromotionButtonCfg _cfg;

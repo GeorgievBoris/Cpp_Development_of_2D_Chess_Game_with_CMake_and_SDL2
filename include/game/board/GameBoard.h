@@ -16,21 +16,31 @@ class Fbo;
 class GameBoard : public GameBoardProxy , public TimerClient {
 public:
     ~GameBoard();
-    int32_t init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId);
+    int32_t init(int32_t boardRsrcId, int32_t targetRsrcId,
+            int32_t moveTilesRsrcId, int32_t blinkTimerId, int32_t enPassantTimerId); // "int32_t enPassantTimerId" is NOT added by Zhivko
     void drawGameBoardOnFbo(Fbo& fbo) const;
     void drawGameBoardOnly() const;
     void draw() const;
+    void restart(); // GameBoard::restart() method is NOT added by Zhivko
+    void show(); // GameBoard::show() method is NOT added by Zhivko
+    void hide(); // GameBoard::hide() method is NOT added by Zhivko
 private:
     void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;
     void onTimeout(int32_t timerId) final;
     bool isMoveAllowed(const BoardPos& pos) const final;
 
-    int32_t _activePlayerId=Defines::WHITE_PLAYER_ID; // this field/member is added by me - NOT by Zhivko !!!
+    void shiftPositions(const BoardPos& boardPos); // GameBoard::shiftPositions() is NOT added by Zhivko
+    
+    void onEnPassant(const BoardPos& boardPos) final; // GameBoard::onEnPassant() is NOT added by Zhivko
 
-    Image _boardImg;
+
+    mutable Image _boardImg; // "mutable" is NOT added by Zhivko
     Image _targetImg;
     int32_t _blinkTimerId;
+    int32_t _enPassantTimerId; // NOT added by Zhivko
+    const TileData* _enPassantEnemyPawn=nullptr; // NOT added by Zhivko
+    const TileData* _enPassantMovePos=nullptr; // NOT added by Zhivko
 
     MoveSelector _moveSelector;
     std::vector<TileData> _currMoveTiles;

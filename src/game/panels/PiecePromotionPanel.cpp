@@ -9,6 +9,8 @@
 #include "game/proxies/GameProxy.h"
 #include "sdl_utils/InputEvent.h"
 
+extern const int32_t GAME_X_POS_SHIFT; // added by me
+extern const int32_t GAME_Y_POS_SHIFT; // added by me
 
 int32_t PiecePromotionPanel::init(const PiecePromotionPanelCfg& cfg, GameProxy* gameProxy){
     if(nullptr==gameProxy){
@@ -37,8 +39,8 @@ int32_t PiecePromotionPanel::init(const PiecePromotionPanelCfg& cfg, GameProxy* 
 
     constexpr auto btnOffset=50;
     // const auto startX=(cfg.gameBoardWidth-(BUTTONS_COUNT*(cfg.buttonWidth+btnOffset)))/2; // this is Zhivko's code - I think it has a little error!
-    const auto startX=(cfg.gameBoardWidth-((BUTTONS_COUNT*(cfg.buttonWidth+btnOffset))-btnOffset))/2; // added by me - this should be more accurte 
-    btnCfg.bgrPos.y=(cfg.gameBoardHeight-cfg.buttonHeight)/2;
+    const auto startX=GAME_X_POS_SHIFT+((cfg.gameBoardWidth-((BUTTONS_COUNT*(cfg.buttonWidth+btnOffset))-btnOffset))/2); // added by me - this should be more accurte 
+    btnCfg.bgrPos.y=GAME_Y_POS_SHIFT+((cfg.gameBoardHeight-cfg.buttonHeight)/2);
 
     for(int32_t i=0;i<BUTTONS_COUNT;++i){
         btnCfg.bgrPos.x=(i*(cfg.buttonWidth+btnOffset))+startX;
@@ -83,6 +85,29 @@ void PiecePromotionPanel::activate(int32_t playerId){
 
 bool PiecePromotionPanel::isActive() const{
     return _isActive;
+}
+
+void PiecePromotionPanel::restart(){ // PiecePromotionPanel::restart() is NOT added by Zhivko
+    _isActive=false;
+}
+
+void PiecePromotionPanel::show(){ // PiecePromotionPanel::restart() is NOT added by Zhivko
+    if(!_isActive){
+        return;
+    }
+    for(PiecePromotionButton& btn:_promotionBtns){
+        btn.showBtn();
+    }
+}
+
+void PiecePromotionPanel::hide(){
+    if(!_isActive){
+        return;
+    }
+
+    for(PiecePromotionButton& btn:_promotionBtns){
+        btn.hideBtn();
+    }
 }
 
 void PiecePromotionPanel::onButtonClicked(PieceType pieceType) {

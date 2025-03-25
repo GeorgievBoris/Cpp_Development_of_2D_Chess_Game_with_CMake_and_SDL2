@@ -14,12 +14,14 @@ void ButtonBase::draw() const{
 
 void ButtonBase::lockInput(){
     _isInputUnlocked=false;
-    Image::setFrame(DISABLED);
+    // Image::setFrame(DISABLED); // Original code used by Zhivko!
+    Image::setFrame(UNCLICKED); // added by me, NOT by Zhivko !
 }
 
 void ButtonBase::unlockInput(){
     _isInputUnlocked=true;
-    Image::setFrame(UNCLICKED);
+    // Image::setFrame(UNCLICKED); // Original code used by Zhivko!
+    Image::setFrame(UNCLICKED); // added by me, NOT by Zhivko !
 }
 
 void ButtonBase::destroy(){

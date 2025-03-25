@@ -10,6 +10,7 @@
 #include "sdl_utils/InputEvent.h"
 #include "manager_utils/managers/ManagerHandler.h"
 #include "manager_utils/debug/DebugConsole.h"
+#include "StartScreen/StartScreen.h" // NOT added by Zhivko
 // Forward Declarations
 struct EngineCfg;
 
@@ -19,7 +20,6 @@ public:
     void deinit();
     void start();
     void draw();
-
 private:
     void mainLoop();
     void drawFrame();
@@ -32,6 +32,7 @@ private:
     Game _game;
     ManagerHandler _managerHandler;
     DebugConsole _debugConsole;
+    StartScreen _startScreen; // NOT added by Zhivko
 };
 
 

@@ -10,13 +10,6 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 
-    // Information about the Castling the King and the Rook:
-
-    // 1) Castling is permitted only if neither the king nor the rook has previously moved; 
-    // 2) the squares between the king and the rook are vacant; 
-    // 3) and the king does not leave, cross over, or finish on a square attacked by an enemy piece. 
-    // 4) Castling is the only move in chess in which two pieces are moved at once.[3]
-
 class Rook : public ChessPiece{
 public:
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,

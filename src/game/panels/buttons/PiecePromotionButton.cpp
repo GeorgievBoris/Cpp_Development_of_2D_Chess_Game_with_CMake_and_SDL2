@@ -47,3 +47,13 @@ void PiecePromotionButton::activate(int32_t activePlayerId){
     ButtonBase::create(rsrcId,btnPos);
     ButtonBase::setFrame(static_cast<int32_t>(_cfg.pieceType));
 }
+
+void PiecePromotionButton::showBtn(){ // PiecePromotionButton::showBtn() is NOT added by Zhivko
+    ButtonBase::show();
+    _bgrImg.show();
+}
+
+void PiecePromotionButton::hideBtn(){ // PiecePromotionButton::hideBtn() is NOT added by Zhivko
+    ButtonBase::hide();
+    _bgrImg.hide();
+}

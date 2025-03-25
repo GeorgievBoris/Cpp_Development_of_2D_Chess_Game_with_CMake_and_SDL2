@@ -8,6 +8,7 @@
 // Own headers
 #include "manager_utils/config/ManagerHandlerCfg.h"
 #include "game/config/GameCfg.h"
+#include "StartScreen/config/StartScreenCfg.h"
 // Forward Declarations
 
 struct EngineCfg {
@@ -15,6 +16,9 @@ struct EngineCfg {
     GameCfg gameCfg;
 
     int32_t debugConsoleFontId;
+
+    StartScreenCfg startScreenCfg; // added by me
+    int32_t startScreenButtonsRsrcId; // added by me
 };
 
 

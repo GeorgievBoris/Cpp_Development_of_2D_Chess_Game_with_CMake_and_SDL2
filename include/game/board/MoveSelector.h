@@ -18,21 +18,24 @@ public:
     void markTiles(const std::vector<TileData>& markedTiles);
     void unmarkTiles();
 
-    void shiftMoveTilesPos(const Point& posShift); // MoveSelector::shiftMoveTilesPos() method is NOT added by Zhivko
-    void onEnPassant(const BoardPos& boardPos); // MoveSelector::onEnPassant() method is NOT added by Zhivko
-    void blinkEnPassant(); // MoveSelector::indicateEnPassant() method is NOT added by Zhivko
+    void shiftMoveTilesPos(const Point& posShift); // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
+    void onEnPassant(const BoardPos& boardPos); // MoveSelector::onEnPassant() is NOT added by Zhivko
+    void onCastling(const BoardPos& boardPos); // MoveSelector::onCastling() is NOT added by Zhivko
+    void blinkEnPassant(); // MoveSelector::blinkEnPassant() is NOT added by Zhivko
+    void blinkCastling(); // MoveSelector::blinkCastling() is NOT added by Zhivko
+
+    const Image* getCastlingKingTilePtr() const; // MoveSelector::getCastlingKingTilePtr() is NOT added by Zhivko
 
     enum InternalDefines{
         MAX_ACTIVE_TILES=28
     };
-
-    
 private:
     std::array<Image,MAX_ACTIVE_TILES> _tileImgs;
     size_t _activeTiles{};
 
     Image* _enPassantTakeTile=nullptr;
     Image* _enPassantMoveTile=nullptr;
+    Image* _castlingKingTile=nullptr;
 };
 
 #endif // INCLUDE_GAME_BOARD_MOVESELECTOR_H_

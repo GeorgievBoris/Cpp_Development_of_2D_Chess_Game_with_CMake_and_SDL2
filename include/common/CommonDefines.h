@@ -42,6 +42,8 @@ enum Keys{
     PLAYER_TURN_CAP_TIMER_ID, // NOT added by Zhivko
     PLAYER_TURN_CAP_TEXT_TIMER_ID, // NOT added by Zhivko
     BLINK_EN_PASSANT_TIMER_ID, // NOT added by Zhivko
+    BLINK_TILE_CASTLING_TIMER_ID, // NOT added by Zhivko
+    BLINK_TEXT_CASTLING_TIMER_ID, // NOT added by Zhivko
     COUNT
 };
 

@@ -14,7 +14,7 @@ extern const int32_t GAME_Y_POS_SHIFT;
 
 int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScreenCallBack){
     if(EXIT_SUCCESS!=_gameBoard.init(cfg.chessBoardRsrcId, cfg.targetRsrcId,
-                                            cfg.moveTilesRsrcId, cfg.blinkTargetTimerId,cfg.blinkEnPassantTimerId)){
+                                            cfg.moveTilesRsrcId, cfg.blinkTargetTimerId, cfg.blinkEnPassantTimerId, cfg.blinkTileCastlingTimerId)){
         std::cerr<<"_gameBoard.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -27,6 +27,7 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     }
 
     if(EXIT_SUCCESS!=_gameLogic.init(static_cast<GameProxy*>(this), cfg.playerTurnCapTimerId, cfg.playerTurnCapTextTimerId,
+                                                                            cfg.blinkTextCastlingTimerId,
                                                                             cfg.unfinishedPieceFontId, cfg.quitGameButtonRsrcId,
                                                                            [&](){_pieceHandler.setIsPieceGrabbed();})){
 
@@ -85,19 +86,25 @@ void Game::draw() const{
     _quitGameBtn.draw(); // NOT added by Zhivko
 }
 
-void Game::handleEvent(InputEvent& e){
+void Game::handleEvent(InputEvent& e){    
 
-    if(!_gameLogic.isTimerActive()){
-        if(!_piecePromotionPanel.isActive()){
-            return;
+    if(!_gameLogic.isTimerActive()){ // NOT added by Zhivko
+        if(!_piecePromotionPanel.isActive()){ // NOT added by Zhivko
+            if(!_isGameFinished){
+                return;
+            }
         }
     }
 
-    if(!_quitGameBtn.isInputUnlocked()){
+    if(!_quitGameBtn.isInputUnlocked()){ // NOT added by Zhivko
         return;
     }
 
     _quitGameBtn.handleEvent(e); // NOT added by Zhivko
+
+    if(_isGameFinished){ // NOT added by Zhivko
+        return;
+    }    
     
     if(_piecePromotionPanel.isActive()){
         _piecePromotionPanel.handleEvent(e);
@@ -140,7 +147,6 @@ void Game::start(){ // Game::start() method is NOT added by Zhivko
     }
 
     _quitGameBtn.restart();
-    _gameBoard.restart(); // a check is performed inside GameBoard::restart()
 }
 
 void Game::startPlayersTimer(){ // method Game::startPlayersTimer() is NOT added by Zhivko
@@ -148,19 +154,20 @@ void Game::startPlayersTimer(){ // method Game::startPlayersTimer() is NOT added
 }
 
 void Game::onGameTurnFinished(){
-
+    
     _gameLogic.stopPlayersTimer(); // NOT added by Zhivko
 
     if(_isPromotionActive){
         return; // this "if" statement and the "return" are NOT added by Zhivko
     }
 
-    _gameBoard.restart(); // NOT added by Zhivko - used for cases when the 60s-timer reaches 0s
+    _gameBoard.restart(); // NOT added by Zhivko - used for cases when the Players' turn timer reaches 0s
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
 }
 
 void Game::onPawnPromotion(){
     _isPromotionActive=true; // a quick fix by Zhivko done in the last lecture 14
+    _pieceHandler.onPawnPromotion(); // NOT added by Zhivko
     _piecePromotionPanel.activate(_gameLogic.getActivePlayerId());
 }
 
@@ -168,7 +175,7 @@ void Game::promotePiece(PieceType pieceType){
     // bonus for homework - finish the promotion !!! (listen again to the instructions of Zhivko)
     _pieceHandler.promotePiece(pieceType);
     _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
-    // onBoardAnimFinished(); // added originally by Zhivko 
+    // onBoardAnimFinished(); // added originally by Zhivko
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId()); // NOT added by Zhivko
 }
 
@@ -181,6 +188,10 @@ void Game::onBoardAnimFinished(){
     /// ...to display the currently active player (WHITE or BLACK)    
     _gameLogic.finishTurn();
     _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
+    
+    if(_isGameFinished){ // NOT added by Zhivko
+        return;
+    }
     _gameLogic.startPlayersTimer(); // NOT added by Zhivko
 }
 
@@ -197,12 +208,13 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
         std::cerr<<"PieceHandler::restart() failed. The game cannot be restarted."<<std::endl;
         return;
     }
-    _piecePromotionPanel.restart();
+    _piecePromotionPanel.restart(); 
     _gameBoardAnimator.restart();
     _inputInverter.restart(); 
     _gameLogic.restart();
     _quitGameBtn.restart();
     _isPromotionActive=false;
+    _isGameFinished=false;
 }
 
 void Game::regenerateGameFbo() {
@@ -233,4 +245,16 @@ void Game::correctInputEvent(InputEvent& e){ // Game::correctInputEvent() method
 
     e.pos.x-=GAME_X_POS_SHIFT;
     e.pos.y-=GAME_Y_POS_SHIFT;
+}
+
+void Game::onGameFinish() { // Game::onGameFinish() is NOT added by Zhivko
+    _isGameFinished=true;
+}
+
+void Game::castleTextShow() { // Game::castleTextShow() is NOT added by Zhivko
+    _gameLogic.startOnCastleTimer();
+}
+
+void Game::castleTextHide(){ // Game::castleTextHide() is NOT added by Zhivko
+    _gameLogic.stopOnCastleTimer();
 }

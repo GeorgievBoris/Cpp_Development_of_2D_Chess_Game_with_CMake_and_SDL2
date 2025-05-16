@@ -34,7 +34,7 @@ private:
     void deactivate();  
     void setShouldExit(bool shouldExit=true);
     void onTimeout(int32_t timerId) final; // put it private here, because it is PUBLIC in the BaseClass
-    void changeOpacity();
+    void changeOpacity(int32_t opacity);
     // void getOpacity();
 
     enum InternalDefines{
@@ -56,7 +56,7 @@ private:
     int32_t _timerId=INVALID_RSRC_ID; // set also to INVALID_RSRC_ID?
     int32_t _deltaOpacity{};
     int32_t _currTotalOpacity=TOTAL_ENTITIES_COUNT*FULL_OPACITY;
-    const int32_t _maxTotalOpacity=TOTAL_ENTITIES_COUNT*FULL_OPACITY;
+    const int32_t _maxTotalOpacity=FULL_OPACITY*TOTAL_ENTITIES_COUNT;
 };
 
 #endif // INCLUDE_STARTSCREEN_STARTSCREEN_H_

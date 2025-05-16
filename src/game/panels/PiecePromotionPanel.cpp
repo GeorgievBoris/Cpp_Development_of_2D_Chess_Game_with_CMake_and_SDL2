@@ -87,20 +87,21 @@ bool PiecePromotionPanel::isActive() const{
     return _isActive;
 }
 
-void PiecePromotionPanel::restart(){ // PiecePromotionPanel::restart() is NOT added by Zhivko
+void PiecePromotionPanel::restart(){
     _isActive=false;
 }
 
-void PiecePromotionPanel::show(){ // PiecePromotionPanel::restart() is NOT added by Zhivko
+void PiecePromotionPanel::show(){ //PiecePromotionPanel::show() is NOT added by Zhivko
     if(!_isActive){
         return;
     }
+
     for(PiecePromotionButton& btn:_promotionBtns){
         btn.showBtn();
     }
 }
 
-void PiecePromotionPanel::hide(){
+void PiecePromotionPanel::hide(){ //PiecePromotionPanel::hide() is NOT added by Zhivko
     if(!_isActive){
         return;
     }

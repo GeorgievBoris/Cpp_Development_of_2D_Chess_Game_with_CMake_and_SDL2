@@ -15,13 +15,15 @@ class GameProxy; // NOT added by Zhivko
 class GameLogic : public TimerClient { // inheritance is added by me
 public:
     GameLogic();
-    int32_t init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t fontId, 
+    int32_t init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId, int32_t fontId, 
                                     int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack); // GameLogic::init() method is added by me
     int32_t getActivePlayerId() const;
     void finishTurn();
     void restart(); // GameLogic::restart() method is NOT added by Zhivko
     void startPlayersTimer(); // GameLogic::startPlayerTimer() is NOT added by Zhivko
     void stopPlayersTimer(); // GameLogic::stopPlayerTimer() is NOT added by Zhivko
+    void startOnCastleTimer(); // GameLogic::startOnCastleTimer() is NOT added by Zhivko
+    void stopOnCastleTimer(); // GameLogic::stopOnCastleTimer() is NOT added by Zhivko
     void draw() const; // GameLogic::draw() method is NOT added by Zhivko
     bool isTimerActive() const; // GameLogic::isTimerOn() method is NOT added by Zhivko
 private:
@@ -31,10 +33,12 @@ private:
     int32_t _activePlayer;
     int32_t _playerTurnCapTimerId; // variable / object is added by me
     int32_t _playerTurnCapTextTimerId; // variable / object is added by me
+    int32_t _blinkTextCastlingTimerId; // NOT added by Zhivko
     int32_t _fontId;  // variable / object is added by me
     mutable int64_t _playerRemainingTime; // variable / object is added by me
     GameProxy* _gameProxy=nullptr; // variable / object is added by me
     mutable Text _playerTurnText; // variable / object is added by me
+    Text _onCastleText; // NOT added by Zhivko
     std::function<void()> _pieceHandlerCallBack;
 };
 

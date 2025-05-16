@@ -116,7 +116,7 @@ bool Engine::processFrame(){
 void Engine::handleEvent(){
     _startScreen.handleEvent(_event); // NOT added by Zhivko
 
-    _game.handleEvent(_event); // added by Zhivko
+    _game.handleEvent(_event);
 
     _debugConsole.handleEvent(_event);
 }

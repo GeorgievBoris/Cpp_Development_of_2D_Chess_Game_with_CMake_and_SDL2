@@ -16,7 +16,7 @@ constexpr int32_t GAME_X_POS_SHIFT=0; // NOT added by Zhivko
 constexpr int32_t GAME_Y_POS_SHIFT=100; // NOT added by Zhivko
 
 // constants
-static constexpr auto WINDOW_WIDTH=900;
+static constexpr auto WINDOW_WIDTH=900+400; // "+ 400" is NOT added by Zhivko
 static constexpr auto WINDOW_HEIGHT=1000;
 static constexpr auto WINDOW_NAME="Hardware_Rendering";
 
@@ -175,6 +175,8 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.playerTurnCapTimerId=TimerId::PLAYER_TURN_CAP_TIMER_ID; // NOT added by Zhivko
     cfg.playerTurnCapTextTimerId=TimerId::PLAYER_TURN_CAP_TEXT_TIMER_ID; // NOT added by Zhivko
     cfg.blinkEnPassantTimerId=TimerId::BLINK_EN_PASSANT_TIMER_ID; // NOT added by Zhivko
+    cfg.blinkTileCastlingTimerId=TimerId::BLINK_TILE_CASTLING_TIMER_ID; // NOT added by Zhivko
+    cfg.blinkTextCastlingTimerId=TimerId::BLINK_TEXT_CASTLING_TIMER_ID; // NOT added by Zhivko
     
     cfg.unfinishedPieceFontId=FontId::ANGELINE_VINTAGE_40;
 

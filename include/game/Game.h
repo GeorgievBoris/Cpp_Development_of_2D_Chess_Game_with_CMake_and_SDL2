@@ -43,11 +43,15 @@ private:
     void promotePiece(PieceType pieceType) final;
     void onBoardAnimFinished() final;
     void setWidgetFlip(WidgetFlip flipType) final;
-    void restart(); // method added by me
+    void restart(); // Game::restart() is NOT added by Zhivko
 
     void regenerateGameFbo();
 
-    void correctInputEvent(InputEvent& e); // added by me
+    void correctInputEvent(InputEvent& e); // Game::correctInputEvent() is NOT added by Zhivko
+
+    void onGameFinish() final; // Game::onGameFinish() is NOT added by Zhivko
+    void castleTextShow() final; // Game::castleTextShow() is NOT added by Zhivko
+    void castleTextHide() final; // Game::castleTextHide() is NOT added by Zhivko
 
     GameBoard _gameBoard;
     PieceHandler _pieceHandler;
@@ -57,9 +61,10 @@ private:
     InputInverter _inputInverter;
     Fbo _gameFbo;
 
-    QuitGameButton _quitGameBtn; // added by me
+    QuitGameButton _quitGameBtn; // NOT added by Zhivko
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
+    bool _isGameFinished=false; // NOT added by Zhivko
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

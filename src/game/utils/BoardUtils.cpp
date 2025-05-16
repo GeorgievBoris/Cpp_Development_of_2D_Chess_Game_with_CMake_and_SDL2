@@ -8,6 +8,10 @@
 // Own headers
 #include "utils/drawing/Rectangle.h"
 
+#include "game/pieces/types/Pawn.h" // NOT added by Zhivko
+#include "game/pieces/types/Rook.h" // NOT added by Zhivko
+#include "game/pieces/types/King.h"// NOT added by Zhivko
+
 // NOTE: if these four variables DO NOT need to go out of this source file / be visible outside of it...
 // ... use them either in a "namespace" or set them as "static"
 
@@ -114,6 +118,11 @@ TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::Pla
     return TileType::MOVE;
 }
 
+BoardPos BoardUtils::shiftBoardPositions(const Point& gameBoardImgAbsPos, const BoardPos& boardPos) { //BoardUtils::shiftBoardPositions() is NOT added by Zhivko
+    const Point boardPosToAbsPoint=BoardUtils::getAbsPos(boardPos);
+    return BoardUtils::getBoardPos(Point(gameBoardImgAbsPos.x+boardPosToAbsPoint.x,gameBoardImgAbsPos.y+boardPosToAbsPoint.y));
+}
+
 void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
                                         BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() method is NOT added by Zhivko  
     
@@ -128,7 +137,7 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
 
     if(enPassantRows[currPlayerId]!=selectedPieceBoardPos.row){
         return;
-    }    
+    }
 
     int32_t i=-1;
     
@@ -143,14 +152,13 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
             continue;
         }
 
-        if(!piece->isPieceTheLastMovedPiece()){
+        const ChessPiece* const chessPiecePtr=piece.get();
+        const Pawn* const pawnPtr=static_cast<const Pawn*>(chessPiecePtr);
+
+        if(!pawnPtr->isPawnTargetedForEnPassant()){
             continue;
         }
-
-        if(!piece->isPieceFirstMoveNow()){
-            continue; 
-        }
-
+        
         if(selectedPieceBoardPos.row!=boardPos.row){
             Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos) : 
                                                     boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos);
@@ -161,10 +169,182 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
         }
 
         Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
-                                                boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);
+                                                boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);            
+
 
         if(outCollisionRelativeId==i){
             break;
         }       
+    }
+}
+
+/*
+void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
+                                            BoardPos& newBoardPos,
+                                            std::pair<bool, std::pair<int32_t, BoardPos>>& pair){ // BoardUtils::doCastling() is NOT added by Zhivko
+
+    const PieceType& pieceType=piece->getPieceType();
+
+    if(PieceType::KING!=pieceType && PieceType::ROOK!=pieceType){
+        return;
+    }
+
+    if(PieceType::KING==pieceType){
+        const ChessPiece* const chessPiecePtr=piece.get();
+        const King* const kingPtr=static_cast<const King*>(chessPiecePtr);
+        if(kingPtr->isMoved()){
+            return;
+        }
+    } else {
+        const ChessPiece* const chessPiecePtr=piece.get();
+        const Rook* const rookPtr=static_cast<const Rook*>(chessPiecePtr);
+        if(rookPtr->isMoved()){
+            return;
+        }
+    }
+
+    const BoardPos pieceBoardPos=piece->getBoardPos();
+
+    if(pieceBoardPos.row!=newBoardPos.row){
+        return;
+    }    
+
+    if(PieceType::KING==pieceType){
+
+        const int32_t kingColRight=pieceBoardPos.col+1;
+        const int32_t kingColLeft=pieceBoardPos.col-1;
+
+        if(kingColRight>=newBoardPos.col && kingColLeft<=newBoardPos.col){
+            return;
+        }
+
+        for(const std::unique_ptr<ChessPiece>& currPiece:pieces){
+            ++pair.second.first;
+            if(PieceType::ROOK!=currPiece->getPieceType()){
+                continue;
+            }
+
+            const ChessPiece* const chessPiecePtr=currPiece.get();
+            const Rook* const rookPtr=static_cast<const Rook*>(chessPiecePtr);
+
+            if(rookPtr->isMoved()){
+                continue;
+            }
+
+            const BoardPos rookPos=currPiece->getBoardPos();
+
+            pair.second.second.row=pieceBoardPos.row;
+            pair.first=true;
+
+            if(newBoardPos.col>pieceBoardPos.col){
+                if(0==rookPos.col){
+                    continue;
+                }
+                pair.second.second.col=kingColRight;
+                return;
+            }
+
+            if(0!=rookPos.col){
+                continue;
+            }
+            pair.second.second.col=kingColLeft;
+            return;
+        }
+        return;
+    } // the logic for the KING ends here
+
+    for(size_t i=0;i<pieces.size();++i){
+        if(PieceType::KING!=pieces[i]->getPieceType()){
+            continue;
+        }
+
+        const ChessPiece* const chessPiecePtr=pieces[i].get();
+        const King* const kingPtr=static_cast<const King*>(chessPiecePtr);
+
+        if(kingPtr->isMoved()){
+            return;
+        }
+
+        if(newBoardPos!=kingPtr->getBoardPos()){
+            return;
+        }
+    
+        pair.second.first=static_cast<int32_t>(i);
+        pair.second.second=kingPtr->getBoardPos();
+        pair.first=true;
+        0==pieceBoardPos.col ? (pair.second.second.col-=2, newBoardPos.col=pair.second.second.col+1) 
+                             :  (pair.second.second.col+=2, newBoardPos.col=pair.second.second.col-1);        
+        break;
+    }
+    return;
+}
+*/
+
+
+void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
+                                            BoardPos& newBoardPos,
+                                            std::pair<bool, std::pair<int32_t, BoardPos>>& pair){ // BoardUtils::doCastling() is NOT added by Zhivko
+
+    const PieceType& pieceType=piece->getPieceType();
+
+    const BoardPos pieceBoardPos=piece->getBoardPos();
+
+    if(pieceBoardPos.row!=newBoardPos.row){
+        return;
+    }    
+
+    if(PieceType::KING==pieceType){
+
+        const int32_t kingColRight=pieceBoardPos.col+1;
+        const int32_t kingColLeft=pieceBoardPos.col-1;
+
+        if(kingColRight>=newBoardPos.col && kingColLeft<=newBoardPos.col){
+            return;
+        }
+
+        int32_t counter=-1;
+        for(const std::unique_ptr<ChessPiece>& currPiece:pieces){
+            ++counter;
+            if(PieceType::ROOK!=currPiece->getPieceType()){
+                continue;
+            }
+
+            pair.second.second.row=pieceBoardPos.row;
+            pair.second.first=counter;
+            pair.first=true;                
+
+            if(newBoardPos.col>pieceBoardPos.col){
+                if(0==currPiece->getBoardPos().col){
+                    continue;
+                }
+                pair.second.second.col=kingColRight;
+                return;
+            }
+
+            if(0!=currPiece->getBoardPos().col){
+                continue;
+            }
+
+            pair.second.second.col=kingColLeft;        
+            return;
+        }
+        return;
+    } // the logic for the KING ends here
+
+    for(size_t i=0;i<pieces.size();++i){
+        if(PieceType::KING!=pieces[i]->getPieceType()){
+            continue;
+        }
+
+        if(pieces[i]->getBoardPos()!=newBoardPos){
+            return;
+        }
+    
+        pair.second.first=static_cast<int32_t>(i);
+        pair.second.second=pieces[i]->getBoardPos();
+        pair.first=true;
+        0==pieceBoardPos.col ? (pair.second.second.col-=2, newBoardPos.col=pair.second.second.col+1) 
+                             :  (pair.second.second.col+=2, newBoardPos.col=pair.second.second.col-1);        
+        break;
     }
 }

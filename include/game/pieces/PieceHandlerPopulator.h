@@ -20,7 +20,8 @@ public:
     // dtor is left here just in case if somebody somehow creates an object -> this object has a way of destroying
     ~PieceHandlerPopulator()=default; 
 
-    static int32_t populatePieceHandler(GameProxy* gameProxy, int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
+    static int32_t populatePieceHandler(GameProxy* gameProxy,
+                                        int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
                                         std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& outPieces);
     static std::unique_ptr<ChessPiece> createPiece(PieceType pieceType, GameProxy* gameProxy);
 };

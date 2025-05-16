@@ -35,10 +35,13 @@ void MoveSelector::unmarkTiles(){
         _enPassantMoveTile->show(); // NOT added by Zhivko
         _enPassantMoveTile=nullptr; // NOT added by Zhivko
     }
-
     if(_enPassantTakeTile){ // NOT added by Zhivko
         _enPassantTakeTile->show(); // NOT added by Zhivko
         _enPassantTakeTile=nullptr; // NOT added by Zhivko
+    }
+    if(_castlingKingTile){ // NOT added by Zhivko
+        _castlingKingTile->show(); // NOT added by Zhivko
+        _castlingKingTile=nullptr; // NOT added by Zhivko
     }
 
 }
@@ -50,18 +53,43 @@ void MoveSelector::shiftMoveTilesPos(const Point& posShift) { // MoveSelector::s
     }
 }
 
-void MoveSelector::onEnPassant(const BoardPos& boardPos){ // MoveSelector::onEnPassant() method is NOT added by Zhivko
+void MoveSelector::onEnPassant(const BoardPos& boardPos){ // MoveSelector::onEnPassant() is NOT added by Zhivko
     for(size_t idx=0;idx<_activeTiles;++idx){
         if(boardPos!=BoardUtils::getBoardPos(_tileImgs[idx].getPosition())){
             continue;
         }
-        _enPassantTakeTile=&_tileImgs[idx];
-        _enPassantMoveTile=&_tileImgs[idx-1];
-        return;
+
+        if(!_enPassantTakeTile){
+            _enPassantTakeTile=&_tileImgs[idx];
+            return;
+        }
+
+        if(!_enPassantMoveTile){
+            _enPassantMoveTile=&_tileImgs[idx];
+            return;
+        }
     }
 }
 
-void MoveSelector::blinkEnPassant(){ // MoveSelector::indicateEnPassant() method is NOT added by Zhivko
+void MoveSelector::onCastling(const BoardPos& boardPos){ // MoveSelector::onCastling() is NOT added by Zhivko
+    for(size_t idx=0;idx<_activeTiles;++idx){
+        if(boardPos!=BoardUtils::getBoardPos(_tileImgs[idx].getPosition())){
+            continue;
+        }
+        _castlingKingTile=&_tileImgs[idx];
+        break;
+    }
+}
+
+void MoveSelector::blinkCastling(){ // MoveSelector::blinkCastling() is NOT added by Zhivko
+    if(_castlingKingTile->isVisible()){
+        _castlingKingTile->hide();
+        return;
+    }
+    _castlingKingTile->show();
+}
+
+void MoveSelector::blinkEnPassant(){ // MoveSelector::blinkEnPassant() is NOT added by Zhivko
     if(_enPassantTakeTile->isVisible()){
         _enPassantTakeTile->hide();
         _enPassantMoveTile->hide();
@@ -69,4 +97,8 @@ void MoveSelector::blinkEnPassant(){ // MoveSelector::indicateEnPassant() method
     }
     _enPassantTakeTile->show();
     _enPassantMoveTile->show();
+}
+
+const Image* MoveSelector::getCastlingKingTilePtr() const { // MoveSelector::getCastlingKingTilePtr() is NOT added by Zhivko
+    return _castlingKingTile;
 }

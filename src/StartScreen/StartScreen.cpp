@@ -111,39 +111,39 @@ void StartScreen::setShouldExit(bool shouldExit){
     _shouldExit=shouldExit;
 }
 
-void StartScreen::changeOpacity(){
+void StartScreen::changeOpacity(int32_t opacity){
     const int32_t backgroundOpacity=_background.getOpacity();
     _currTotalOpacity=backgroundOpacity;
 
-    if(0>_deltaOpacity){
+    if(0>opacity){
         for(size_t i=0;i<BUTTONS_COUNT;++i){
             _currTotalOpacity+=_screenBtns[i].getOpacity();
         }
 
         if(FULL_OPACITY<_currTotalOpacity){
             for(size_t i=0;i<BUTTONS_COUNT;++i){
-                _screenBtns[i].setOpacity(_screenBtns[i].getOpacity()+_deltaOpacity);
-                _currTotalOpacity+=_deltaOpacity;
+                _screenBtns[i].setOpacity(_screenBtns[i].getOpacity()+opacity);
+                _currTotalOpacity+=opacity;
             }
             return;
         }
 
-        _currTotalOpacity+=_deltaOpacity;
+        _currTotalOpacity+=opacity;
         _background.setOpacity(_currTotalOpacity);
         return;
     }
 
     
     if(FULL_OPACITY!=backgroundOpacity){
-        _currTotalOpacity+=_deltaOpacity;
+        _currTotalOpacity+=opacity;
         _background.setOpacity(_currTotalOpacity);
         return;
     }
 
     for(size_t i=0;i<BUTTONS_COUNT;++i){
         const int32_t btnOpacity=_screenBtns[i].getOpacity();
-        _screenBtns[i].setOpacity(btnOpacity+_deltaOpacity);
-        _currTotalOpacity+=btnOpacity+_deltaOpacity;
+        _screenBtns[i].setOpacity(btnOpacity+opacity);
+        _currTotalOpacity+=btnOpacity+opacity;
     }
 }
 
@@ -153,7 +153,7 @@ void StartScreen::onTimeout(int32_t timerId){
         return;
     }
 
-    StartScreen::changeOpacity();
+    changeOpacity(_deltaOpacity);
 
     if(DELTA_OPACITY_DECREASE==_deltaOpacity){
 
@@ -162,8 +162,8 @@ void StartScreen::onTimeout(int32_t timerId){
         }
 
         if(ZERO_OPACITY==_currTotalOpacity){
-            TimerClient::stopTimer(_timerId);
-            StartScreen::deactivate();
+            TimerClient::stopTimer(timerId);
+            deactivate();
             _startPlayersTimerCallBack();            
         }
         return;
@@ -181,16 +181,16 @@ void StartScreen::onTimeout(int32_t timerId){
 
 void StartScreen::show(){
     TimerClient::startTimer(50,_timerId,TimerType::PULSE);
-    _deltaOpacity=DELTA_OPACITY_DECREASE;
-    StartScreen::activate();
+    _deltaOpacity=DELTA_OPACITY_INCREASE;
+    activate();
 
     while(true){
-        StartScreen::changeOpacity();
+        changeOpacity(DELTA_OPACITY_DECREASE);
         if(ZERO_OPACITY==_currTotalOpacity){
             break;
         }
+        
     }
-    _deltaOpacity=DELTA_OPACITY_INCREASE;
 }
 
 void StartScreen::hide(){

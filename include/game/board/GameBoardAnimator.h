@@ -28,7 +28,7 @@ public:
     int32_t init(GameProxy* gameProxy, Fbo* gameFbo, int32_t gameFboRotTimerId);
     void startAnim(int32_t playerId);
     bool isActive() const;
-    void restart(); // this method is NOT added by Zhivko !
+    void restart();
     int32_t getTargetRotation()const; // this method is NOT added by Zhivko !
 private:
     void onTimeout(int32_t timerId) final;

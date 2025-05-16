@@ -11,6 +11,7 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 
+// Note: "Queen.h" is NOT added by Zhivko
 
 class Queen : public ChessPiece {
 public:

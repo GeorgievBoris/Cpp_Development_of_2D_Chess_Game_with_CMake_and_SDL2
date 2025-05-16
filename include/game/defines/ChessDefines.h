@@ -38,6 +38,10 @@ enum PawnDefines {
     PAWNS_COUNT=8
 };
 
+enum nonPawnDefines { // enum is NOT added by Zhivko
+    KING_STARTING_COLUMN_POSITION=4,
+};
+
 } // end of namespace Defines
 
 // NOTE 1: "PieceType" is NOT an ordinary/standard enum, because it will not be used as an index 

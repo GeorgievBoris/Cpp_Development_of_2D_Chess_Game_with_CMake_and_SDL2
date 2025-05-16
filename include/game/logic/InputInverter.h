@@ -10,7 +10,7 @@
 // Forward Declarations
 class InputEvent;
 
-// NOTE: to be 100% correct this class must be in the "sdl_utils" library because it is related to the input
+// NOTE: top be 100% correct this class must be in the "sdl_utils" library because it is related to the input
 
 class InputInverter{
 public:

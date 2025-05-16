@@ -30,6 +30,8 @@ struct GameCfg{
     int32_t playerTurnCapTimerId; // NOT added by Zhivko
     int32_t playerTurnCapTextTimerId; // NOT added by Zhivko
     int32_t blinkEnPassantTimerId; // NOT added by Zhivko
+    int32_t blinkTileCastlingTimerId; // NOT added by Zhivko
+    int32_t blinkTextCastlingTimerId; // NOT added by Zhivko
 };
 
 #endif // GAME_CONFIG_GAMECFG_H_

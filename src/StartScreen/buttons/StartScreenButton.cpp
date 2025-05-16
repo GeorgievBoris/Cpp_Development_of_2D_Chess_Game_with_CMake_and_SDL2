@@ -34,7 +34,7 @@ void StartScreenButton::draw() const{
 }
 
 void StartScreenButton::activate(){
-    StartScreenButton::deactivate();
+    deactivate();
 
     ButtonBase::create(_cfg.startScreenBtnsRsrcId,_cfg.btnPos);
     ButtonBase::setFrame(static_cast<int32_t>(_cfg.btnType));

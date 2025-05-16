@@ -17,6 +17,9 @@ public:
     virtual void promotePiece(PieceType pieceType)=0;
     virtual void onBoardAnimFinished()=0;
     virtual void setWidgetFlip(WidgetFlip flipType)=0;
+    virtual void onGameFinish()=0; // GameProxy::onKingCheckMate() method NOT added by Zhivko
+    virtual void castleTextShow()=0; // GameProxy::castleTextShow() method is NOT added by Zhivko
+    virtual void castleTextHide()=0; // GameProxy::castleTextHide() method is NOT added by Zhivko
 };
 
 

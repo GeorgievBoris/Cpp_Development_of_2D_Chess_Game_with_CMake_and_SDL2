@@ -1,6 +1,7 @@
 // Corresponding header
 #include "game/pieces/types/Pawn.h"
 // C system headers
+#include <cstdlib>
 // C++ system headers
 #include <iostream>
 // Third-party headers
@@ -18,15 +19,17 @@ Pawn::Pawn(GameProxy* gameProxy) :_gameProxy(gameProxy) {
 }
 
 void Pawn::setBoardPos(const BoardPos& boardPos) {
-
+    
     ChessPiece::setBoardPos(boardPos);
 
     if(Defines::WHITE_PLAYER_ID==_playerId) {
         if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
+            std::cout<<"here whites"<<std::endl;
             _gameProxy->onPawnPromotion();
         }
     } else {
         if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
+            std::cout<<"here blacks"<<std::endl;
             _gameProxy->onPawnPromotion();
         }
     }
@@ -39,6 +42,34 @@ std::vector<TileData> Pawn::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         return getWhiteMoveTiles(activePieces);
     }
     return getBlackMoveTiles(activePieces);
+}
+
+void Pawn::checkStateForEnPassant(const BoardPos& newBoardPos,
+                                  const ChessPiece::PlayerPieces& currPlayerPieces, PieceType pieceType) { // Pawn::checkStateForEnPassant() is NOT added by Zhivko
+    
+    for(const std::unique_ptr<ChessPiece>& piece: currPlayerPieces){
+        if(PieceType::PAWN!=piece->getPieceType()){
+            continue;
+        }
+
+        ChessPiece* const chessPiecePtr=piece.get();
+        Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
+        pawnPtr->_isPawnTargetedForEnPassant=false;
+    }
+
+    if(PieceType::PAWN!=pieceType){
+        return;
+    }
+
+    const int32_t boardPosDiff=_boardPos.row-newBoardPos.row;
+    
+    if(2==abs(boardPosDiff)) {
+        _isPawnTargetedForEnPassant=true;
+    }
+}
+
+bool Pawn::isPawnTargetedForEnPassant() const { // Pawn::isPawnTargetedForEnPassant() is NOT added by Zhivko
+    return _isPawnTargetedForEnPassant;
 }
 
 std::unordered_map<Defines::Directions,MoveDirection> Pawn::getWhiteBoardMoves() const {
@@ -202,17 +233,16 @@ bool Pawn::isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPi
     for(const std::unique_ptr<ChessPiece>& piece:enemyPieces){
         if(PieceType::PAWN!=piece->getPieceType()){
             continue;
-        }     
+        }
 
-        if(!piece->isPieceTheLastMovedPiece()){
+        const ChessPiece* const chessPiecePtr=piece.get();
+        const Pawn* const pawnPtr=static_cast<const Pawn*>(chessPiecePtr);
+
+        if(!pawnPtr->isPawnTargetedForEnPassant()){
             continue;
         }
 
         if(pos!=piece->getBoardPos()){
-            continue;
-        }
-
-        if(!piece->isPieceFirstMoveNow()){
             continue;
         }
 

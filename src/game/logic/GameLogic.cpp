@@ -6,15 +6,15 @@
 // Third-party headers
 // Own headers
 #include "game/defines/ChessDefines.h"
-#include "game/proxies/GameProxy.h" // added by me
-#include "manager_utils/managers/TimerMgr.h" // added by me
-#include "manager_utils/managers/RsrcMgr.h"// added by me
+#include "game/proxies/GameProxy.h" // NOT added by Zhivko
+#include "manager_utils/managers/TimerMgr.h" // NOT added by Zhivko
+#include "manager_utils/managers/RsrcMgr.h"// NOT added by Zhivko
 
 GameLogic::GameLogic() : _activePlayer(Defines::WHITE_PLAYER_ID){
 
 }
 
-int32_t GameLogic::init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId,
+int32_t GameLogic::init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId,
                                             int32_t fontId, int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack){ // GameLogic::init() method is added by me
     if(nullptr==gameProxy){
         std::cerr<<"Error, nullptr provided for gameProxy"<<std::endl;
@@ -22,6 +22,8 @@ int32_t GameLogic::init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int3
     }
     _playerTurnCapTimerId=playerTurnCapTimerId;
     _playerTurnCapTextTimerId=playerTurnCapTextTimerId;
+    _blinkTextCastlingTimerId=blinkTextCastlingTimerId;
+
     _gameProxy=gameProxy;
     _fontId=fontId;
     _pieceHandlerCallBack=pieceHandlerCallBack;
@@ -33,6 +35,9 @@ int32_t GameLogic::init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int3
 
     _playerTurnText.create("0",_fontId,Colors::WHITE,textPos);
     _playerTurnText.hide();
+
+    _onCastleText.create("Castling possible",_fontId,Colors::WHITE,Point(textPos.x+offset*7,textPos.y));
+    _onCastleText.hide();
 
     return EXIT_SUCCESS;
 }
@@ -49,19 +54,19 @@ void GameLogic::finishTurn(){
     _activePlayer=Defines::WHITE_PLAYER_ID;
 }
 
-void GameLogic::restart(){ // GameLogic::restart() method added by me
+void GameLogic::restart(){ // GameLogic::restart() method is NOT added by Zhivko
     _activePlayer=Defines::WHITE_PLAYER_ID;
     _playerTurnText.setText("0");
     GameLogic::stopPlayersTimer();
 }
 
-void GameLogic::startPlayersTimer(){ // GameLogic::startPlayerTimer() method added by me
+void GameLogic::startPlayersTimer(){ // GameLogic::startPlayerTimer() is NOT added by Zhivko
     _playerTurnText.show();
 
     if(TimerClient::isActiveTimerId(_playerTurnCapTimerId)){
         return;
     }
-    TimerClient::startTimer(60600,_playerTurnCapTimerId,TimerType::ONESHOT);
+    TimerClient::startTimer(60000,_playerTurnCapTimerId,TimerType::ONESHOT);
 
     if(TimerClient::isActiveTimerId(_playerTurnCapTextTimerId)){
         return;
@@ -71,7 +76,7 @@ void GameLogic::startPlayersTimer(){ // GameLogic::startPlayerTimer() method add
     GameLogic::setInternals();
 }
 
-void GameLogic::stopPlayersTimer(){ // GameLogic::stopPlayerTimer() method added by me
+void GameLogic::stopPlayersTimer(){ // GameLogic::stopPlayerTimer() is NOT added by Zhivko
     _playerTurnText.hide();
     if(TimerClient::isActiveTimerId(_playerTurnCapTextTimerId)){
         TimerClient::stopTimer(_playerTurnCapTextTimerId);
@@ -80,10 +85,32 @@ void GameLogic::stopPlayersTimer(){ // GameLogic::stopPlayerTimer() method added
     if(TimerClient::isActiveTimerId(_playerTurnCapTimerId)){
         TimerClient::stopTimer(_playerTurnCapTimerId);
     }
+
+    if(TimerClient::isActiveTimerId(_blinkTextCastlingTimerId)){
+        TimerClient::stopTimer(_blinkTextCastlingTimerId);
+    }
+}
+
+void GameLogic::startOnCastleTimer(){ // GameLogic::startOnCastleTimer() is NOT added by Zhivko
+    
+    if(TimerClient::isActiveTimerId(_blinkTextCastlingTimerId)){
+        return;
+    }
+    _onCastleText.show();
+    startTimer(500,_blinkTextCastlingTimerId,TimerType::PULSE);
+}
+
+void GameLogic::stopOnCastleTimer(){ // GameLogic::stopOnCastleTimer() is NOT added by Zhivko
+    
+    if(TimerClient::isActiveTimerId(_blinkTextCastlingTimerId)){
+        _onCastleText.hide();
+        stopTimer(_blinkTextCastlingTimerId);
+    }
 }
 
 void GameLogic::draw() const{ // GameLogic::draw() method added by me
     _playerTurnText.draw();
+    _onCastleText.draw();
 }
 
 bool GameLogic::isTimerActive() const{ // GameLogic::isTimerOn() method added by me
@@ -109,7 +136,12 @@ void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is 
         _playerTurnText.isVisible() ? _playerTurnText.hide() : _playerTurnText.show();
         
         return;
-    }    
+    }
+
+    if(timerId==_blinkTextCastlingTimerId){
+        _onCastleText.isVisible() ? _onCastleText.hide() : _onCastleText.show();
+        return;
+    }
 
     std::cerr<<"Invalid timerId is provieded for GameLogic"<<std::endl;
 }

@@ -11,6 +11,8 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 
+// Note: "Bishop.h" is NOT added by Zhivko
+
 class Bishop : public ChessPiece {
 public:
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;

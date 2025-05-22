@@ -134,6 +134,7 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
 
             PieceHandler::alertGameBoardIfEnPassant(BoardUtils::getBoardPos(e.pos),moveTiles,piece->getPieceType()); // NOT added by Zhivko
             _isCastlingPossible=PieceHandler::alertGameBoardIfCastling(piece); // NOT added by Zhivko
+            _gameBoardProxy->shiftMoveTilesPos(BoardUtils::getBoardPos(e.pos)); // NOT added by Zhivko 
             return;
         }
         ++relativePieceId;
@@ -213,18 +214,12 @@ bool PieceHandler::isMoveValid(BoardPos& boardPos, bool isCastlingDone, int32_t&
         return false;
     }
 
-    if(_kingIsCheck){ 
-        _kingIsCheck=false;
+    if(_isKingInCheck){ 
+        _isKingInCheck=false;
     }
         
     return true;
 }
-
-// void PieceHandler::unmarkPieces(){ // PieceHandler::unmarkPieces() is NOT added by Zhivko
-//     for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
-//         piece->setPieceAsLastMovedPiece(false);
-//     }
-// }
 
 void PieceHandler::alertGameBoardIfEnPassant(const BoardPos& boardPos, const std::vector<TileData>& moveTiles,
                                                     PieceType pieceType) const {  // PieceHandler::alertGameBoardIfEnPassant() is NOT added by Zhivko
@@ -310,9 +305,10 @@ bool PieceHandler::isOpponentKingInCheck() { // PieceHandler::isOpponentKingInCh
             if(opponentPlayerKingPosition!=tileData.boardPos){
                 continue;
             }
-            _kingIsCheck=true;
+            _isKingInCheck=true;
+            std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
             if(!PieceHandler::isOpponentKingInMate()){
-                std::cerr<<"Player with index: "<<opponentId<<" is in check!"<<std::endl;
+                std::cerr<<"pieces is in CHECK!"<<std::endl;
             }
             return true;
         }
@@ -344,21 +340,23 @@ bool PieceHandler::isOpponentKingInMate(){ // PieceHandler::checkKingForMate() i
             }
         }
     }
-
+    if(_isKingInCheck){
+        std::cerr<<"pieces is in CHECKMATE."<<std::endl;
+        std::cerr<<"The game has finished."<<std::endl;
+        std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID==_currPlayerId? std::cerr<<"white " : std::cerr<<"black ";
+        std::cerr<<"pieces has won the game!"<<std::endl;
+    }
     _gameProxy->onGameFinish();
-    std::cerr<<"Player with index: "<<opponentPlayerId<<" is in check and mate!"<<std::endl;
     return true;
 }
 
 void PieceHandler::isOpponentInStalemate(){ // PieceHandler::isOpponentInStalemate() is NOT added by Zhivko
-    const int32_t opponentPlayerId=BoardUtils::getOpponentId(_currPlayerId);
-
     if(!PieceHandler::isOpponentKingInMate()){
         return;
     }
 
-    std::cerr<<"Player with ID: "<<opponentPlayerId<<" is in stalemate. Game ends in a draw!"<<std::endl;
-    _gameProxy->onGameFinish();
+    std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId? std::cerr<<"white " : std::cerr<<"black ";
+    std::cerr<<"pieces is in STALEMATE. The game ends in a draw!"<<std::endl;
 }
 
 bool PieceHandler::isNextMoveCheckForKing(int32_t playerId, int32_t selectedPieceId, int32_t collisionIdx, const BoardPos& boardPos){ // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko
@@ -484,15 +482,28 @@ int32_t PieceHandler::restart(const std::function<void()>& gameRegenerateFboCall
     }
 
     gameRegenerateFboCallBack();
-    setCurrentPlayerId(Defines::WHITE_PLAYER_ID);
+    PieceHandler::setCurrentPlayerId(Defines::WHITE_PLAYER_ID);
+    _isPieceGrabbed=false;
+    _isKingInCheck=false;
+    _isCastlingPossible=false;
+    _isPawnPromoted=false;
     
     return EXIT_SUCCESS;
 }
 
-void PieceHandler::setIsPieceGrabbed(){  // PieceHandler::setIsPieceGrabbed() is NOT added by Zhivko
-    _isPieceGrabbed=false;
-}
-
 void PieceHandler::onPawnPromotion(){ // PieceHandler::onPawnPromotion() is NOT added by Zhivko
     _isPawnPromoted=true;
+}
+
+void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
+    if(_isKingInCheck){
+        std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID==_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
+        std::cerr<<"pieces has run out of time to move a chess piece."<<std::endl;
+        std::cerr<<"The game has finished."<<std::endl;
+        std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
+        std::cerr<<"pieces has won the game."<<std::endl;
+        _gameProxy->onGameFinish();
+    }
+    _isPieceGrabbed=false;
+    _gameProxy->onGameTurnFinished();
 }

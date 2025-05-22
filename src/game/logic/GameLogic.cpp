@@ -6,7 +6,6 @@
 // Third-party headers
 // Own headers
 #include "game/defines/ChessDefines.h"
-#include "game/proxies/GameProxy.h" // NOT added by Zhivko
 #include "manager_utils/managers/TimerMgr.h" // NOT added by Zhivko
 #include "manager_utils/managers/RsrcMgr.h"// NOT added by Zhivko
 
@@ -14,17 +13,13 @@ GameLogic::GameLogic() : _activePlayer(Defines::WHITE_PLAYER_ID){
 
 }
 
-int32_t GameLogic::init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId,
+int32_t GameLogic::init(int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId,
                                             int32_t fontId, int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack){ // GameLogic::init() method is added by me
-    if(nullptr==gameProxy){
-        std::cerr<<"Error, nullptr provided for gameProxy"<<std::endl;
-        return EXIT_FAILURE;
-    }
+    
     _playerTurnCapTimerId=playerTurnCapTimerId;
     _playerTurnCapTextTimerId=playerTurnCapTextTimerId;
     _blinkTextCastlingTimerId=blinkTextCastlingTimerId;
 
-    _gameProxy=gameProxy;
     _fontId=fontId;
     _pieceHandlerCallBack=pieceHandlerCallBack;
 
@@ -121,7 +116,6 @@ void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is 
 
     if(timerId==_playerTurnCapTimerId){
         _pieceHandlerCallBack();
-        _gameProxy->onGameTurnFinished();
         return;
     }    
 

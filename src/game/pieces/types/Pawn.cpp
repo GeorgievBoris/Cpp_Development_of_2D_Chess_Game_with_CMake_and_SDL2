@@ -24,12 +24,10 @@ void Pawn::setBoardPos(const BoardPos& boardPos) {
 
     if(Defines::WHITE_PLAYER_ID==_playerId) {
         if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
-            std::cout<<"here whites"<<std::endl;
             _gameProxy->onPawnPromotion();
         }
     } else {
         if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
-            std::cout<<"here blacks"<<std::endl;
             _gameProxy->onPawnPromotion();
         }
     }

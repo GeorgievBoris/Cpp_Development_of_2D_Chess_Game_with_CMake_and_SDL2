@@ -31,8 +31,8 @@ public:
 
     // PieceHandler::restart() is NOT added by Zhivko
     int32_t restart(const std::function<void()>& gameRegenerateFboCallBack); // check where #include <functional> is included so that it does not give error here???
-    void setIsPieceGrabbed(); // PieceHandler::setIsPieceGrabbed() is NOT added by Zhivko
     void onPawnPromotion(); // PieceHandler::onPawnPromotion() is NOT added by Zhivko
+    void onTurnTimeElapsed(); // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
 private:
     void handlePieceGrabbedEvent(const InputEvent& e);
     void handlePieceUngrabbedEvent(const InputEvent& e);
@@ -66,7 +66,7 @@ private:
     int32_t _currPlayerId=0;
     bool _isPieceGrabbed=false;
 
-    bool _kingIsCheck=false; // NOT added by Zhivko
+    bool _isKingInCheck=false; // NOT added by Zhivko
     bool _isPawnPromoted=false; // NOT added by Zhivko
     bool _isCastlingPossible=false; // NOT added by Zhivko
 };

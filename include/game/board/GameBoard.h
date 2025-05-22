@@ -24,13 +24,14 @@ public:
     void restart(); // GameBoard::restart() method is NOT added by Zhivko
     void show(); // GameBoard::show() method is NOT added by Zhivko
     void hide(); // GameBoard::hide() method is NOT added by Zhivko
+    void setWidgetFlip(WidgetFlip flipType); // GameBoard::setWidgetFlip() is NOT added by Zhivko
 private:
     void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;
     void onTimeout(int32_t timerId) final;
     bool isMoveAllowed(const BoardPos& pos) const final;
 
-    void shiftPositions(const BoardPos& boardPos); // GameBoard::shiftPositions() is NOT added by Zhivko
+    void shiftMoveTilesPos(const BoardPos& boardPos); // GameBoard::shiftMoveTilesPos() is NOT added by Zhivko
 
     void onEnPassant(const BoardPos& boardPos) final; // GameBoard::onEnPassant() is NOT added by Zhivko
     void onCastling(const BoardPos& boardPos) final; // GameBoard::onCastling() is NOT added by Zhivko
@@ -44,6 +45,7 @@ private:
     int32_t _castlingTimerId; // NOT added by Zhivko
     const TileData* _enPassantEnemyPawn=nullptr; // NOT added by Zhivko
     const TileData* _enPassantMovePos=nullptr; // NOT added by Zhivko
+    WidgetFlip _flipType=WidgetFlip::NONE; // NOT added by Zhivko
     MoveSelector _moveSelector;
     std::vector<TileData> _currMoveTiles;
 };

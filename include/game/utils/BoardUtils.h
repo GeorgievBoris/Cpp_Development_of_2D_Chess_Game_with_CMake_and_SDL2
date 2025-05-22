@@ -20,6 +20,7 @@ public:
     // map monitor/screen coordinates to coordinates on the chess board AND vice versa
     static BoardPos getBoardPos(const Point& absPos);
     static Point getAbsPos(const BoardPos& boardPos);
+    static BoardPos getInvertedBoardPos(const BoardPos& boardPos, WidgetFlip flipType); // NOT added by Zhivko
     static bool isInsideBoard(const BoardPos& boardPos);
     static bool isInsideBoard(const Point& absPos);
 

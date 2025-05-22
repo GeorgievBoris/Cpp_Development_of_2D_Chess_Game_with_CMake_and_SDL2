@@ -29,6 +29,22 @@ Point BoardUtils::getAbsPos(const BoardPos& boardPos){
     return {(boardPos.col*TILE_SIZE)+FIRST_TILE_X_POS, (boardPos.row*TILE_SIZE)+FIRST_TILE_Y_POS};
 }
 
+BoardPos BoardUtils::getInvertedBoardPos(const BoardPos& boardPos, WidgetFlip flipType){ // NOT added by Zhivko
+    switch(flipType){
+    case WidgetFlip::NONE:
+        return boardPos; // return BoardPos(boardPos.row,boardPos.col);
+    case WidgetFlip::HORIZONTAL:
+        return BoardPos((BOARD_SIZE-1)-boardPos.row,boardPos.col);
+    case WidgetFlip::VERTICAL:
+        return BoardPos(boardPos.row,(BOARD_SIZE-1)-boardPos.col);
+    case WidgetFlip::HORIZONTAL_AND_VERTICAL:
+        return BoardPos((BOARD_SIZE-1)-boardPos.row,(BOARD_SIZE-1)-boardPos.col);
+    }
+
+    std::cerr<<"Error, BoardUtils::getInvertedBoardPos() encountered unknown WidgetFlip type!"<<std::endl;
+    return BoardPos(0,0);
+}
+
 bool BoardUtils::isInsideBoard(const BoardPos& boardPos){
 
     const Rectangle bound{0, 0, BOARD_SIZE, BOARD_SIZE};

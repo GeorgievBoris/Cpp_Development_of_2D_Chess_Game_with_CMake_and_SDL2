@@ -30,7 +30,7 @@ int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId,
     _enPassantTimerId=enPassantTimerId; // NOT added by Zhivko
     _castlingTimerId=castlingTimerId; // NOT added by Zhivko
 
-    if(EXIT_SUCCESS!=_moveSelector.init(moveTilesRsrcId)){
+    if(EXIT_SUCCESS!=_moveSelector.init(moveTilesRsrcId,&_boardImg)){
         std::cerr<<"_moveSelector.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -70,14 +70,12 @@ void GameBoard::hide(){ // GameBoard::hide() method is NOT added by Zhivko
     _boardImg.hide();
 }
 
-void GameBoard::onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles){
+void GameBoard::onPieceGrabbed([[maybe_unused]]const BoardPos& boardPos, const std::vector<TileData>& moveTiles){
     _currMoveTiles=moveTiles;
     _moveSelector.markTiles(_currMoveTiles);
     _targetImg.show();
 
-    GameBoard::shiftPositions(boardPos); // NOT added by Zhivko
-    //_targetImg.setPosition(BoardUtils::getAbsPos(boardPos)); // original code by Zhivko
-    
+    // _targetImg.setPosition(BoardUtils::getAbsPos(boardPos)); // original code by Zhivko
     startTimer(500,_blinkTimerId,TimerType::PULSE);
 }
 
@@ -161,8 +159,8 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
             return false; // NOT added by Zhivko
         }
 
-        const BoardPos shiftedSelectedPos=BoardUtils::shiftBoardPositions(_boardImg.getPosition(),pos); // NOT added by Zhivko
-        
+        const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(pos,_flipType); //NOT added by Zhivko
+        const BoardPos shiftedSelectedPos=BoardUtils::shiftBoardPositions(_boardImg.getPosition(),invertedBoardPos); // NOT added by Zhivko
         if(shiftedSelectedPos!=BoardUtils::getBoardPos(castlingKingTilePtr->getPosition())){ // NOT added by Zhivko
             return false; // NOT added by Zhivko
         }
@@ -171,27 +169,25 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
     return false;
 }
 
-void GameBoard::shiftPositions(const BoardPos& boardPos){ // GameBoard::shiftPositions() is NOT added by Zhivko
-    const Point posBoardImg=_boardImg.getPosition(); // this correction is NOT added by Zhivko
-    _moveSelector.shiftMoveTilesPos(posBoardImg); // this correction is NOT added by Zhivko
+void GameBoard::shiftMoveTilesPos(const BoardPos& boardPos){ // GameBoard::shiftMoveTilesPos() is NOT added by Zhivko
+    _moveSelector.shiftMoveTilesPos(_flipType); // this correction is NOT added by Zhivko
 
-    const Point absPos=BoardUtils::getAbsPos(boardPos); // this correction is NOT added by Zhivko
-    _targetImg.setPosition(absPos.x+posBoardImg.x,absPos.y+posBoardImg.y); // this correction is NOT added by Zhivko
+    const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(boardPos,_flipType); // NOT added by Zhivko
+    const Point invertedAbsPos=BoardUtils::getAbsPos(invertedBoardPos); // NOT added by Zhivko
+    const Point posBoardImg=_boardImg.getPosition(); // NOT added by Zhivko
+    _targetImg.setPosition(invertedAbsPos.x+posBoardImg.x,invertedAbsPos.y+posBoardImg.y); // NOT added by Zhivko      
 }
 
 void GameBoard::onEnPassant(const BoardPos& boardPos){ // GameBoard::onEnPassant() is NOT added by Zhivko
-    const BoardPos shiftedBoardPos=BoardUtils::shiftBoardPositions(_boardImg.getPosition(),boardPos);
-
-    _moveSelector.onEnPassant(shiftedBoardPos);
-    if(TimerClient::isActiveTimerId(_enPassantTimerId)){
-        return;
-    }
+    _moveSelector.onEnPassant(boardPos);
     startTimer(500,_enPassantTimerId,TimerType::PULSE);
 }
 
 void GameBoard::onCastling(const BoardPos& boardPos) { // GameBoard::onCastling() is NOT added by Zhivko
-    const BoardPos shiftedBoardPos=BoardUtils::shiftBoardPositions(_boardImg.getPosition(),boardPos);
-
-    _moveSelector.onCastling(shiftedBoardPos);
+    _moveSelector.onCastling(boardPos);
     startTimer(500,_castlingTimerId,TimerType::PULSE);
+}
+
+void GameBoard::setWidgetFlip(WidgetFlip flipType) { // GameBoard::setWidgetFlip() is NOT added by Zhivko
+    _flipType=flipType;
 }

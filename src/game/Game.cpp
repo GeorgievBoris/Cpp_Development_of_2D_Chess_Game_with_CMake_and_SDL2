@@ -26,10 +26,8 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_gameLogic.init(static_cast<GameProxy*>(this), cfg.playerTurnCapTimerId, cfg.playerTurnCapTextTimerId,
-                                                                            cfg.blinkTextCastlingTimerId,
-                                                                            cfg.unfinishedPieceFontId, cfg.quitGameButtonRsrcId,
-                                                                           [&](){_pieceHandler.setIsPieceGrabbed();})){
+    if(EXIT_SUCCESS!=_gameLogic.init(cfg.playerTurnCapTimerId, cfg.playerTurnCapTextTimerId, cfg.blinkTextCastlingTimerId,
+                                        cfg.unfinishedPieceFontId, cfg.quitGameButtonRsrcId, [&](){_pieceHandler.onTurnTimeElapsed();})){
 
         // this particular if statement is NOT added by Zhivko
         std::cerr<<"_gameLogic.init() failed"<<std::endl;
@@ -172,7 +170,6 @@ void Game::onPawnPromotion(){
 }
 
 void Game::promotePiece(PieceType pieceType){    
-    // bonus for homework - finish the promotion !!! (listen again to the instructions of Zhivko)
     _pieceHandler.promotePiece(pieceType);
     _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     // onBoardAnimFinished(); // added originally by Zhivko
@@ -184,26 +181,23 @@ void Game::onBoardAnimFinished(){
         // a quick fix by Zhivko done in the last lecture 14
         return;
     }
-    // BONUS: for homework implement text in the upper right corner...
-    /// ...to display the currently active player (WHITE or BLACK)    
-    _gameLogic.finishTurn();
-    _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
-    
+
     if(_isGameFinished){ // NOT added by Zhivko
         return;
-    }
+    }        
+    _gameLogic.finishTurn();
+    _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
     _gameLogic.startPlayersTimer(); // NOT added by Zhivko
 }
 
 void Game::setWidgetFlip(WidgetFlip flipType){
     _pieceHandler.setWidgetFlip(flipType);
     _inputInverter.setBoardFlipType(flipType);
+    _gameBoard.setWidgetFlip(flipType); // NOT added by Zhivko
     regenerateGameFbo();
 }
 
 void Game::restart(){ // Game::restart() method is NOT added by Zhivko
-    _gameBoard.restart();
-
     if(EXIT_SUCCESS!=_pieceHandler.restart([&](){regenerateGameFbo();})){
         std::cerr<<"PieceHandler::restart() failed. The game cannot be restarted."<<std::endl;
         return;
@@ -213,6 +207,8 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _inputInverter.restart(); 
     _gameLogic.restart();
     _quitGameBtn.restart();
+    _gameBoard.restart();
+    _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
     _isGameFinished=false;
 }

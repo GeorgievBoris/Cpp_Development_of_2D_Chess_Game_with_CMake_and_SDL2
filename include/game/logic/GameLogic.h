@@ -15,7 +15,7 @@ class GameProxy; // NOT added by Zhivko
 class GameLogic : public TimerClient { // inheritance is added by me
 public:
     GameLogic();
-    int32_t init(GameProxy* gameProxy, int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId, int32_t fontId, 
+    int32_t init(int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId, int32_t fontId, 
                                     int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack); // GameLogic::init() method is added by me
     int32_t getActivePlayerId() const;
     void finishTurn();

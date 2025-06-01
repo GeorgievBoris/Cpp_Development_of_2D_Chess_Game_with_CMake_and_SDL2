@@ -19,8 +19,9 @@
 #include "game/logic/InputInverter.h"
 #include "manager_utils/drawing/Image.h"
 #include "manager_utils/drawing/Fbo.h"
+#include "game/animations/WinnerAnimator.h" // NOT added by Zhivko
 
-#include "game/buttons/QuitGameButton.h" // added by me
+#include "game/buttons/QuitGameButton.h" // NOT added by Zhivko
 
 // Forward Declarations
 class InputEvent;
@@ -52,6 +53,12 @@ private:
     void onGameFinish() final; // Game::onGameFinish() is NOT added by Zhivko
     void castleTextShow() final; // Game::castleTextShow() is NOT added by Zhivko
     void castleTextHide() final; // Game::castleTextHide() is NOT added by Zhivko
+    void setCurrPlayerKingInCheck(bool isCurrPlayerKingInCheck); // Game::setCurrPlayerKingInCheck() is NOT added by Zhivko
+    bool isCurrPlayerKingInCheck() final; // Game::isCurrPlayerKingInCheck() is NOT added by Zhivko
+    void setAutomaticWin(bool isAutomaticWin) final; // Game::setAutomaticWin() method is NOT added by Zhivko
+    bool isAutomaticWin() final; // Game::isAutomaticWin() method is NOT added by Zhivko
+    bool isWinnerAnimatorActive() final; // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
+    bool isPromotionActive() final; // Game::isPromotionActive() method is NOT added by Zhivko
 
     GameBoard _gameBoard;
     PieceHandler _pieceHandler;
@@ -62,9 +69,12 @@ private:
     Fbo _gameFbo;
 
     QuitGameButton _quitGameBtn; // NOT added by Zhivko
+    WinnerAnimator _winnerAnimator; // NOT added by Zhivko
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     bool _isGameFinished=false; // NOT added by Zhivko
+    bool _isCurrPlayerKingInCheck=false; // NOT added by Zhivko
+    bool _isAutomaticWin=false;
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

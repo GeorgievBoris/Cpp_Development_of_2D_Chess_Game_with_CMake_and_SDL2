@@ -17,14 +17,14 @@ class Fbo;
 class QuitGameButton : public ButtonBase {
 public:
     int32_t init(int32_t rsrcId, const std::function<void()>& showStartScreenCallBack,
-                                 const std::function<void()>& gameLogicCallBack);
+                                 const std::function<void()>& gameLogicAndWinnerAnimatorCallBack);
     void handleEvent(const InputEvent& e) final;
 
     void restart();
     // void drawOnFbo(Fbo& fbo) const;
 private:
     std::function<void()> _showStartScreenCallBack;
-    std::function<void()> _gameLogicCallBack;
+    std::function<void()> _gameLogicAndWinnerAnimatorCallBack;
 };
 
 

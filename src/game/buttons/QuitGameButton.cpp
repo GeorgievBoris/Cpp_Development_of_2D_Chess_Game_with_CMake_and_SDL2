@@ -10,7 +10,7 @@
 
 
 int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showStartScreenCallBack,
-                                             const std::function<void()>& gameLogicCallBack){
+                                             const std::function<void()>& gameLogicAndWinnerAnimatorCallBack){
     if(INVALID_RSRC_ID==rsrcId){
         std::cerr<<"QuitGameButton::init() failed."<<std::endl;
         return EXIT_FAILURE;
@@ -20,7 +20,7 @@ int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showSt
     Image::create(rsrcId,pos);
     Widget::show();
     _showStartScreenCallBack=showStartScreenCallBack;
-    _gameLogicCallBack=gameLogicCallBack;
+    _gameLogicAndWinnerAnimatorCallBack=gameLogicAndWinnerAnimatorCallBack;
 
     return EXIT_SUCCESS;
 }
@@ -32,7 +32,7 @@ void QuitGameButton::handleEvent(const InputEvent& e){
 
     if(ButtonBase::containsEvent(e)){
         _showStartScreenCallBack();
-        _gameLogicCallBack();
+        _gameLogicAndWinnerAnimatorCallBack();
         ButtonBase::lockInput();
     }
 }

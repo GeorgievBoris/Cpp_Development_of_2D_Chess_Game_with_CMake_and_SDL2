@@ -40,6 +40,7 @@ private:
     int32_t _targetRotation{0};
     int32_t _gameFboRotTimerId=-1;
     WidgetFlip _targetFlipType=WidgetFlip::NONE;
+    bool _isActive=false; // NOT added by Zhivko
 };
 
 

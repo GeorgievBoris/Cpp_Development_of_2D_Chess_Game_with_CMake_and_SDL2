@@ -25,6 +25,7 @@ public:
     void show(); // GameBoard::show() method is NOT added by Zhivko
     void hide(); // GameBoard::hide() method is NOT added by Zhivko
     void setWidgetFlip(WidgetFlip flipType); // GameBoard::setWidgetFlip() is NOT added by Zhivko
+    const Point getChessBoardBoardPos() const;  // GameBoard::getChessBoardBoardPos() is NOT added by Zhivko
 private:
     void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;

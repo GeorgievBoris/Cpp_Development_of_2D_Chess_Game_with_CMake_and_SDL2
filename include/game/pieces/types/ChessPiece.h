@@ -22,7 +22,6 @@ struct ChessPieceCfg{
     int32_t playerId{};
     int32_t rsrcId=INVALID_RSRC_ID;
     PieceType pieceType=PieceType::UNKNOWN;
-    int32_t unfinishedPieceFontId; // not entirely correct to add it here, but we do so, in order to save time 
 };
 
 class ChessPiece{ // NOTE: ChessPiece is a composition !!!
@@ -52,6 +51,8 @@ public:
     int32_t getRsrcId() const;
     void setWidgetFlip(WidgetFlip flipType);
     PieceType getPieceType()const; // ChessPiece::getPieceType() is NOT added by Zhivko
+    void setRotationAngle(double angle); // ChessPiece::setRotationAngle() is NOT added by Zhivko
+    double getRotationAngle() const; // ChessPiece::getRotationAngle() is NOT added by Zhivko
 
 protected:
     Image _pieceImg;

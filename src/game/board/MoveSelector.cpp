@@ -7,15 +7,10 @@
 // Own headers
 #include "game/utils/BoardUtils.h"
 
-int32_t MoveSelector::init(int32_t rsrcId, const Image* const gameBoardPtr){
+int32_t MoveSelector::init(int32_t rsrcId){
     for(Image& img:_tileImgs){
         img.create(rsrcId);
     }
-    if(nullptr==gameBoardPtr){ // NOT added by Zhivko
-        std::cerr<<"Error, nullptr provided for gameBoardPtr"<<std::endl; // NOT added by Zhivko
-        return EXIT_FAILURE; // NOT added by Zhivko
-    }
-    _gameBoardPtr=gameBoardPtr; // NOT added by Zhivko
 
     return EXIT_SUCCESS;
 }
@@ -52,13 +47,13 @@ void MoveSelector::unmarkTiles(){
 
 }
 
-void MoveSelector::shiftMoveTilesPos(WidgetFlip flipType) { // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
+void MoveSelector::shiftMoveTilesPos(WidgetFlip flipType,const Point& pos) { // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
     for(size_t i=0;i<_activeTiles;++i){
         const Point tileImgAbsPos=_tileImgs[i].getPosition();
         const BoardPos tileImgBoardPos=BoardUtils::getBoardPos(tileImgAbsPos);
         const BoardPos invertedTileImgBoardPos=BoardUtils::getInvertedBoardPos(tileImgBoardPos,flipType);
         const Point invertedTileImgAbsPos=BoardUtils::getAbsPos(invertedTileImgBoardPos);
-        _tileImgs[i].setPosition(invertedTileImgAbsPos.x+_gameBoardPtr->getPosition().x,invertedTileImgAbsPos.y+_gameBoardPtr->getPosition().y);
+        _tileImgs[i].setPosition(invertedTileImgAbsPos.x+pos.x,invertedTileImgAbsPos.y+pos.y);
     }
 }
 

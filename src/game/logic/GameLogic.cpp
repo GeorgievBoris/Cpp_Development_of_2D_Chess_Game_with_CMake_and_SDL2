@@ -8,20 +8,25 @@
 #include "game/defines/ChessDefines.h"
 #include "manager_utils/managers/TimerMgr.h" // NOT added by Zhivko
 #include "manager_utils/managers/RsrcMgr.h"// NOT added by Zhivko
+#include "game/proxies/PieceHandlerProxy.h" // NOT added by Zhivko
 
 GameLogic::GameLogic() : _activePlayer(Defines::WHITE_PLAYER_ID){
 
 }
 
-int32_t GameLogic::init(int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId,
-                                            int32_t fontId, int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack){ // GameLogic::init() method is added by me
-    
+int32_t GameLogic::init(PieceHandlerProxy* pieceHandlerProxy,int32_t playerTurnCapTimerId,int32_t playerTurnCapTextTimerId, 
+                        int32_t blinkTextCastlingTimerId, int32_t fontId, int32_t quitGameButtonRsrcId){ // GameLogic::init() method is added by me
+
+    if(nullptr==pieceHandlerProxy){
+        std::cerr<<"Error, received nullptr for pieceHandlerProxy"<<std::endl;
+        return EXIT_FAILURE;
+    }
+    _pieceHandlerProxy=pieceHandlerProxy;
     _playerTurnCapTimerId=playerTurnCapTimerId;
     _playerTurnCapTextTimerId=playerTurnCapTextTimerId;
     _blinkTextCastlingTimerId=blinkTextCastlingTimerId;
 
     _fontId=fontId;
-    _pieceHandlerCallBack=pieceHandlerCallBack;
 
     const Frames& frame=gRsrcMgr->getImageFrame(quitGameButtonRsrcId); // obtain the position, width, height of the Game Quit Button
 
@@ -115,7 +120,7 @@ bool GameLogic::isTimerActive() const{ // GameLogic::isTimerOn() method added by
 void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is added by me
 
     if(timerId==_playerTurnCapTimerId){
-        _pieceHandlerCallBack();
+        _pieceHandlerProxy->onTurnTimeElapsed();
         return;
     }    
 
@@ -137,7 +142,7 @@ void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is 
         return;
     }
 
-    std::cerr<<"Invalid timerId is provieded for GameLogic"<<std::endl;
+    std::cerr<<"Error, invalid timerId is provieded for GameLogic"<<std::endl;
 }
 
 int32_t GameLogic::setInternals() const{

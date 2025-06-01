@@ -30,7 +30,7 @@ int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId,
     _enPassantTimerId=enPassantTimerId; // NOT added by Zhivko
     _castlingTimerId=castlingTimerId; // NOT added by Zhivko
 
-    if(EXIT_SUCCESS!=_moveSelector.init(moveTilesRsrcId,&_boardImg)){
+    if(EXIT_SUCCESS!=_moveSelector.init(moveTilesRsrcId)){
         std::cerr<<"_moveSelector.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -170,12 +170,13 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
 }
 
 void GameBoard::shiftMoveTilesPos(const BoardPos& boardPos){ // GameBoard::shiftMoveTilesPos() is NOT added by Zhivko
-    _moveSelector.shiftMoveTilesPos(_flipType); // this correction is NOT added by Zhivko
+    const Point boardImgAbsPos=_boardImg.getPosition(); // NOT added by Zhivko
+    _moveSelector.shiftMoveTilesPos(_flipType,boardImgAbsPos); // this correction is NOT added by Zhivko
 
     const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(boardPos,_flipType); // NOT added by Zhivko
     const Point invertedAbsPos=BoardUtils::getAbsPos(invertedBoardPos); // NOT added by Zhivko
-    const Point posBoardImg=_boardImg.getPosition(); // NOT added by Zhivko
-    _targetImg.setPosition(invertedAbsPos.x+posBoardImg.x,invertedAbsPos.y+posBoardImg.y); // NOT added by Zhivko      
+    // const Point posBoardImg=_boardImg.getPosition(); // NOT added by Zhivko
+    _targetImg.setPosition(invertedAbsPos.x+boardImgAbsPos.x,invertedAbsPos.y+boardImgAbsPos.y); // NOT added by Zhivko      
 }
 
 void GameBoard::onEnPassant(const BoardPos& boardPos){ // GameBoard::onEnPassant() is NOT added by Zhivko
@@ -190,4 +191,8 @@ void GameBoard::onCastling(const BoardPos& boardPos) { // GameBoard::onCastling(
 
 void GameBoard::setWidgetFlip(WidgetFlip flipType) { // GameBoard::setWidgetFlip() is NOT added by Zhivko
     _flipType=flipType;
+}
+
+const Point GameBoard::getChessBoardBoardPos() const { // GameBoard::getChessBoardBoardPos() is NOT added by Zhivko
+    return _boardImg.getPosition();
 }

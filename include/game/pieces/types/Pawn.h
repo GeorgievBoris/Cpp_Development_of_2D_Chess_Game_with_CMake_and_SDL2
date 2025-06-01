@@ -10,15 +10,13 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 class GameProxy;
+
 class Pawn : public ChessPiece {
 public:
     Pawn(GameProxy* gameProxy);
     void setBoardPos(const BoardPos& boardPos) final;
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                         Defines::PLAYERS_COUNT>& activePieces) const final;
-    // void setAsTheLastMovedPiece(bool isPieceTheLastMovedPiece); // Pawn::setAsTheLastMovedPiece() is NOT added by Zhivko
-    // bool isTheLastMovedPiece() const; // Pawn::isTheLastMovedPiece() is NOT added by Zhivko
-    // bool isFirstMoveOfPieceNow() const; // Pawn::isFirstMoveOfPieceNow() is NOT added by Zhivko
     void checkStateForEnPassant(const BoardPos& newBoardPos,
                                 const ChessPiece::PlayerPieces& currPlayerPieces, PieceType pieceType); // Pawn::checkStateForEnPassant() is NOT added by Zhivko
     bool isPawnTargetedForEnPassant() const; // Pawn::isPawnTargetedForEnPassant() is NOT added by Zhivko
@@ -35,10 +33,7 @@ private:
 
     GameProxy* _gameProxy;
 
-    // bool _isPieceTheLastMovedPiece=false; // NOT added by Zhivko
-    // bool _isFirstMoveOfPieceNow=false; // NOT added by Zhivko
     bool _isPawnTargetedForEnPassant=false; // NOT added by Zhivko
-
 };
 
 

@@ -13,12 +13,12 @@
 
 class MoveSelector{
 public:
-    int32_t init(int32_t rsrcId, const Image* const gameBoardPtr); // "const Image* const gameBoardPtr" NOT added by Zhivko
+    int32_t init(int32_t rsrcId);
     void draw() const;
     void markTiles(const std::vector<TileData>& markedTiles);
     void unmarkTiles();
 
-    void shiftMoveTilesPos(WidgetFlip flipType); // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
+    void shiftMoveTilesPos(WidgetFlip flipType,const Point& boardPos); // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
     void onEnPassant(const BoardPos& boardPos); // MoveSelector::onEnPassant() is NOT added by Zhivko
     void onCastling(const BoardPos& boardPos); // MoveSelector::onCastling() is NOT added by Zhivko
     void blinkEnPassant(); // MoveSelector::blinkEnPassant() is NOT added by Zhivko
@@ -36,7 +36,6 @@ private:
     Image* _enPassantTakeTile=nullptr; // NOT added by Zhivko
     Image* _enPassantMoveTile=nullptr; // NOT added by Zhivko
     Image* _castlingKingTile=nullptr; // NOT added by Zhivko
-    const Image* _gameBoardPtr=nullptr; // NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_BOARD_MOVESELECTOR_H_

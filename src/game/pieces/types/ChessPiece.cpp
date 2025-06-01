@@ -32,6 +32,9 @@ int32_t ChessPiece::init(const ChessPieceCfg& cfg){
 
     _pieceImg.create(cfg.rsrcId,BoardUtils::getAbsPos(_boardPos));
     _pieceImg.setFrame(static_cast<int32_t>(_pieceType));
+    
+    const Point rotCenter=Point(_pieceImg.getWidth()/2,_pieceImg.getHeight()/2); // NOT added by Zhivko
+    _pieceImg.setRotationCenter(rotCenter); // NOT added by Zhivko
 
     return EXIT_SUCCESS;
 }
@@ -71,4 +74,12 @@ void ChessPiece::setWidgetFlip(WidgetFlip flipType){
 
 PieceType ChessPiece::getPieceType() const{ // ChessPiece::getPieceType() is NOT added by Zhivko
     return _pieceType;
+}
+
+void ChessPiece::setRotationAngle(double angle) { // ChessPiece::setRotationAngle() is NOT added by Zhivko
+    _pieceImg.setRotationAngle(angle);
+}
+
+double ChessPiece::getRotationAngle() const{ // ChessPiece::getRotationAngle() is NOT added by Zhivko
+    return _pieceImg.getRotationAngle();
 }

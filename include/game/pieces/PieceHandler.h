@@ -11,16 +11,16 @@
 // Own headers
 #include "game/defines/ChessDefines.h"
 #include "game/pieces/types/ChessPiece.h"
+#include "game/proxies/PieceHandlerProxy.h" // NOT included by Zhivko
 // Forward Declarations
 class InputEvent;
 class GameBoardProxy;
 class GameProxy;
 class Fbo;
 
-class PieceHandler{
+class PieceHandler : public PieceHandlerProxy{
 public:
-    int32_t init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
-                        int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId);
+    int32_t init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy, int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId);
     void drawOnFbo(Fbo& fbo) const;
     void draw() const;
     void handleEvent(const InputEvent& e);
@@ -31,8 +31,7 @@ public:
 
     // PieceHandler::restart() is NOT added by Zhivko
     int32_t restart(const std::function<void()>& gameRegenerateFboCallBack); // check where #include <functional> is included so that it does not give error here???
-    void onPawnPromotion(); // PieceHandler::onPawnPromotion() is NOT added by Zhivko
-    void onTurnTimeElapsed(); // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
+    void shiftWinnerPiecesPos(const Point& pos); // NOT added by Zhivko
 private:
     void handlePieceGrabbedEvent(const InputEvent& e);
     void handlePieceUngrabbedEvent(const InputEvent& e);
@@ -43,8 +42,6 @@ private:
     void checkPawnsStateForEnPassant(const BoardPos& newBoardPos, const std::unique_ptr<ChessPiece>& selectedPiece); // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
     
     bool isMoveValid(BoardPos& boardPos, bool isCastlingDone, int32_t& collisionIdx); // PieceHandler::isMoveValid() is NOT added by Zhivko
-    
-    void unmarkPieces(); // PieceHandler::unmarkPieces() is NOT added by Zhivko
 
     void alertGameBoardIfEnPassant(const BoardPos& boardPos, const std::vector<TileData>& moveTiles,
                                                         PieceType pieceType) const; // PieceHandler::alertGameBoardIfEnPassant() is NOT added by Zhivko
@@ -53,10 +50,12 @@ private:
     bool isOpponentKingInCheck(); // PieceHandler::isOpponentKingInCheck() is NOT added by Zhivko
     bool isOpponentKingInMate(); // PieceHandler::isOpponentKingInMate() is NOT added by Zhivko
     void isOpponentInStalemate(); // PieceHandler::isOpponentInStalemate() is NOT added by Zhivko
-    bool isNextMoveCheckForKing(int32_t playerId, int32_t selectedPieceId, int32_t collisionIdx, const BoardPos& boardPos); // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko
-    bool isPositionTaken(int32_t nonAttackedPlayerId, const BoardPos& attackedKingPos, const BoardPos& nonAttackedKingPos) const; // PieceHandler::isPositionTaken() is NOT added by Zhivko
+    bool isNextMoveCheckForKing(int32_t playerId, int32_t selectedPieceId, int32_t collisionIdx,const BoardPos& boardPos); // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko
+    bool isPositionTaken(int32_t nonAttackedPlayerId, const BoardPos& attackedKingPos) const; // PieceHandler::isPositionTaken() is NOT added by Zhivko
     int32_t getKingIndex(int32_t playerId) const; // PieceHandler::getKingIndex() is NOT added by Zhivko
-    
+
+    void rotateWinnerPieces(double angle) final; // PieceHandler::animateWinnerPieces() is NOT added by Zhivko
+    void onTurnTimeElapsed() final; // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
 
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;
@@ -66,8 +65,6 @@ private:
     int32_t _currPlayerId=0;
     bool _isPieceGrabbed=false;
 
-    bool _isKingInCheck=false; // NOT added by Zhivko
-    bool _isPawnPromoted=false; // NOT added by Zhivko
     bool _isCastlingPossible=false; // NOT added by Zhivko
 };
 

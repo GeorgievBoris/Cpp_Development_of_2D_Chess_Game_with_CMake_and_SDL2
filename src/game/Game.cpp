@@ -19,15 +19,15 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_pieceHandler.init(static_cast<GameBoardProxy*>(&_gameBoard), 
-                                        static_cast<GameProxy*>(this),
-                                cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId, cfg.unfinishedPieceFontId)){
+    if(EXIT_SUCCESS!=_pieceHandler.init(static_cast<GameBoardProxy*>(&_gameBoard), static_cast<GameProxy*>(this),
+                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId)){
+
         std::cerr<<"_pieceHandler.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_gameLogic.init(cfg.playerTurnCapTimerId, cfg.playerTurnCapTextTimerId, cfg.blinkTextCastlingTimerId,
-                                        cfg.unfinishedPieceFontId, cfg.quitGameButtonRsrcId, [&](){_pieceHandler.onTurnTimeElapsed();})){
+    if(EXIT_SUCCESS!=_gameLogic.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),cfg.playerTurnCapTimerId, cfg.playerTurnCapTextTimerId, 
+                                        cfg.blinkTextCastlingTimerId, cfg.textFontId, cfg.quitGameButtonRsrcId)){
 
         // this particular if statement is NOT added by Zhivko
         std::cerr<<"_gameLogic.init() failed"<<std::endl;
@@ -40,11 +40,12 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_quitGameBtn.init(cfg.quitGameButtonRsrcId,showStartScreenCallBack, [&](){_gameLogic.stopPlayersTimer();})){
+    if(EXIT_SUCCESS!=_quitGameBtn.init(cfg.quitGameButtonRsrcId,showStartScreenCallBack,
+                                        [&](){_gameLogic.stopPlayersTimer(),_winnerAnimator.deactivate();})){
         // NOT added by Zhivko
         std::cerr<<"_quitGameBtn.init() failed"<<std::endl;
         return EXIT_FAILURE;
-    }    
+    }
 
     _gameFbo.create(cfg.piecePromotionPanelCfg.gameBoardWidth, cfg.piecePromotionPanelCfg.gameBoardHeight,
                                     Point::ZERO, Colors::FULL_TRANSPARENT);
@@ -62,6 +63,13 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
+    if(EXIT_SUCCESS!=_winnerAnimator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),
+                                                        cfg.blinkWinnerTextTimerId, cfg.winnerStarRsrcId,cfg.textFontId)){
+        // NOT added by Zhivko
+        std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }    
+
     Game::hide(); // NOT added by Zhivko
 
     return EXIT_SUCCESS;
@@ -73,7 +81,9 @@ void Game::deinit(){
 
 void Game::draw() const{
     
-    _gameBoard.drawGameBoardOnly();
+    if(_gameBoardAnimator.isActive()){
+        _gameBoard.drawGameBoardOnly();
+    }
     _gameFbo.draw();
     _gameBoard.draw();
     if(_piecePromotionPanel.isActive()){
@@ -82,6 +92,8 @@ void Game::draw() const{
     _gameLogic.draw(); // NOT added by Zhivko
 
     _quitGameBtn.draw(); // NOT added by Zhivko
+    _winnerAnimator.draw(); // NOT added by Zhivko
+    _pieceHandler.draw(); // NOT added by Zhivko
 }
 
 void Game::handleEvent(InputEvent& e){    
@@ -165,7 +177,6 @@ void Game::onGameTurnFinished(){
 
 void Game::onPawnPromotion(){
     _isPromotionActive=true; // a quick fix by Zhivko done in the last lecture 14
-    _pieceHandler.onPawnPromotion(); // NOT added by Zhivko
     _piecePromotionPanel.activate(_gameLogic.getActivePlayerId());
 }
 
@@ -183,6 +194,13 @@ void Game::onBoardAnimFinished(){
     }
 
     if(_isGameFinished){ // NOT added by Zhivko
+        if(_isAutomaticWin){
+            _gameLogic.finishTurn();
+            _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
+        }
+        _winnerAnimator.activate(_gameLogic.getActivePlayerId());
+        _pieceHandler.shiftWinnerPiecesPos(_gameBoard.getChessBoardBoardPos());
+        regenerateGameFbo();
         return;
     }        
     _gameLogic.finishTurn();
@@ -198,6 +216,8 @@ void Game::setWidgetFlip(WidgetFlip flipType){
 }
 
 void Game::restart(){ // Game::restart() method is NOT added by Zhivko
+    
+    _winnerAnimator.restart();
     if(EXIT_SUCCESS!=_pieceHandler.restart([&](){regenerateGameFbo();})){
         std::cerr<<"PieceHandler::restart() failed. The game cannot be restarted."<<std::endl;
         return;
@@ -211,6 +231,8 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
     _isGameFinished=false;
+    _isCurrPlayerKingInCheck=false;
+    _isAutomaticWin=false;
 }
 
 void Game::regenerateGameFbo() {
@@ -220,9 +242,10 @@ void Game::regenerateGameFbo() {
     _gameFbo.reset();
 
     // Zhivko: "Should the _gameBoard be part of the _gameFbo? Both yes and no, but for the moment it should not be."
-    if(_gameBoardAnimator.isActive()){
-        _gameBoard.drawGameBoardOnFbo(_gameFbo);
-    }
+    _gameBoard.drawGameBoardOnFbo(_gameFbo);
+    // if(_gameBoardAnimator.isActive()){
+    //     _gameBoard.drawGameBoardOnFbo(_gameFbo);
+    // }
     _pieceHandler.drawOnFbo(_gameFbo);
     
     _gameFbo.update();
@@ -254,3 +277,27 @@ void Game::castleTextShow() { // Game::castleTextShow() is NOT added by Zhivko
 void Game::castleTextHide(){ // Game::castleTextHide() is NOT added by Zhivko
     _gameLogic.stopOnCastleTimer();
 }
+
+void Game::setCurrPlayerKingInCheck(bool isCurrPlayerKingInCheck){ // Game::setCurrPlayerKingInCheck() is NOT added by Zhivko
+    _isCurrPlayerKingInCheck=isCurrPlayerKingInCheck;
+}
+
+bool Game::isCurrPlayerKingInCheck(){ // Game::isCurrPlayerKingInCheck() is NOT added by Zhivko
+    return _isCurrPlayerKingInCheck;
+}
+
+void Game::setAutomaticWin(bool isAutomaticWin){ // GameProxy::setAutomaticWin() method is NOT added by Zhivko
+    _isAutomaticWin=isAutomaticWin;
+} 
+
+bool Game::isAutomaticWin(){ // GameProxy::isAutomaticWin() method is NOT added by Zhivko
+    return _isAutomaticWin;
+}
+
+bool Game::isWinnerAnimatorActive() { // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
+    return _winnerAnimator.isActive();
+}; 
+
+bool Game::isPromotionActive() { // Game::isPromotionActive() method is NOT added by Zhivko
+    return _isPromotionActive;
+} 

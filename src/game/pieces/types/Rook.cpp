@@ -6,10 +6,16 @@
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
-
+#include "game/proxies/GameProxy.h" // NOT added by Zhivko
 #include "game/pieces/types/King.h" // NOT added by Zhivko
 
 extern bool isCastleEnquiryMadeOnce;
+
+Rook::Rook(GameProxy* gameProxy) : _gameProxy(gameProxy) {
+    if(nullptr==_gameProxy){
+        std::cerr<<"Error, nullptr received for Rook::_gameProxy"<<std::endl;
+    }
+}
 
 int32_t Rook::init(const ChessPieceCfg& cfg){ // Rook::init() method is NOT added by Zhivko
     if(EXIT_SUCCESS!=ChessPiece::init(cfg)){
@@ -40,6 +46,23 @@ std::vector<MoveDirection> Rook::getBoardMoves() const{
     }
     return boardMoves;
 }
+
+void Rook::setBoardPos(const BoardPos& boardPos) { // Rook::setBoardPos() is NOT added by Zhivko
+    ChessPiece::setBoardPos(boardPos);
+
+    if(_isMoved){
+        return;
+    }
+
+    if(_gameProxy->isCurrPlayerKingInCheck()){
+        return;
+    }
+
+    Defines::WHITE_PLAYER_ID==_playerId ?
+    _isMoved=_boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,_initialColumnPosition) :
+    _isMoved=_boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,_initialColumnPosition);
+
+} 
 
 bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers,
                             const BoardPos& kingBoardPos) const { // Rook::checkForCastle() is NOT added by Zhivko
@@ -186,9 +209,7 @@ bool Rook::getIsCastlePossible() const{ // Rook::getIsCastlePossible() is NOT ad
     return _isCastlePossible;
 }
 
-bool Rook::isMoved() const { // Rook::isMoved() is NOT added by Zhivko
-    if(Defines::WHITE_PLAYER_ID==_playerId){
-        return _boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,_initialColumnPosition);
-    }
-    return _boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,_initialColumnPosition);
+bool Rook::isMoved() const {
+    // Rook::isMoved() is NOT added by Zhivko
+    return _isMoved;
 }

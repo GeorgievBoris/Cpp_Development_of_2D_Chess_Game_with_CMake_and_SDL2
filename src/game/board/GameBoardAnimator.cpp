@@ -56,11 +56,13 @@ void GameBoardAnimator::startAnim(int32_t playerId){
         _targetRotation=FULL_ROTATION;
     }
     startTimer(20,_gameFboRotTimerId,TimerType::PULSE);
+    _isActive=TimerClient::isActiveTimerId(_gameFboRotTimerId); // NOT added by Zhivko
     _gameProxy->setWidgetFlip(_targetFlipType);
 }
 
 bool GameBoardAnimator::isActive() const{
-    return isActiveTimerId(_gameFboRotTimerId);
+    // return isActiveTimerId(_gameFboRotTimerId); // original code used by Zhivko
+    return _isActive; // NOT used by Zhivko
 }
 
 // GameBoardAnimator::restart() method is added by me
@@ -69,7 +71,7 @@ void GameBoardAnimator::restart(){
     _targetRotation=0;
     _currRotation=0;
     _gameFbo->setRotationAngle(_currRotation);
-    
+    _isActive=false;
     // about " _gameProxy->setWidgetFlip(_targetFlipType) "
     // perhaps no point to call this method , because when ::restart() is performed either 1) new chessPieces are created...
     // ... or 2) the "old" chessPieces have not changed at all
@@ -98,6 +100,7 @@ void GameBoardAnimator::processRotAnim(){
             _currRotation=0;
         }
         stopTimer(_gameFboRotTimerId);
+        _isActive=TimerClient::isActiveTimerId(_gameFboRotTimerId); // NOT added by Zhivko
         _gameProxy->onBoardAnimFinished();
     }
 }

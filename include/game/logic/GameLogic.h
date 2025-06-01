@@ -4,19 +4,18 @@
 // C system headers
 #include <cstdint>
 // C++ system headers
-#include <functional> // NOT added by Zhivko
 // Third-party headers
 // Own headers
 #include "manager_utils/time/TimerClient.h" // NOT added by Zhivko
 #include "manager_utils/drawing/Text.h" // NOT added by Zhivko
 // Forward Declarations
-class GameProxy; // NOT added by Zhivko
+class PieceHandlerProxy;
 
 class GameLogic : public TimerClient { // inheritance is added by me
 public:
     GameLogic();
-    int32_t init(int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, int32_t blinkTextCastlingTimerId, int32_t fontId, 
-                                    int32_t quitGameButtonRsrcId, const std::function<void()>& pieceHandlerCallBack); // GameLogic::init() method is added by me
+    int32_t init(PieceHandlerProxy* pieceHandlerProxy,int32_t playerTurnCapTimerId, int32_t playerTurnCapTextTimerId, 
+                    int32_t blinkTextCastlingTimerId, int32_t fontId, int32_t quitGameButtonRsrcId); // GameLogic::init() method is added by me
     int32_t getActivePlayerId() const;
     void finishTurn();
     void restart(); // GameLogic::restart() method is NOT added by Zhivko
@@ -36,10 +35,9 @@ private:
     int32_t _blinkTextCastlingTimerId; // NOT added by Zhivko
     int32_t _fontId;  // variable / object is added by me
     mutable int64_t _playerRemainingTime; // variable / object is added by me
-    GameProxy* _gameProxy=nullptr; // variable / object is added by me
     mutable Text _playerTurnText; // variable / object is added by me
     Text _onCastleText; // NOT added by Zhivko
-    std::function<void()> _pieceHandlerCallBack;
+    PieceHandlerProxy* _pieceHandlerProxy; // NOT added by Zhivko
 };
 
 

@@ -17,8 +17,7 @@ namespace {
 constexpr auto STARTING_PIECE_COUNT=16;
 };
 
-static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId,
-                                    ChessPiece::PlayerPieces& whites){
+static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, ChessPiece::PlayerPieces& whites){
     whites.reserve(STARTING_PIECE_COUNT); // this calls the automatic default ctor (which we have NOT disabled) of "ChessPiece" - so no problem !
 
     ChessPieceCfg pieceCfg;
@@ -26,7 +25,6 @@ static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
     pieceCfg.rsrcId=rsrcId;
     pieceCfg.boardPos.row=Defines::WHITE_PLAYER_START_PAWN_ROW;
     pieceCfg.pieceType=PieceType::PAWN;
-    pieceCfg.unfinishedPieceFontId=unfinishedPieceFontId;
     for(int32_t i=0;i<Defines::PAWNS_COUNT;++i){
         pieceCfg.boardPos.col=i;
         whites.push_back(PieceHandlerPopulator::createPiece(pieceCfg.pieceType, gameProxy));
@@ -54,8 +52,7 @@ static int32_t populateWhitePieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
     return EXIT_SUCCESS;
 }
 
-static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, int32_t unfinishedPieceFontId,
-                                    ChessPiece::PlayerPieces& blacks){
+static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, ChessPiece::PlayerPieces& blacks){
     blacks.reserve(STARTING_PIECE_COUNT);
 
     ChessPieceCfg pieceCfg;
@@ -63,7 +60,6 @@ static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
     pieceCfg.rsrcId=rsrcId;
     pieceCfg.boardPos.row=Defines::BLACK_PLAYER_START_PAWN_ROW;
     pieceCfg.pieceType=PieceType::PAWN;
-    pieceCfg.unfinishedPieceFontId=unfinishedPieceFontId;
 
     for(int32_t i=0;i<Defines::PAWNS_COUNT;++i){
         pieceCfg.boardPos.col=i;
@@ -95,19 +91,18 @@ static int32_t populateBlackPieces(GameProxy* gameProxy, int32_t rsrcId, int32_t
     return EXIT_SUCCESS;
 }
 
-int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, 
-                            int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t unfinishedPieceFontId,
+int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId,
                             std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& outPieces){
 
     ChessPiece::PlayerPieces& whites=outPieces[Defines::WHITE_PLAYER_ID];
     ChessPiece::PlayerPieces& blacks=outPieces[Defines::BLACK_PLAYER_ID];
 
-    if(EXIT_SUCCESS!=populateWhitePieces(gameProxy, whitePiecesRsrcId, unfinishedPieceFontId, whites)){
+    if(EXIT_SUCCESS!=populateWhitePieces(gameProxy, whitePiecesRsrcId, whites)){
         std::cerr<<"Error, PieceHandler::populateWhitePieces() failed"<<std::endl;
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=populateBlackPieces(gameProxy, blackPiecesRsrcId, unfinishedPieceFontId, blacks)){
+    if(EXIT_SUCCESS!=populateBlackPieces(gameProxy, blackPiecesRsrcId, blacks)){
         std::cerr<<"Error, PieceHandler::populateBlackPieces() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -118,7 +113,7 @@ int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy,
 std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceType, GameProxy* gameProxy){
     switch(pieceType){
     case PieceType::ROOK:
-        return std::make_unique<Rook>();
+        return std::make_unique<Rook>(gameProxy);
     case PieceType::PAWN:
         return std::make_unique<Pawn>(gameProxy);
     case PieceType::BISHOP:
@@ -128,7 +123,7 @@ std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceTy
     case PieceType::QUEEN:
         return std::make_unique<Queen>();
     case PieceType::KING:
-        return std::make_unique<King>();
+        return std::make_unique<King>(gameProxy);
     default:
         std::cerr<<"Error, received unknown PieceType: "<<static_cast<int32_t>(pieceType)<<std::endl;
         break;

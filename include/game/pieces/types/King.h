@@ -10,6 +10,7 @@
 // Own headers
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
+class GameProxy;
 
 // Note: "King.h" is NOT added by Zhivko
 
@@ -27,13 +28,20 @@ Information about the Castling the King and the Rook:
 
 class King : public ChessPiece{
 public:
+    King(GameProxy* gameProxy);
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;
     bool getIsCastlePossible() const;
     bool isMoved() const;
 private:
     std::vector<MoveDirection> getBoardMoves() const;
+    void setBoardPos(const BoardPos& boardPos) final;
     bool isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const BoardPos& rookBoardPos) const;
+    bool isMoveTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;
+    bool isTakeTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;
+    
     mutable bool _isCastlePossible=false;
+    bool _isMoved=false;
+    GameProxy* _gameProxy=nullptr;
 };
 
 #endif // INCLUDE_GAME_PIECES_TYPES_KING_H

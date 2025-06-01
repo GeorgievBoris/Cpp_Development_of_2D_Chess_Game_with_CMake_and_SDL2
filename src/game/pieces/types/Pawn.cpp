@@ -22,11 +22,18 @@ void Pawn::setBoardPos(const BoardPos& boardPos) {
     
     ChessPiece::setBoardPos(boardPos);
 
+    if(_gameProxy->isCurrPlayerKingInCheck()){ // this IF statement and its content is NOT added by Zhivko
+        return;
+    }
+    
     if(Defines::WHITE_PLAYER_ID==_playerId) {
         if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
             _gameProxy->onPawnPromotion();
         }
     } else {
+        if(_gameProxy->isAutomaticWin()){ // this IF statement and its content is NOT added by Zhivko        
+            return;
+        }
         if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
             _gameProxy->onPawnPromotion();
         }

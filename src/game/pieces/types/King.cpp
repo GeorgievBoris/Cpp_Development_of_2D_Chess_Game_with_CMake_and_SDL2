@@ -7,9 +7,20 @@
 // Own headers
 #include "game/utils/BoardUtils.h"
 #include "game/pieces/types/Rook.h"
+#include "game/proxies/GameProxy.h"
 
 extern bool isCastleEnquiryMadeOnce;
 bool isCastleEnquiryMadeOnce=false;
+
+extern bool isMoveOrTakeTileEnquiryMadeOnce;
+bool isMoveOrTakeTileEnquiryMadeOnce=false;
+
+
+King::King(GameProxy* gameProxy) : _gameProxy(gameProxy){
+    if(nullptr==_gameProxy){
+        std::cerr<<"Error, nullptr provided for King::_gameProxy"<<std::endl;
+    }
+}
 
 std::vector<MoveDirection> King::getBoardMoves() const {
     // Note: Probably can use std::unordered_map instead of std::vector ?
@@ -36,6 +47,22 @@ std::vector<MoveDirection> King::getBoardMoves() const {
         }
     }
     return boardMoves;
+}
+
+void King::setBoardPos(const BoardPos& boardPos){
+    ChessPiece::setBoardPos(boardPos);
+
+    if(_isMoved){
+        return;
+    }
+
+    if(_gameProxy->isCurrPlayerKingInCheck()){
+        return;
+    }
+
+    Defines::WHITE_PLAYER_ID==_playerId ?
+    _isMoved=_boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,Defines::KING_STARTING_COLUMN_POSITION) :
+    _isMoved=_boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,Defines::KING_STARTING_COLUMN_POSITION);     
 }
 
 bool King::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, 
@@ -123,6 +150,63 @@ bool King::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
     return true;
 }
 
+bool King::isMoveTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
+    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
+
+    constexpr std::array<std::array<Defines::Directions,Defines::PLAYERS_COUNT>,Defines::PLAYERS_COUNT> pawnDirs 
+    {std::array<Defines::Directions,Defines::PLAYERS_COUNT>{Defines::UP_LEFT,Defines::UP_RIGHT},
+      std::array<Defines::Directions,Defines::PLAYERS_COUNT>{Defines::DOWN_LEFT,Defines::DOWN_RIGHT}};
+
+    // constexpr std::array<std::array<Defines::Directions,Defines::PLAYERS_COUNT>,Defines::PLAYERS_COUNT> pawnDirs 
+    // {{{Defines::UP_LEFT,Defines::UP_RIGHT}, {Defines::DOWN_LEFT,Defines::DOWN_RIGHT}}};
+
+    for(const std::unique_ptr<ChessPiece>& piece : activePlayers[opponentId]){
+
+        if(PieceType::PAWN==piece->getPieceType()){
+            const BoardPos& pawnBoardPos=piece->getBoardPos();
+            for(const Defines::Directions dir:pawnDirs[opponentId]){
+                const BoardPos& pawnTakeBoardPos=BoardUtils::getAdjacentPos(dir,pawnBoardPos);
+                if(boardPos!=pawnTakeBoardPos){
+                    continue;
+                }
+                return false;
+            }
+            continue;
+        }
+
+        const std::vector<TileData>& moveTiles=piece->getMoveTiles(activePlayers);
+        for(const TileData& tileData:moveTiles){
+            if(TileType::MOVE!=tileData.tileType){
+                continue;
+            }
+            if(boardPos!=tileData.boardPos){
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+bool King::isTakeTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
+    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
+
+    for(const std::unique_ptr<ChessPiece>& piece : activePlayers[opponentId]){
+
+        const std::vector<TileData>& moveTiles=piece->getMoveTiles(activePlayers);
+        for(const TileData& tileData:moveTiles){
+            if(TileType::GUARD!=tileData.tileType){
+                continue;
+            }
+            if(boardPos!=tileData.boardPos){
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
 std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
     const std::vector<MoveDirection> boardMoves=getBoardMoves();
     const size_t maxKingMoves=boardMoves.size();
@@ -139,10 +223,42 @@ std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPiec
 
         BoardPos pos=moveDir.front();
         tileType=BoardUtils::getTileType(pos,activePlayers[_playerId],activePlayers[opponentId]);
-        moveTiles.emplace_back(pos,tileType);
+
+
+        if(isMoveOrTakeTileEnquiryMadeOnce){
+            moveTiles.emplace_back(pos,tileType);
+            continue;
+        }
+
+        // if (TileType::MOVE!=tileType){
+        //     moveTiles.emplace_back(pos,tileType);
+        //     continue;
+        // }
+
+        if(TileType::GUARD==tileType){
+            moveTiles.emplace_back(pos,tileType);
+            continue;
+        }
+
+        isMoveOrTakeTileEnquiryMadeOnce=true;
+        if(TileType::TAKE==tileType){
+            if(King::isTakeTileValid(pos,activePlayers)){
+                moveTiles.emplace_back(pos,tileType);
+            }      
+        }        
+
+        if(TileType::MOVE==tileType){
+            if(King::isMoveTileValid(pos,activePlayers)){
+                moveTiles.emplace_back(pos,tileType);
+            }      
+        }
+        isMoveOrTakeTileEnquiryMadeOnce=false;
     }
 
-    
+    if(isMoveOrTakeTileEnquiryMadeOnce){
+        return moveTiles;
+    }
+
     if(King::isMoved()) {
         if(_isCastlePossible){
             _isCastlePossible=false;
@@ -188,8 +304,5 @@ bool King::getIsCastlePossible() const{
 }
 
 bool King::isMoved() const{
-    if(Defines::WHITE_PLAYER_ID==_playerId){
-        return _boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,Defines::KING_STARTING_COLUMN_POSITION);
-    }
-    return _boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,Defines::KING_STARTING_COLUMN_POSITION);    
+    return _isMoved;  
 }

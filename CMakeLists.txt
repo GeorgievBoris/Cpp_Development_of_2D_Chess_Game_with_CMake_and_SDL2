@@ -55,6 +55,8 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/StartScreen/buttons/StartScreenButton.h
                 ${_INC_DIR}/StartScreen/buttons/config/StartScreenButtonCfg.h
                 ${_INC_DIR}/game/buttons/QuitGameButton.h
+                ${_INC_DIR}/game/animations/WinnerAnimator.h
+                ${_INC_DIR}/game/proxies/PieceHandlerProxy.h
                 
 
                 ${_SRC_DIR}/engine/Engine.cpp
@@ -83,6 +85,7 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/StartScreen/StartScreen.cpp
                 ${_SRC_DIR}/StartScreen/buttons/StartScreenButton.cpp
                 ${_SRC_DIR}/game/buttons/QuitGameButton.cpp
+                ${_SRC_DIR}/game/animations/WinnerAnimator.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

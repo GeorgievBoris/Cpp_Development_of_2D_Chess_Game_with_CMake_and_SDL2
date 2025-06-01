@@ -42,6 +42,9 @@ constexpr int32_t START_SCREEN_BACKGROUND_WIDTH=WINDOW_WIDTH; // fix the .png!!!
 
 constexpr int32_t QUIT_GAME_BUTTON_WIDTH=169;
 constexpr int32_t QUIT_GAME_BUTTON_HEIGHT=66;
+
+constexpr int32_t WINNER_STAR_HEIGHT=280;
+constexpr int32_t WINNER_STAR_WIDTH=300;
 }
 
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
@@ -141,6 +144,11 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.frames.emplace_back(0,0,QUIT_GAME_BUTTON_WIDTH,QUIT_GAME_BUTTON_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::QUIT_GAME_BUTTON, imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/winnerStar.png");
+    imageCfg.frames.emplace_back(0,0,WINNER_STAR_WIDTH,WINNER_STAR_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::WINNER_STAR,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -169,6 +177,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.targetRsrcId=TextureId::TARGET;
     cfg.moveTilesRsrcId=TextureId::MOVE_TILES;
     cfg.quitGameButtonRsrcId=TextureId::QUIT_GAME_BUTTON; // NOT added by Zhivko
+    cfg.winnerStarRsrcId=TextureId::WINNER_STAR; // NOT added by Zhivko
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
     cfg.gameFboRotTimerId=TimerId::GAME_FBO_ROT_TIMER_ID;
@@ -177,8 +186,9 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blinkEnPassantTimerId=TimerId::BLINK_EN_PASSANT_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTileCastlingTimerId=TimerId::BLINK_TILE_CASTLING_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTextCastlingTimerId=TimerId::BLINK_TEXT_CASTLING_TIMER_ID; // NOT added by Zhivko
+    cfg.blinkWinnerTextTimerId=TimerId::BLINK_WINNER_TEXT_TIMER_ID; // NOT added by Zhivko
     
-    cfg.unfinishedPieceFontId=FontId::ANGELINE_VINTAGE_40;
+    cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 
     auto& panelCfg=cfg.piecePromotionPanelCfg;
     panelCfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;

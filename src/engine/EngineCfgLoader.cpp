@@ -4,6 +4,7 @@
 // C++ system headers
 #include <iostream>
 #include <string>
+#include <array>
 // Third-party headers
 // Own headers
 #include "common/CommonDefines.h"
@@ -45,6 +46,11 @@ constexpr int32_t QUIT_GAME_BUTTON_HEIGHT=66;
 
 constexpr int32_t WINNER_STAR_HEIGHT=280;
 constexpr int32_t WINNER_STAR_WIDTH=300;
+
+constexpr int32_t WINNER_MEDAL_HEIGHT=1010;
+constexpr int32_t WINNER_MEDAL_WIDTH=650;
+
+constexpr int32_t WINNER_ANIMATOR_FIREWORKS_FRAMES=11;
 }
 
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
@@ -149,6 +155,27 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.frames.emplace_back(0,0,WINNER_STAR_WIDTH,WINNER_STAR_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::WINNER_STAR,imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/fireworks_frames.png");
+    imageCfg.frames.reserve(WINNER_ANIMATOR_FIREWORKS_FRAMES);
+    const std::array<Rectangle,WINNER_ANIMATOR_FIREWORKS_FRAMES> fireworksFramesPos {
+        Rectangle(0,0,36,74), Rectangle(0,0,33,32), Rectangle(0,0,55,54), Rectangle(0,0,73,67), Rectangle(0,0,95,84), Rectangle(0,0,106,109), 
+        Rectangle(0,0,158,145), Rectangle(0,0,171,164), Rectangle(0,0,208,197), Rectangle(0,0,216,214), Rectangle(0,0,221,221)
+    };
+    for(int32_t frameId=0;frameId<WINNER_ANIMATOR_FIREWORKS_FRAMES;++frameId){
+        0<frameId ? 
+        imageCfg.frames.emplace_back(imageCfg.frames[frameId-1].x+imageCfg.frames[frameId-1].w,
+                                    fireworksFramesPos[frameId].y,
+                                    fireworksFramesPos[frameId].w,fireworksFramesPos[frameId].h) :
+        imageCfg.frames.emplace_back(0,0,fireworksFramesPos[frameId].w,fireworksFramesPos[frameId].h);
+    }
+    cfg.imageConfigs.emplace(TextureId::FIREWORKS,imageCfg);
+    imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/winnerMedal.png");
+    imageCfg.frames.emplace_back(0,0,WINNER_MEDAL_WIDTH,WINNER_MEDAL_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::WINNER_MEDAL,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -178,6 +205,8 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.moveTilesRsrcId=TextureId::MOVE_TILES;
     cfg.quitGameButtonRsrcId=TextureId::QUIT_GAME_BUTTON; // NOT added by Zhivko
     cfg.winnerStarRsrcId=TextureId::WINNER_STAR; // NOT added by Zhivko
+    cfg.fireworksRsrcId=TextureId::FIREWORKS;  // NOT added by Zhivko
+    cfg.winnerMedalRsrcId=TextureId::WINNER_MEDAL; // NOT added by Zhivko
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
     cfg.gameFboRotTimerId=TimerId::GAME_FBO_ROT_TIMER_ID;
@@ -186,7 +215,10 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blinkEnPassantTimerId=TimerId::BLINK_EN_PASSANT_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTileCastlingTimerId=TimerId::BLINK_TILE_CASTLING_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTextCastlingTimerId=TimerId::BLINK_TEXT_CASTLING_TIMER_ID; // NOT added by Zhivko
-    cfg.blinkWinnerTextTimerId=TimerId::BLINK_WINNER_TEXT_TIMER_ID; // NOT added by Zhivko
+    cfg.nextWinnerAnimTimerId=TimerId::NEW_WINNER_ANIM_TIMER_ID; // NOT added by Zhivko
+    cfg.winnerAnimEndTimerId=TimerId::WINNER_ANIM_END_TIMER_ID; // NOT added by Zhivko
+    cfg.windowHeight=WINDOW_HEIGHT; // NOT added by Zhivko
+    cfg.windowWidth=WINDOW_WIDTH; // NOT added by Zhivko
     
     cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 

@@ -20,6 +20,7 @@ public:
     void setNextFrame();
     void setPrevFrame();
     int32_t getFrame() const;
+    int32_t getMaxFrame() const; // NOT added by Zhivko
 private:
     int32_t _currFrame{0};
     int32_t _maxFrames{0};

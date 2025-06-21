@@ -21,6 +21,8 @@ enum ResourceId{
     START_SCREEN_BACKGROUND, // NOT added by Zhivko
     QUIT_GAME_BUTTON, // NOT added by Zhivko
     WINNER_STAR, // NOT added by Zhivko
+    FIREWORKS, // NOT added by Zhivko
+    WINNER_MEDAL, // NOT added by Zhivko
     COUNT
 };
 
@@ -45,7 +47,8 @@ enum Keys{
     BLINK_EN_PASSANT_TIMER_ID, // NOT added by Zhivko
     BLINK_TILE_CASTLING_TIMER_ID, // NOT added by Zhivko
     BLINK_TEXT_CASTLING_TIMER_ID, // NOT added by Zhivko
-    BLINK_WINNER_TEXT_TIMER_ID, // NOT added by Zhivko
+    NEW_WINNER_ANIM_TIMER_ID, // NOT added by Zhivko
+    WINNER_ANIM_END_TIMER_ID, // NOT added by Zhivko
     COUNT
 };
 

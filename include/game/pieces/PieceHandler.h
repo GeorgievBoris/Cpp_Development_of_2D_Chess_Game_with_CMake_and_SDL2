@@ -6,7 +6,6 @@
 // C++ system headers
 #include <vector>
 #include <array>
-#include <functional> // NOT included by Zhivko !!!
 // Third-party headers
 // Own headers
 #include "game/defines/ChessDefines.h"
@@ -30,7 +29,7 @@ public:
     void promotePiece(PieceType pieceType);
 
     // PieceHandler::restart() is NOT added by Zhivko
-    int32_t restart(const std::function<void()>& gameRegenerateFboCallBack); // check where #include <functional> is included so that it does not give error here???
+    int32_t restart();
     void shiftWinnerPiecesPos(const Point& pos); // NOT added by Zhivko
 private:
     void handlePieceGrabbedEvent(const InputEvent& e);
@@ -56,6 +55,8 @@ private:
 
     void rotateWinnerPieces(double angle) final; // PieceHandler::animateWinnerPieces() is NOT added by Zhivko
     void onTurnTimeElapsed() final; // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
+    const ChessPiece::PlayerPieces& getWinnerPieces() final; // PieceHandler::assignWinnerMedals() is NOT added by Zhivko
+    
 
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;

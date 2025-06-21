@@ -21,6 +21,7 @@ public:
     static BoardPos getBoardPos(const Point& absPos);
     static Point getAbsPos(const BoardPos& boardPos);
     static BoardPos getInvertedBoardPos(const BoardPos& boardPos, WidgetFlip flipType); // NOT added by Zhivko
+    static Point getCenterPos(const int32_t& width, const int32_t& height); // NOT added by Zhivko
     static bool isInsideBoard(const BoardPos& boardPos);
     static bool isInsideBoard(const Point& absPos);
 

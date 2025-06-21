@@ -52,6 +52,10 @@ void Image::setFrame(int32_t frameIdx){
     const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
     // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
     _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];
+
+
+    _drawParams.width=_drawParams.frameRect.w; // NOT added by Zhivko
+    _drawParams.height=_drawParams.frameRect.h; // NOT added by Zhivko   
 }
 
 void Image::setNextFrame(){
@@ -61,7 +65,11 @@ void Image::setNextFrame(){
     }
     const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
     // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
-    _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];    
+    _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];
+
+    _drawParams.width=_drawParams.frameRect.w; // NOT added by Zhivko
+    _drawParams.height=_drawParams.frameRect.h; // NOT added by Zhivko  
+
 }
 
 void Image::setPrevFrame(){
@@ -72,8 +80,16 @@ void Image::setPrevFrame(){
      const Frames& frames=gRsrcMgr->getImageFrame(_drawParams.rsrcId);
      // the casting is done here, because if the clang++ compiler is used instead of g++, it will throw a warning/error
     _drawParams.frameRect=frames[static_cast<size_t>(_currFrame)];
+
+    _drawParams.width=_drawParams.frameRect.w; // NOT added by Zhivko
+    _drawParams.height=_drawParams.frameRect.h; // NOT added by Zhivko  
+
 }
 
 int32_t Image::getFrame()const{
     return _currFrame;
+}
+
+int32_t Image::getMaxFrame() const{ // NOT added by Zhivko
+    return _maxFrames;
 }

@@ -12,7 +12,7 @@
 extern const int32_t GAME_X_POS_SHIFT;
 extern const int32_t GAME_Y_POS_SHIFT;
 
-int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScreenCallBack){
+int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScreenCb){
     if(EXIT_SUCCESS!=_gameBoard.init(cfg.chessBoardRsrcId, cfg.targetRsrcId,
                                             cfg.moveTilesRsrcId, cfg.blinkTargetTimerId, cfg.blinkEnPassantTimerId, cfg.blinkTileCastlingTimerId)){
         std::cerr<<"_gameBoard.init() failed"<<std::endl;
@@ -40,8 +40,8 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_quitGameBtn.init(cfg.quitGameButtonRsrcId,showStartScreenCallBack,
-                                        [&](){_gameLogic.stopPlayersTimer(),_winnerAnimator.deactivate();})){
+    if(EXIT_SUCCESS!=_quitGameBtn.init(cfg.quitGameButtonRsrcId,showStartScreenCb,
+                                        [&](){_gameLogic.stopPlayersTimer();})){
         // NOT added by Zhivko
         std::cerr<<"_quitGameBtn.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -63,8 +63,9 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_winnerAnimator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),
-                                                        cfg.blinkWinnerTextTimerId, cfg.winnerStarRsrcId,cfg.textFontId)){
+    if(EXIT_SUCCESS!=_winnerAnimator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),showStartScreenCb,
+                                                cfg.nextWinnerAnimTimerId, cfg.winnerAnimEndTimerId,cfg.winnerStarRsrcId,cfg.fireworksRsrcId,
+                                                cfg.winnerMedalRsrcId, cfg.textFontId,cfg.windowWidth,cfg.windowHeight)){ 
         // NOT added by Zhivko
         std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -80,6 +81,10 @@ void Game::deinit(){
 }
 
 void Game::draw() const{
+
+    if(_isGameHidden){ // NOT added by Zhivko
+        return; // NOT added by Zhivko
+    }
     
     if(_gameBoardAnimator.isActive()){
         _gameBoard.drawGameBoardOnly();
@@ -92,8 +97,11 @@ void Game::draw() const{
     _gameLogic.draw(); // NOT added by Zhivko
 
     _quitGameBtn.draw(); // NOT added by Zhivko
-    _winnerAnimator.draw(); // NOT added by Zhivko
     _pieceHandler.draw(); // NOT added by Zhivko
+    if(_winnerAnimator.isActive()){ // NOT added by Zhivko
+        _winnerAnimator.draw(); // NOT added by Zhivko
+    }
+    
 }
 
 void Game::handleEvent(InputEvent& e){    
@@ -128,6 +136,7 @@ void Game::handleEvent(InputEvent& e){
 }
 
 void Game::show(){ // Game::show() method is NOT added by Zhivko
+    _isGameHidden=false;
     _gameFbo.show();
     _gameBoard.show();
     _quitGameBtn.show();
@@ -135,10 +144,12 @@ void Game::show(){ // Game::show() method is NOT added by Zhivko
 }
 
 void Game::hide(){ // Game::hide() method is NOT added by Zhivko
+    _isGameHidden=true;
     _gameFbo.hide();
     _gameBoard.hide();
     _quitGameBtn.hide();
     _piecePromotionPanel.hide();
+    _winnerAnimator.deactivate();
 }
 
 
@@ -198,8 +209,9 @@ void Game::onBoardAnimFinished(){
             _gameLogic.finishTurn();
             _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
         }
-        _winnerAnimator.activate(_gameLogic.getActivePlayerId());
+        // _winnerAnimator.activate(_gameLogic.getActivePlayerId());
         _pieceHandler.shiftWinnerPiecesPos(_gameBoard.getChessBoardBoardPos());
+        _winnerAnimator.activate(_gameLogic.getActivePlayerId());
         regenerateGameFbo();
         return;
     }        
@@ -216,18 +228,18 @@ void Game::setWidgetFlip(WidgetFlip flipType){
 }
 
 void Game::restart(){ // Game::restart() method is NOT added by Zhivko
-    
-    _winnerAnimator.restart();
-    if(EXIT_SUCCESS!=_pieceHandler.restart([&](){regenerateGameFbo();})){
+    if(EXIT_SUCCESS!=_pieceHandler.restart()){
         std::cerr<<"PieceHandler::restart() failed. The game cannot be restarted."<<std::endl;
         return;
     }
+    regenerateGameFbo();
     _piecePromotionPanel.restart(); 
     _gameBoardAnimator.restart();
     _inputInverter.restart(); 
     _gameLogic.restart();
     _quitGameBtn.restart();
     _gameBoard.restart();
+    _winnerAnimator.restart();
     _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
     _isGameFinished=false;

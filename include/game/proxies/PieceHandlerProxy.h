@@ -5,15 +5,17 @@
 // C++ system headers
 // Third-party headers
 // Own headers
+#include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 
-// NOTE: "WinnerAnimator.h" is NOT created by Zhivko!
+// NOTE: "PieceHandlerProxy.h" is NOT created by Zhivko!
 
 class PieceHandlerProxy{
 public:
     virtual ~PieceHandlerProxy()=default;
     virtual void rotateWinnerPieces(double angle)=0;
     virtual void onTurnTimeElapsed()=0;
+    virtual const ChessPiece::PlayerPieces& getWinnerPieces()=0;
 };
 
 

@@ -74,7 +74,8 @@ private:
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     bool _isGameFinished=false; // NOT added by Zhivko
     bool _isCurrPlayerKingInCheck=false; // NOT added by Zhivko
-    bool _isAutomaticWin=false;
+    bool _isAutomaticWin=false; // NOT added by Zhivko
+    bool _isGameHidden=true; // NOT added by Zhivko
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

@@ -181,6 +181,9 @@ void GameBoard::shiftMoveTilesPos(const BoardPos& boardPos){ // GameBoard::shift
 
 void GameBoard::onEnPassant(const BoardPos& boardPos){ // GameBoard::onEnPassant() is NOT added by Zhivko
     _moveSelector.onEnPassant(boardPos);
+    if(TimerClient::isActiveTimerId(_enPassantTimerId)){
+        return;
+    }
     startTimer(500,_enPassantTimerId,TimerType::PULSE);
 }
 

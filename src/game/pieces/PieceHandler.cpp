@@ -387,11 +387,7 @@ bool PieceHandler::isNextMoveCheckForKing(int32_t playerId, int32_t selectedPiec
 
     const std::unique_ptr<ChessPiece>& playerSelectedPiece=_pieces[playerId][selectedPieceId]; // why put a "const" qualifier in front ?
     const BoardPos playerSelectedPieceOldPosition=playerSelectedPiece->getBoardPos();
-
-    _gameProxy->isCurrPlayerKingInCheck() ? 
-    playerSelectedPiece->setBoardPos(boardPos) : 
-    playerSelectedPiece->setBoardPos(BoardUtils::getBoardPos(Point::UNDEFINED));
-
+    playerSelectedPiece->setBoardPos(boardPos);
     const BoardPos& currPlayerKingBoardPos=_pieces[playerId][playerKingIdx]->getBoardPos(); // the position of the king of the current Player
 
     if(INVALID_RSRC_ID==collisionIdx){
@@ -480,8 +476,7 @@ void PieceHandler::promotePiece(PieceType pieceType){
 }
 
 // PieceHandler::restart() is added by me
-int32_t PieceHandler::restart(const std::function<void()>& gameRegenerateFboCallBack){
-
+int32_t PieceHandler::restart(){
     int32_t piecesWhitesRsrcId=INVALID_RSRC_ID;
     int32_t piecesBlackRsrcId=INVALID_RSRC_ID;
     for(ChessPiece::PlayerPieces& pieces:_pieces){
@@ -497,7 +492,6 @@ int32_t PieceHandler::restart(const std::function<void()>& gameRegenerateFboCall
         return EXIT_FAILURE;
     }
 
-    gameRegenerateFboCallBack();
     PieceHandler::setCurrentPlayerId(Defines::WHITE_PLAYER_ID);
     _isPieceGrabbed=false;
     _isCastlingPossible=false;
@@ -519,6 +513,10 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
     _gameProxy->onGameTurnFinished();
 }
 
+const ChessPiece::PlayerPieces& PieceHandler::getWinnerPieces(){
+    return _pieces[_currPlayerId];
+}
+
 void PieceHandler::rotateWinnerPieces(double angle){
 
     // obtain the current rotation angle of an arbitrary chess piece (i.e the first one)...
@@ -531,36 +529,43 @@ void PieceHandler::rotateWinnerPieces(double angle){
 }
 
 void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivko
+
     if(Defines::BLACK_PLAYER_ID==_currPlayerId){
-        for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
-            const BoardPos& pieceOldBoardPos=piece->getBoardPos();
-            if(_gameProxy->isAutomaticWin()){
+        if(_gameProxy->isAutomaticWin()){
+            for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+                const BoardPos& pieceOldBoardPos=piece->getBoardPos();
                 const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
                 const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
-                const BoardPos pieceBoardPosNew=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
-                piece->setBoardPos(pieceBoardPosNew);
+                const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
+                piece->setBoardPos(pieceNewBoardPos);
                 piece->setWidgetFlip(WidgetFlip::NONE);
-                continue;
             }
+            return;
+        }
+        for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+            const BoardPos& pieceOldBoardPos=piece->getBoardPos();
             const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
-            const BoardPos pieceBoardPosNew=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
-            piece->setBoardPos(pieceBoardPosNew);
+            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
+            piece->setBoardPos(pieceNewBoardPos);
         }
         return;
     }
 
+    if(_gameProxy->isAutomaticWin()){
+        for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+            const BoardPos& pieceOldBoardPos=piece->getBoardPos();
+            const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
+            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
+            piece->setBoardPos(pieceNewBoardPos);
+        }
+        return;
+    }
     for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
         const BoardPos& pieceOldBoardPos=piece->getBoardPos();
-        if(_gameProxy->isAutomaticWin()){
-            const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
-            const BoardPos pieceBoardPosNew=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
-            piece->setBoardPos(pieceBoardPosNew);
-            continue;
-        }
         const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
         const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
-        const BoardPos pieceBoardPosNew=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
-        piece->setBoardPos(pieceBoardPosNew);
+        const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
+        piece->setBoardPos(pieceNewBoardPos);
         piece->setWidgetFlip(WidgetFlip::NONE);
     }
 }

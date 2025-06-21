@@ -17,8 +17,8 @@ struct EngineCfg {
 
     int32_t debugConsoleFontId;
 
-    StartScreenCfg startScreenCfg; // added by me
-    int32_t startScreenButtonsRsrcId; // added by me
+    StartScreenCfg startScreenCfg; // NOT added by Zhivko
+    int32_t startScreenButtonsRsrcId; // NOT added by Zhivko
 };
 
 

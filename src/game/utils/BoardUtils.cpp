@@ -45,6 +45,10 @@ BoardPos BoardUtils::getInvertedBoardPos(const BoardPos& boardPos, WidgetFlip fl
     return BoardPos(0,0);
 }
 
+Point BoardUtils::getCenterPos(const int32_t& width, const int32_t& height){ // NOT added by Zhivko
+    return Point((TILE_SIZE-width)/2,(TILE_SIZE-height)/2);
+}
+
 bool BoardUtils::isInsideBoard(const BoardPos& boardPos){
 
     const Rectangle bound{0, 0, BOARD_SIZE, BOARD_SIZE};

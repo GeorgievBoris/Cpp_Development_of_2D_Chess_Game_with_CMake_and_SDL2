@@ -306,3 +306,12 @@ bool King::getIsCastlePossible() const{
 bool King::isMoved() const{
     return _isMoved;  
 }
+
+void King::setIsTaken(bool isTaken){
+    (void)isTaken;
+    return;
+}
+
+bool King::getIsTaken() const {
+    return false;
+}

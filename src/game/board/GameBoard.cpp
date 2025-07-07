@@ -160,7 +160,7 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
         }
 
         const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(pos,_flipType); //NOT added by Zhivko
-        const BoardPos shiftedSelectedPos=BoardUtils::shiftBoardPositions(_boardImg.getPosition(),invertedBoardPos); // NOT added by Zhivko
+        const BoardPos shiftedSelectedPos=BoardUtils::shiftBoardPositions(invertedBoardPos); // NOT added by Zhivko
         if(shiftedSelectedPos!=BoardUtils::getBoardPos(castlingKingTilePtr->getPosition())){ // NOT added by Zhivko
             return false; // NOT added by Zhivko
         }
@@ -194,8 +194,4 @@ void GameBoard::onCastling(const BoardPos& boardPos) { // GameBoard::onCastling(
 
 void GameBoard::setWidgetFlip(WidgetFlip flipType) { // GameBoard::setWidgetFlip() is NOT added by Zhivko
     _flipType=flipType;
-}
-
-const Point GameBoard::getChessBoardBoardPos() const { // GameBoard::getChessBoardBoardPos() is NOT added by Zhivko
-    return _boardImg.getPosition();
 }

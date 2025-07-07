@@ -12,13 +12,18 @@
 #include "game/pieces/types/Rook.h" // NOT added by Zhivko
 #include "game/pieces/types/King.h"// NOT added by Zhivko
 
+extern const int32_t GAME_X_POS_SHIFT;
+extern const int32_t GAME_Y_POS_SHIFT;
+
 // NOTE: if these four variables DO NOT need to go out of this source file / be visible outside of it...
 // ... use them either in a "namespace" or set them as "static"
 
 static constexpr auto BOARD_SIZE=8;
-static constexpr auto FIRST_TILE_X_POS=58;
-static constexpr auto FIRST_TILE_Y_POS=60;
-static constexpr auto TILE_SIZE=98;
+// static constexpr auto FIRST_TILE_X_POS=58; // used initially by Zhivko
+// static constexpr auto FIRST_TILE_Y_POS=60; // used initially by Zhivko
+static constexpr auto FIRST_TILE_X_POS=111; // not added by Zhivko
+static constexpr auto FIRST_TILE_Y_POS=114; // not added by Zhivko
+static constexpr auto TILE_SIZE=98; 
 
 
 BoardPos BoardUtils::getBoardPos(const Point& absPos){
@@ -109,8 +114,7 @@ BoardPos BoardUtils::getAdjacentPos(Defines::Directions dir,const BoardPos& curr
     return pos;
 }
 
-bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiece::PlayerPieces& pieces,
-                                            int32_t& outCollisionRelativeId){
+bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiece::PlayerPieces& pieces, int32_t& outCollisionRelativeId){
     const size_t size=pieces.size();
     for(size_t i=0;i<size;++i){
         if(pieces[i]->getBoardPos()==selectedPos){
@@ -124,8 +128,7 @@ bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiec
     return false;
 }
 
-TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
-                                                            const ChessPiece::PlayerPieces& enemyPieces){
+TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces, const ChessPiece::PlayerPieces& enemyPieces){
     int32_t collisionIdx=-1;
     if(doCollideWithPiece(boardPos,playerPieces,collisionIdx)){
         return TileType::GUARD;
@@ -138,13 +141,13 @@ TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::Pla
     return TileType::MOVE;
 }
 
-BoardPos BoardUtils::shiftBoardPositions(const Point& gameBoardImgAbsPos, const BoardPos& boardPos) { //BoardUtils::shiftBoardPositions() is NOT added by Zhivko
-    const Point boardPosToAbsPoint=BoardUtils::getAbsPos(boardPos);
-    return BoardUtils::getBoardPos(Point(gameBoardImgAbsPos.x+boardPosToAbsPoint.x,gameBoardImgAbsPos.y+boardPosToAbsPoint.y));
+BoardPos BoardUtils::shiftBoardPositions(const BoardPos& boardPos) { //BoardUtils::shiftBoardPositions() is NOT added by Zhivko
+    const Point absPos=BoardUtils::getAbsPos(boardPos);
+    return BoardUtils::getBoardPos(Point(GAME_X_POS_SHIFT+absPos.x,GAME_Y_POS_SHIFT+absPos.y));
 }
 
 void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
-                                        BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() method is NOT added by Zhivko  
+                                        BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() is NOT added by Zhivko  
     
     if(PieceType::PAWN!=selectedPiece->getPieceType()){
         return;
@@ -264,4 +267,167 @@ void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const 
                              :  (pair.second.second.col+=2, newBoardPos.col=pair.second.second.col-1);        
         break;
     }
+}
+
+Point BoardUtils::getPosOfMovedPiece(const Point& currPos, const Point& targetPos, const PieceType pieceType){ // NOT added by Zhivko
+
+    Point currAbsPos=currPos;
+    switch(pieceType)
+    {
+    case PieceType::KNIGHT:
+        {
+        BoardUtils::moveDeltaX(currAbsPos,targetPos);
+        if(targetPos.x==currAbsPos.x){
+            BoardUtils::moveDeltaY(currAbsPos,targetPos);
+        }
+        return currAbsPos;
+        }
+    default:
+        {
+        BoardUtils::moveDeltaX(currAbsPos,targetPos);
+        BoardUtils::moveDeltaY(currAbsPos,targetPos);
+        return currAbsPos;
+        }
+    }
+    std::cerr<<"Error, returning zero for the animated position of PieceType: "<<static_cast<uint32_t>(pieceType)<<std::endl;
+    return Point::ZERO;
+}
+
+void BoardUtils::moveDeltaX(Point& currAbsPos,const Point& targetAbsPos){ // BoardUtils::moveDeltaX() is NOT added by Zhivko
+    constexpr int32_t deltaX=5;
+    
+    if(targetAbsPos.x>currAbsPos.x){
+        currAbsPos.x+=deltaX;
+        if(targetAbsPos.x<currAbsPos.x){
+            currAbsPos.x=targetAbsPos.x;
+            return;
+        }
+    }
+    if(targetAbsPos.x<currAbsPos.x){
+        currAbsPos.x-=deltaX;
+        if(targetAbsPos.x>currAbsPos.x){
+            currAbsPos.x=targetAbsPos.x;
+        }            
+    }
+}
+
+void BoardUtils::moveDeltaY(Point& currAbsPos,const Point& targetAbsPos){ // BoardUtils::moveDeltaY() is NOT added by Zhivko 
+    constexpr int32_t deltaY=5;
+
+    if(targetAbsPos.y>currAbsPos.y){
+        currAbsPos.y+=deltaY;
+        if(targetAbsPos.y<currAbsPos.y){
+            currAbsPos.y=targetAbsPos.y;
+            return;
+        }
+    }
+
+    if(targetAbsPos.y<currAbsPos.y){
+        currAbsPos.y-=deltaY;
+        if(targetAbsPos.y>currAbsPos.y){
+            currAbsPos.y=targetAbsPos.y;
+        }
+    }   
+}    
+
+BoardPos BoardUtils::getBoardPosForAnim(const Point& absPos){ // BoardUtils::getBoardPosForAnim() is NOT added by Zhivko
+    return {(absPos.y-FIRST_TILE_Y_POS)/TILE_SIZE, (absPos.x-FIRST_TILE_X_POS)/TILE_SIZE,
+            (absPos.y-FIRST_TILE_Y_POS)%TILE_SIZE, (absPos.x-FIRST_TILE_X_POS)%TILE_SIZE};
+}
+Point BoardUtils::getAbsPosForAnim(const BoardPos& boardPos){ // BoardUtils::getAbsPosForAnim() is NOT added by Zhivko
+    return {(boardPos.col*TILE_SIZE)+FIRST_TILE_X_POS+boardPos.remCol, (boardPos.row*TILE_SIZE)+FIRST_TILE_Y_POS+boardPos.remRow};
+}
+
+BoardPos BoardUtils::getInvBoardPosForAnim(const BoardPos& boardPos, WidgetFlip flipType){ // BoardUtils::getAnimatedInvertedBoardPos() is NOT added by Zhivko
+    switch(flipType){
+    case WidgetFlip::NONE:
+        return boardPos; // return BoardPos(boardPos.row,boardPos.col);
+    case WidgetFlip::HORIZONTAL:
+        return BoardPos((BOARD_SIZE-1)-boardPos.row,boardPos.col,boardPos.remRow,boardPos.remCol);
+    case WidgetFlip::VERTICAL:
+        return BoardPos(boardPos.row,(BOARD_SIZE-1)-boardPos.col,boardPos.remRow,boardPos.remCol);
+    case WidgetFlip::HORIZONTAL_AND_VERTICAL:
+        return BoardPos((BOARD_SIZE-1)-boardPos.row,(BOARD_SIZE-1)-boardPos.col,boardPos.remRow,boardPos.remCol);
+    }
+
+    std::cerr<<"Error, BoardUtils::getInvertedBoardPos() encountered unknown WidgetFlip type!"<<std::endl;
+    return BoardPos(0,0,0,0);
+}
+
+void BoardUtils::shiftBoardPosOfMovedPiece(std::unique_ptr<ChessPiece>& piece,const int32_t currPlayerId, BoardPos& targetBoardPos) {  // BoardUtils::shiftBoardPosOfMovedPiece() is NOT added by Zhivko
+    const BoardPos boardPosInit=piece->getBoardPos();
+    if(Defines::BLACK_PLAYER_ID==currPlayerId){
+        const BoardPos boardPosInv=BoardUtils::getInvBoardPosForAnim(boardPosInit,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+        const Point absPosInv=BoardUtils::getAbsPosForAnim(boardPosInv);
+        const BoardPos boardPosNew=BoardUtils::getBoardPosForAnim({absPosInv.x+GAME_X_POS_SHIFT,absPosInv.y+GAME_Y_POS_SHIFT});
+        piece->setBoardPos(boardPosNew);
+        piece->setWidgetFlip(WidgetFlip::NONE);
+        if(Defines::BLACK_PLAYER_ID==piece->getPlayerId()){
+            targetBoardPos=BoardUtils::getInvBoardPosForAnim(targetBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+        }
+        return;
+    }
+    const Point absPosInit=BoardUtils::getAbsPosForAnim(boardPosInit);
+    const BoardPos boardPosNew=BoardUtils::getBoardPosForAnim({absPosInit.x+GAME_X_POS_SHIFT,absPosInit.y+GAME_Y_POS_SHIFT});
+    piece->setBoardPos(boardPosNew);
+    return;
+}
+
+bool BoardUtils::doPiecesPosOverlap(const Point& targetPos, const Point& posTopLeft){ // BoardUtils::isInsideBorder() is NOT added by Zhivko
+    const Rectangle border(targetPos.x,targetPos.y,TILE_SIZE,TILE_SIZE);
+    const Point posTopRight(posTopLeft.x+TILE_SIZE,posTopLeft.y);
+    const Point posBottLeft(posTopLeft.x,posTopLeft.y+TILE_SIZE);
+    const Point posBottRight(posTopLeft.x+TILE_SIZE,posTopLeft.y+TILE_SIZE);
+    return border.isPointInside(posTopLeft) || border.isPointInside(posTopRight) || 
+           border.isPointInside(posBottLeft) || border.isPointInside(posBottRight);
+}
+
+Point BoardUtils::getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces) { // BoardUtils::getAbsPosOfTakenPiece() is NOT added by Zhivko
+    const size_t size=pieces.size();
+    const int32_t playerId=pieces.front()->getPlayerId();
+    uint32_t counter{0};
+    for(size_t i=0;i<size;++i){
+        if(pieces[i]->getIsTaken()){
+            ++counter;
+        }
+    }
+
+    if(Defines::WHITE_PLAYER_ID==playerId){
+        const int32_t xPos1=FIRST_TILE_X_POS+(BOARD_SIZE-counter)*TILE_SIZE;
+        const int32_t xPosLimit=FIRST_TILE_X_POS-TILE_SIZE;
+        const int32_t yPos1=FIRST_TILE_Y_POS-TILE_SIZE;
+        if(xPos1>=xPosLimit){
+            return Point(xPos1,yPos1);
+        }
+
+        for(size_t i=0;i<size;++i){
+            const BoardPos boardPos=pieces[i]->getBoardPos();
+            const Point absPos=BoardUtils::getAbsPosForAnim(boardPos);
+            if(yPos1==absPos.y){
+                --counter;
+            }
+        }
+        const int32_t xPos2=xPosLimit;
+        const int32_t yPos2=counter*TILE_SIZE;          
+        return Point(xPos2,yPos2);
+    }
+
+    const int32_t xPos1=FIRST_TILE_X_POS+(counter-1)*TILE_SIZE;
+    const int32_t xPosLimit=FIRST_TILE_X_POS+BOARD_SIZE*TILE_SIZE;
+    const int32_t yPos1=FIRST_TILE_Y_POS+BOARD_SIZE*TILE_SIZE;  
+
+    if(xPosLimit>=xPos1){
+        return Point(xPos1,yPos1);
+    }
+
+    for(size_t i=0;i<size;++i){
+        const BoardPos boardPos=pieces[i]->getBoardPos();
+        const Point absPos=BoardUtils::getAbsPosForAnim(boardPos);
+        if(absPos.y==yPos1){
+            --counter;
+        }
+    }
+    const int32_t xPos2=FIRST_TILE_X_POS+BOARD_SIZE*TILE_SIZE;
+    const int32_t yPos2=FIRST_TILE_Y_POS+(BOARD_SIZE-counter)*TILE_SIZE;
+    return Point(xPos2,yPos2);
 }

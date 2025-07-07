@@ -44,7 +44,9 @@ public:
     virtual void draw() const;
     virtual void setBoardPos(const BoardPos& boardPos);
     virtual std::vector<TileData> getMoveTiles(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const=0; // a pure-virtual method
-    
+    virtual void setIsTaken(bool isTaken)=0; // ChessPiece::setIsTaken() is NOT added by Zhivko
+    virtual bool getIsTaken() const=0; // ChessPiece::getIsTaken() is NOT added by Zhivko
+
     bool containsEvent(const InputEvent& e) const;
     BoardPos getBoardPos() const;
     int32_t getPlayerId() const;

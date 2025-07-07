@@ -121,19 +121,17 @@ void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is 
 
     if(timerId==_playerTurnCapTimerId){
         _pieceHandlerProxy->onTurnTimeElapsed();
+        GameLogic::stopPlayersTimer();
         return;
     }    
 
     if(timerId==_playerTurnCapTextTimerId){
 
         GameLogic::setInternals();
-
         if(30<_playerRemainingTime){
             return;
         }
-
         _playerTurnText.isVisible() ? _playerTurnText.hide() : _playerTurnText.show();
-        
         return;
     }
 
@@ -141,7 +139,6 @@ void GameLogic::onTimeout(int32_t timerId){ // GameLogic::onTimeout() method is 
         _onCastleText.isVisible() ? _onCastleText.hide() : _onCastleText.show();
         return;
     }
-
     std::cerr<<"Error, invalid timerId is provieded for GameLogic"<<std::endl;
 }
 

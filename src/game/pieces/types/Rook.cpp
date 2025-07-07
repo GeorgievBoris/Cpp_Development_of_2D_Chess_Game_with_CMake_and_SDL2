@@ -48,8 +48,13 @@ std::vector<MoveDirection> Rook::getBoardMoves() const{
 }
 
 void Rook::setBoardPos(const BoardPos& boardPos) { // Rook::setBoardPos() is NOT added by Zhivko
+    
     ChessPiece::setBoardPos(boardPos);
 
+    if(_isTaken){ // IF statement is NOT added by Zhivk
+        return;
+    }    
+    
     if(_isMoved){
         return;
     }
@@ -67,6 +72,9 @@ void Rook::setBoardPos(const BoardPos& boardPos) { // Rook::setBoardPos() is NOT
 bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers,
                             const BoardPos& kingBoardPos) const { // Rook::checkForCastle() is NOT added by Zhivko
 
+    if(_isTaken){
+        return false;
+    }
 
     const int32_t activePlayerId=ChessPiece::getPlayerId();
     const int32_t opponentPlayerId=BoardUtils::getOpponentId(activePlayerId);
@@ -149,6 +157,10 @@ bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
 
 std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                             Defines::PLAYERS_COUNT>& activePlayers) const{
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
+
     const std::vector<MoveDirection> boardMoves=getBoardMoves();
 
     std::vector<TileData> moveTiles;
@@ -212,4 +224,12 @@ bool Rook::getIsCastlePossible() const{ // Rook::getIsCastlePossible() is NOT ad
 bool Rook::isMoved() const {
     // Rook::isMoved() is NOT added by Zhivko
     return _isMoved;
+}
+
+void Rook::setIsTaken(bool isTaken){ // Rook::setIsTaken() is NOT added by Zhivko
+    _isTaken=isTaken;
+}
+
+bool Rook::getIsTaken() const { // Rook::getIsTaken() is NOT added by Zhivko
+    return _isTaken;
 }

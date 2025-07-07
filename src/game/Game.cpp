@@ -20,7 +20,7 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     }
 
     if(EXIT_SUCCESS!=_pieceHandler.init(static_cast<GameBoardProxy*>(&_gameBoard), static_cast<GameProxy*>(this),
-                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId)){
+                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId,cfg.movePieceTimerId)){
 
         std::cerr<<"_pieceHandler.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -175,8 +175,8 @@ void Game::startPlayersTimer(){ // method Game::startPlayersTimer() is NOT added
 }
 
 void Game::onGameTurnFinished(){
-    
-    _gameLogic.stopPlayersTimer(); // NOT added by Zhivko
+
+    Game::regenerateGameFbo(); // NOT added by Zhivko
 
     if(_isPromotionActive){
         return; // this "if" statement and the "return" are NOT added by Zhivko
@@ -209,8 +209,7 @@ void Game::onBoardAnimFinished(){
             _gameLogic.finishTurn();
             _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
         }
-        // _winnerAnimator.activate(_gameLogic.getActivePlayerId());
-        _pieceHandler.shiftWinnerPiecesPos(_gameBoard.getChessBoardBoardPos());
+        _pieceHandler.shiftWinnerPiecesPos();
         _winnerAnimator.activate(_gameLogic.getActivePlayerId());
         regenerateGameFbo();
         return;
@@ -245,6 +244,7 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _isGameFinished=false;
     _isCurrPlayerKingInCheck=false;
     _isAutomaticWin=false;
+    _isPieceMovementActive=false;
 }
 
 void Game::regenerateGameFbo() {
@@ -312,4 +312,14 @@ bool Game::isWinnerAnimatorActive() { // Game::isWinnerAnimatorActive() method i
 
 bool Game::isPromotionActive() { // Game::isPromotionActive() method is NOT added by Zhivko
     return _isPromotionActive;
-} 
+}
+
+void Game::setPieceMovementActive(bool isPieceMovementActive){ // Game::setPieceAnimationActive() method is NOT added by Zhivko
+    _isPieceMovementActive=isPieceMovementActive;
+    Game::regenerateGameFbo();
+    _gameLogic.stopPlayersTimer();
+}
+
+bool Game::isPieceMovementActive(){ // Game::isPieceMovementActive() method is NOT added by Zhivko
+    return _isPieceMovementActive;
+}

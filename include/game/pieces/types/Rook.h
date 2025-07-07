@@ -19,15 +19,17 @@ public:
                                             Defines::PLAYERS_COUNT>& activePlayers) const final;
     bool getIsCastlePossible() const; // Rook::getIsCastlePossible() is NOT added by Zhivko
     bool isMoved() const; // Rook::isMoved() is NOT added by Zhivko
+    bool getIsTaken() const final; // Rook::getIsTaken() is NOT added by Zhivko
 private:
     std::vector<MoveDirection> getBoardMoves() const;
     void setBoardPos(const BoardPos& boardPos) final; // Rook::setBoardPos() is NOT added by Zhivko
     bool isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const BoardPos& kingBoardPos) const; // Rook::checkForCastle() is NOT added by Zhivko
-
+    void setIsTaken(bool isTaken) final; // Rook::setIsTaken() is NOT added by Zhivko
     mutable bool _isCastlePossible=false; // NOT added by Zhivko
     int32_t _initialColumnPosition=INVALID_RSRC_ID; // NOT added by Zhivko
     bool _isMoved=false; // NOT added by Zhivko
     GameProxy* _gameProxy=nullptr; // NOT added by Zhivko  
+    bool _isTaken=false; // NOT added by Zhivko
 
 };
 

@@ -32,14 +32,23 @@ public:
     static TileType getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
                                                             const ChessPiece::PlayerPieces& enemyPieces);
 
-    static BoardPos shiftBoardPositions(const Point& gameBoardImgAbsPos, const BoardPos& boardPos); // BoardUtils::shiftBoardPositions() is NOT added by Zhivko
+    static BoardPos shiftBoardPositions(const BoardPos& boardPos); // BoardUtils::shiftBoardPositions() is NOT added by Zhivko
         
     static void checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
                                         BoardPos& boardPos, int32_t& outCollisionRelativeId); // BoardUtils::checkForEnPassant() method is NOT added by Zhivko    
     
-    static void checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
-                                                BoardPos& newBoardPos,
-                                                std::pair<bool,std::pair<int32_t,BoardPos>>& pair); // BoardUtils::doCastling() is NOT added by Zhivko
+    static void checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece, BoardPos& newBoardPos,
+                                                std::pair<bool,std::pair<int32_t,BoardPos>>& pair); // BoardUtils::checkForCastling() is NOT added by Zhivko
+    static Point getPosOfMovedPiece(const Point& currPos, const Point& targetPos, const PieceType pieceType); // BoardUtils::getPosOfMovedPiece() is NOT added by Zhivko
+    static void moveDeltaX(Point& currAbsPos,const Point& targetAbsPos); // BoardUtils::moveDeltaX() is NOT added by Zhivko
+    static void moveDeltaY(Point& currAbsPos,const Point& targetAbsPos); // BoardUtils::moveDeltaY() is NOT added by Zhivko                                            
+    static BoardPos getBoardPosForAnim(const Point& absPos); // BoardUtils::getBoardPosForAnim() is NOT added by Zhivko
+    static Point getAbsPosForAnim(const BoardPos& boardPos); // BoardUtils::getAbsPosForAnim() is NOT added by Zhivko
+    static BoardPos getInvBoardPosForAnim(const BoardPos& boardPos, WidgetFlip flipType); // BoardUtils::getInvBoardPosForAnim() is NOT added by Zhivko
+
+    static void shiftBoardPosOfMovedPiece(std::unique_ptr<ChessPiece>& piece, const int32_t currPlayerId, BoardPos& targetBoardPos); // BoardUtils::shiftBoardPosOfMovedPiece() is NOT added by Zhivko
+    static bool doPiecesPosOverlap(const Point& targetPos, const Point& posLeft); // BoardUtils::doPiecesPosOverlap() is NOT added by Zhivko
+    static Point getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces); // BoardUtils::getAbsPosOfTakenPiece() is NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_UTILS_BOARDUTILS_H_

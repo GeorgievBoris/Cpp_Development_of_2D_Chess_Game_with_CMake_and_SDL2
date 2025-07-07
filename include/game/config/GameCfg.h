@@ -37,6 +37,7 @@ struct GameCfg{
     int32_t blinkTextCastlingTimerId; // NOT added by Zhivko
     int32_t nextWinnerAnimTimerId; // NOT added by Zhivko
     int32_t winnerAnimEndTimerId; // NOT added by Zhivko
+    int32_t movePieceTimerId; // NOT added by Zhivko
 
     int32_t windowWidth; // NOT added by Zhivko
     int32_t windowHeight; // NOT added by Zhivko

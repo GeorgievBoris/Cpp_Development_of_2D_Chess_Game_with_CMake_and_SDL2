@@ -53,7 +53,9 @@ bool ChessPiece::containsEvent(const InputEvent& e) const{
 
 void ChessPiece::setBoardPos(const BoardPos& boardPos){
     _boardPos=boardPos;
-    _pieceImg.setPosition(BoardUtils::getAbsPos(_boardPos));
+    // _pieceImg.setPosition(BoardUtils::getAbsPos(_boardPos));
+    
+    _pieceImg.setPosition(BoardUtils::getAbsPosForAnim(_boardPos)); // NOT added by Zhivko
 }
 
 BoardPos ChessPiece::getBoardPos() const{

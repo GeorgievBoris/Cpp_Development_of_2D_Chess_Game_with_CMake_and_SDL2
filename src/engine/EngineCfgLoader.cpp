@@ -14,17 +14,19 @@ extern const int32_t GAME_X_POS_SHIFT; // NOT added by Zhivko
 extern const int32_t GAME_Y_POS_SHIFT; // NOT added by Zhivko
 
 constexpr int32_t GAME_X_POS_SHIFT=0; // NOT added by Zhivko
-constexpr int32_t GAME_Y_POS_SHIFT=100; // NOT added by Zhivko
+constexpr int32_t GAME_Y_POS_SHIFT=0; // NOT added by Zhivko
 
 // constants
 static constexpr auto WINDOW_WIDTH=900+400; // "+ 400" is NOT added by Zhivko
-static constexpr auto WINDOW_HEIGHT=1000;
+static constexpr auto WINDOW_HEIGHT=1000+100; // "+100" is NOT added by Zhivko
 static constexpr auto WINDOW_NAME="Hardware_Rendering";
 
 static constexpr auto CHESS_PIECES_FRAMES=6;
 static constexpr auto CHESS_PIECES_WIDTH_HEIGHT=96;
 
-static constexpr auto CHESS_BOARD_WIDTH_HEIGHT=900;
+// static constexpr auto CHESS_BOARD_WIDTH_HEIGHT=900; // originally used by Zhivko
+static constexpr auto CHESS_BOARD_WIDTH=1005; // not added by Zhivko
+static constexpr auto CHESS_BOARD_HEIGHT=1006; // not added by Zhivko
 
 static constexpr auto TARGET_IMG_WIDTH_HEIGHT=98;
 
@@ -101,8 +103,8 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
 
 
     // the board does not have transparency, so it is ".jpg" -> no point in using ".png", therefore it saves some information
-    imageCfg.location=getFilePath("resources/p/chessBoard.jpg");
-    imageCfg.frames.emplace_back(0,0,CHESS_BOARD_WIDTH_HEIGHT,CHESS_BOARD_WIDTH_HEIGHT);
+    imageCfg.location=getFilePath("resources/p/chessBoard.png");
+    imageCfg.frames.emplace_back(0,0,CHESS_BOARD_WIDTH,CHESS_BOARD_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::CHESS_BOARD,imageCfg);
     imageCfg.frames.clear(); 
 
@@ -207,6 +209,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.winnerStarRsrcId=TextureId::WINNER_STAR; // NOT added by Zhivko
     cfg.fireworksRsrcId=TextureId::FIREWORKS;  // NOT added by Zhivko
     cfg.winnerMedalRsrcId=TextureId::WINNER_MEDAL; // NOT added by Zhivko
+    
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
     cfg.gameFboRotTimerId=TimerId::GAME_FBO_ROT_TIMER_ID;
@@ -217,6 +220,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blinkTextCastlingTimerId=TimerId::BLINK_TEXT_CASTLING_TIMER_ID; // NOT added by Zhivko
     cfg.nextWinnerAnimTimerId=TimerId::NEW_WINNER_ANIM_TIMER_ID; // NOT added by Zhivko
     cfg.winnerAnimEndTimerId=TimerId::WINNER_ANIM_END_TIMER_ID; // NOT added by Zhivko
+    cfg.movePieceTimerId=TimerId::MOVE_PIECE_TIMER_ID; // NOT added by Zhivko
     cfg.windowHeight=WINDOW_HEIGHT; // NOT added by Zhivko
     cfg.windowWidth=WINDOW_WIDTH; // NOT added by Zhivko
     
@@ -226,8 +230,8 @@ static void populateGameCfg(GameCfg& cfg){
     panelCfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;
     panelCfg.whitePiecesRsrcId=TextureId::WHITE_PIECES;
     panelCfg.buttonBgrRsrcId=TextureId::PROMOTION_BUTTON;
-    panelCfg.gameBoardWidth=CHESS_BOARD_WIDTH_HEIGHT;
-    panelCfg.gameBoardHeight=CHESS_BOARD_WIDTH_HEIGHT;
+    panelCfg.gameBoardWidth=CHESS_BOARD_WIDTH;
+    panelCfg.gameBoardHeight=CHESS_BOARD_HEIGHT;
     panelCfg.buttonHeight=CHESS_PIECES_WIDTH_HEIGHT; // the normal size of 1 tile
     panelCfg.buttonWidth=CHESS_PIECES_WIDTH_HEIGHT; // the normal size of 1 tile
     panelCfg.buttonBgrHeight=PROMOTION_BTN_WIDTH_HEIGHT; // a bit bigger size that surrounds each chess figure/tile
@@ -240,8 +244,8 @@ void populateStartScreenCfg(StartScreenCfg& cfg){
 
     cfg.btnHeight=START_SCREEN_BUTTONS_HEIGHT;
     cfg.btnWidth=START_SCREEN_BUTTONS_WIDTH;
-    cfg.gameBoardWidth=CHESS_BOARD_WIDTH_HEIGHT;
-    cfg.gameBoardHeight=CHESS_BOARD_WIDTH_HEIGHT;
+    cfg.gameBoardWidth=CHESS_BOARD_WIDTH;
+    cfg.gameBoardHeight=CHESS_BOARD_HEIGHT;
     cfg.buttonsRsrcId=TextureId::START_SCREEN_BUTTONS;
 
     cfg.backgroundHeight=START_SCREEN_BACKGROUND_HEIGHT;

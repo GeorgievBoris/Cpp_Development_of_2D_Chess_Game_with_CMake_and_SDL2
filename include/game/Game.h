@@ -59,6 +59,8 @@ private:
     bool isAutomaticWin() final; // Game::isAutomaticWin() method is NOT added by Zhivko
     bool isWinnerAnimatorActive() final; // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
     bool isPromotionActive() final; // Game::isPromotionActive() method is NOT added by Zhivko
+    void setPieceMovementActive(bool isPieceMovementActive) final; // Game::setPieceMovementActive() method is NOT added by Zhivko
+    bool isPieceMovementActive() final; // Game::isPieceMovementActive() method is NOT added by Zhivko
 
     GameBoard _gameBoard;
     PieceHandler _pieceHandler;
@@ -76,6 +78,7 @@ private:
     bool _isCurrPlayerKingInCheck=false; // NOT added by Zhivko
     bool _isAutomaticWin=false; // NOT added by Zhivko
     bool _isGameHidden=true; // NOT added by Zhivko
+    bool _isPieceMovementActive=false; // NOT added by Zhivko
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

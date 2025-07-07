@@ -26,6 +26,9 @@ public:
     virtual bool isAutomaticWin()=0; // GameProxy::isAutomaticWin() method is NOT added by Zhivko
     virtual bool isWinnerAnimatorActive()=0; // GameProxy::isWinnerAnimatorActive() method is NOT added by Zhivko
     virtual bool isPromotionActive()=0; // GameProxy::isPromotionActive() method is NOT added by Zhivko
+    virtual void setPieceMovementActive(bool isPieceMovementActive)=0; // GameProxy::setPieceMovementActive() method is NOT added by Zhivko
+    virtual bool isPieceMovementActive()=0; // GameProxy::isPieceMovementActive() method is NOT added by Zhivko
+    // virtual void stopPlayersTimer()=0; // GameProxy::stopPlayersTimer() method is NOT added by Zhivko
 };
 
 

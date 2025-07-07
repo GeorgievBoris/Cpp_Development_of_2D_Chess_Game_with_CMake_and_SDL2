@@ -17,8 +17,11 @@
 class Knight : public ChessPiece{
 public:
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;
+    bool getIsTaken() const final;
 private:
+    void setIsTaken(bool isTaken) final;
     std::vector<MoveDirection> getBoardMoves() const;
+    bool _isTaken=false;
 
 };
 

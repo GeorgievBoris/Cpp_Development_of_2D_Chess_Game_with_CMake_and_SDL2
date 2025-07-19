@@ -53,13 +53,14 @@ private:
     void onGameFinish() final; // Game::onGameFinish() is NOT added by Zhivko
     void castleTextShow() final; // Game::castleTextShow() is NOT added by Zhivko
     void castleTextHide() final; // Game::castleTextHide() is NOT added by Zhivko
-    void setCurrPlayerKingInCheck(bool isCurrPlayerKingInCheck); // Game::setCurrPlayerKingInCheck() is NOT added by Zhivko
-    bool isCurrPlayerKingInCheck() final; // Game::isCurrPlayerKingInCheck() is NOT added by Zhivko
     void setAutomaticWin(bool isAutomaticWin) final; // Game::setAutomaticWin() method is NOT added by Zhivko
     bool isAutomaticWin() final; // Game::isAutomaticWin() method is NOT added by Zhivko
     bool isWinnerAnimatorActive() final; // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
     bool isPromotionActive() final; // Game::isPromotionActive() method is NOT added by Zhivko
+    void setPieceMovementActive(bool isPieceMovementActive) final; // Game::setPieceMovementActive() method is NOT added by Zhivko
+    bool isPieceMovementActive() final; // Game::isPieceMovementActive() method is NOT added by Zhivko
 
+    // NOTE: think about grouping GameBoardAnimator, WinnerAnimator and PieceAnimator into one Animator classs
     GameBoard _gameBoard;
     PieceHandler _pieceHandler;
     GameLogic _gameLogic;
@@ -73,9 +74,9 @@ private:
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     bool _isGameFinished=false; // NOT added by Zhivko
-    bool _isCurrPlayerKingInCheck=false; // NOT added by Zhivko
     bool _isAutomaticWin=false; // NOT added by Zhivko
     bool _isGameHidden=true; // NOT added by Zhivko
+    bool _isPieceMovementActive=false; // NOT added by Zhivko
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

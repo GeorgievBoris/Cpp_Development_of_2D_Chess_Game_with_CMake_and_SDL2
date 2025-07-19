@@ -49,6 +49,7 @@ enum Keys{
     BLINK_TEXT_CASTLING_TIMER_ID, // NOT added by Zhivko
     NEW_WINNER_ANIM_TIMER_ID, // NOT added by Zhivko
     WINNER_ANIM_END_TIMER_ID, // NOT added by Zhivko
+    MOVE_PIECE_TIMER_ID, // NOT added by Zhivko
     COUNT
 };
 

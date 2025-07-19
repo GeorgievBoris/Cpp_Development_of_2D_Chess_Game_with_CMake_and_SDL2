@@ -6,16 +6,9 @@
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
-#include "game/proxies/GameProxy.h" // NOT added by Zhivko
 #include "game/pieces/types/King.h" // NOT added by Zhivko
 
 extern bool isCastleEnquiryMadeOnce;
-
-Rook::Rook(GameProxy* gameProxy) : _gameProxy(gameProxy) {
-    if(nullptr==_gameProxy){
-        std::cerr<<"Error, nullptr received for Rook::_gameProxy"<<std::endl;
-    }
-}
 
 int32_t Rook::init(const ChessPieceCfg& cfg){ // Rook::init() method is NOT added by Zhivko
     if(EXIT_SUCCESS!=ChessPiece::init(cfg)){
@@ -47,26 +40,12 @@ std::vector<MoveDirection> Rook::getBoardMoves() const{
     return boardMoves;
 }
 
-void Rook::setBoardPos(const BoardPos& boardPos) { // Rook::setBoardPos() is NOT added by Zhivko
-    ChessPiece::setBoardPos(boardPos);
-
-    if(_isMoved){
-        return;
-    }
-
-    if(_gameProxy->isCurrPlayerKingInCheck()){
-        return;
-    }
-
-    Defines::WHITE_PLAYER_ID==_playerId ?
-    _isMoved=_boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,_initialColumnPosition) :
-    _isMoved=_boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,_initialColumnPosition);
-
-} 
-
 bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers,
                             const BoardPos& kingBoardPos) const { // Rook::checkForCastle() is NOT added by Zhivko
 
+    if(_isTaken){
+        return false;
+    }
 
     const int32_t activePlayerId=ChessPiece::getPlayerId();
     const int32_t opponentPlayerId=BoardUtils::getOpponentId(activePlayerId);
@@ -75,13 +54,13 @@ bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
 
     const BoardPos rookBoardPos=ChessPiece::getBoardPos();
 
-
     int32_t columnMin=rookBoardPos.col;
     int32_t columnMax=kingBoardPos.col; 
 
     if(columnMin>columnMax){
-        columnMin=kingBoardPos.col;
-        columnMax=rookBoardPos.col;
+        const int32_t columnMinCopy=columnMin;
+        columnMin=columnMax;
+        columnMax=columnMinCopy;
     }
 
     for(int32_t j=0;j<activePlayerNumOfPieces;++j){
@@ -149,6 +128,10 @@ bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
 
 std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                             Defines::PLAYERS_COUNT>& activePlayers) const{
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
+
     const std::vector<MoveDirection> boardMoves=getBoardMoves();
 
     std::vector<TileData> moveTiles;
@@ -171,10 +154,8 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         }
     }
 
-    if(Rook::isMoved()) {
-        if(_isCastlePossible){
-            _isCastlePossible=false;
-        }
+    if(_isMoved) {
+        _isCastlingPossible=false;
         return moveTiles;
     }
 
@@ -182,7 +163,7 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         return moveTiles;
     }    
 
-    _isCastlePossible=false;
+    _isCastlingPossible=false;
     isCastleEnquiryMadeOnce=true;
 
     for(const std::unique_ptr<ChessPiece>& piece:activePlayers[_playerId]){
@@ -193,23 +174,37 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         const ChessPiece* const chessPiecePtr=piece.get();
         const King* const kingPtr=static_cast<const King*>(chessPiecePtr);
 
-        if(kingPtr->isMoved()){
-            continue;
+        if(kingPtr->isMoved() || kingPtr->isInCheck()){
+            break;
         }
-
-        _isCastlePossible=Rook::isCastlePossible(activePlayers,piece->getBoardPos());
+        _isCastlingPossible=Rook::isCastlePossible(activePlayers,piece->getBoardPos());
+        break;
     }
-
     isCastleEnquiryMadeOnce=false;
-
     return moveTiles;
 }
 
-bool Rook::getIsCastlePossible() const{ // Rook::getIsCastlePossible() is NOT added by Zhivko
-    return _isCastlePossible;
+bool Rook::getIsCastlingPossible() const{ // Rook::getIsCastlingPossible() is NOT added by Zhivko
+    return _isCastlingPossible;
 }
 
-bool Rook::isMoved() const {
-    // Rook::isMoved() is NOT added by Zhivko
+bool Rook::isMoved() const { // Rook::isMoved() is NOT added by Zhivko
     return _isMoved;
+}
+
+void Rook::setIsTaken(bool isTaken){ // Rook::setIsTaken() is NOT added by Zhivko
+    _isTaken=isTaken;
+}
+
+bool Rook::getIsTaken() const { // Rook::getIsTaken() is NOT added by Zhivko
+    return _isTaken;
+}
+
+void Rook::setWhenFirstMoveIsMade() { // Rook::setWhenFirstMoveIsMade() is NOT added by Zhivko
+    if(_isMoved){
+        return;
+    }
+    Defines::WHITE_PLAYER_ID==_playerId ?
+    _isMoved=_boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,_initialColumnPosition) :
+    _isMoved=_boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,_initialColumnPosition);
 }

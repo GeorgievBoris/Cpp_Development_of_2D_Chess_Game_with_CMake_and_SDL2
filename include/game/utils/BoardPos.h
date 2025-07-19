@@ -9,7 +9,9 @@
 // Forward Declarations
 
 struct BoardPos{
-    BoardPos(int32_t inputRow, int32_t inputCol) : row(inputRow), col(inputCol) {}
+    BoardPos(int32_t inputRow, int32_t inputCol) : row(inputRow), col(inputCol) {remRow=0;remCol=0;}
+    BoardPos(int32_t inputRow, int32_t inputCol, int32_t inputRemRow, int32_t inputRemCol): 
+                                                   row(inputRow), col(inputCol), remRow(inputRemRow), remCol(inputRemCol) {}
     BoardPos()=default;
     bool operator==(const BoardPos& other) const{
         return row==other.row && col==other.col;
@@ -19,6 +21,8 @@ struct BoardPos{
     }
     int32_t row{};
     int32_t col{};
+    int32_t remRow{0}; // NOT added by Zhivko
+    int32_t remCol{0}; // NOT added by Zhivko
 };
 
 

@@ -20,7 +20,7 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     }
 
     if(EXIT_SUCCESS!=_pieceHandler.init(static_cast<GameBoardProxy*>(&_gameBoard), static_cast<GameProxy*>(this),
-                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId)){
+                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId,cfg.movePieceTimerId)){
 
         std::cerr<<"_pieceHandler.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -100,8 +100,7 @@ void Game::draw() const{
     _pieceHandler.draw(); // NOT added by Zhivko
     if(_winnerAnimator.isActive()){ // NOT added by Zhivko
         _winnerAnimator.draw(); // NOT added by Zhivko
-    }
-    
+    } 
 }
 
 void Game::handleEvent(InputEvent& e){    
@@ -175,14 +174,9 @@ void Game::startPlayersTimer(){ // method Game::startPlayersTimer() is NOT added
 }
 
 void Game::onGameTurnFinished(){
-    
-    _gameLogic.stopPlayersTimer(); // NOT added by Zhivko
-
     if(_isPromotionActive){
         return; // this "if" statement and the "return" are NOT added by Zhivko
     }
-
-    _gameBoard.restart(); // NOT added by Zhivko - used for cases when the Players' turn timer reaches 0s
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
 }
 
@@ -194,7 +188,6 @@ void Game::onPawnPromotion(){
 void Game::promotePiece(PieceType pieceType){    
     _pieceHandler.promotePiece(pieceType);
     _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
-    // onBoardAnimFinished(); // added originally by Zhivko
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId()); // NOT added by Zhivko
 }
 
@@ -209,8 +202,6 @@ void Game::onBoardAnimFinished(){
             _gameLogic.finishTurn();
             _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
         }
-        // _winnerAnimator.activate(_gameLogic.getActivePlayerId());
-        _pieceHandler.shiftWinnerPiecesPos(_gameBoard.getChessBoardBoardPos());
         _winnerAnimator.activate(_gameLogic.getActivePlayerId());
         regenerateGameFbo();
         return;
@@ -243,8 +234,8 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
     _isGameFinished=false;
-    _isCurrPlayerKingInCheck=false;
     _isAutomaticWin=false;
+    _isPieceMovementActive=false;
 }
 
 void Game::regenerateGameFbo() {
@@ -290,14 +281,6 @@ void Game::castleTextHide(){ // Game::castleTextHide() is NOT added by Zhivko
     _gameLogic.stopOnCastleTimer();
 }
 
-void Game::setCurrPlayerKingInCheck(bool isCurrPlayerKingInCheck){ // Game::setCurrPlayerKingInCheck() is NOT added by Zhivko
-    _isCurrPlayerKingInCheck=isCurrPlayerKingInCheck;
-}
-
-bool Game::isCurrPlayerKingInCheck(){ // Game::isCurrPlayerKingInCheck() is NOT added by Zhivko
-    return _isCurrPlayerKingInCheck;
-}
-
 void Game::setAutomaticWin(bool isAutomaticWin){ // GameProxy::setAutomaticWin() method is NOT added by Zhivko
     _isAutomaticWin=isAutomaticWin;
 } 
@@ -312,4 +295,16 @@ bool Game::isWinnerAnimatorActive() { // Game::isWinnerAnimatorActive() method i
 
 bool Game::isPromotionActive() { // Game::isPromotionActive() method is NOT added by Zhivko
     return _isPromotionActive;
-} 
+}
+
+void Game::setPieceMovementActive(bool isPieceMovementActive){ // Game::setPieceAnimationActive() method is NOT added by Zhivko
+    _isPieceMovementActive=isPieceMovementActive;
+    if(_isPieceMovementActive){
+        _gameLogic.stopPlayersTimer(); 
+        Game::regenerateGameFbo();
+    }   
+}
+
+bool Game::isPieceMovementActive(){ // Game::isPieceMovementActive() method is NOT added by Zhivko
+    return _isPieceMovementActive;
+}

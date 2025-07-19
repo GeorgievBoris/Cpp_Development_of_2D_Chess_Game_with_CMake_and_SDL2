@@ -27,7 +27,9 @@ std::vector<MoveDirection> Bishop::getBoardMoves() const{
 }
 
 std::vector<TileData> Bishop::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const{
-
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
     constexpr int32_t maxTilesCount=14;
     std::vector<TileData> moveTiles;
     moveTiles.reserve(maxTilesCount);
@@ -53,3 +55,10 @@ std::vector<TileData> Bishop::getMoveTiles(const std::array<ChessPiece::PlayerPi
     return moveTiles;
 }
 
+void Bishop::setIsTaken(bool isTaken){
+    _isTaken=isTaken;
+}
+
+bool Bishop::getIsTaken() const {
+    return _isTaken;
+}

@@ -32,14 +32,13 @@ public:
     static TileType getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
                                                             const ChessPiece::PlayerPieces& enemyPieces);
 
-    static BoardPos shiftBoardPositions(const Point& gameBoardImgAbsPos, const BoardPos& boardPos); // BoardUtils::shiftBoardPositions() is NOT added by Zhivko
+    static BoardPos shiftBoardPositions(const BoardPos& boardPos); // BoardUtils::shiftBoardPositions() is NOT added by Zhivko
         
     static void checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
                                         BoardPos& boardPos, int32_t& outCollisionRelativeId); // BoardUtils::checkForEnPassant() method is NOT added by Zhivko    
     
-    static void checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
-                                                BoardPos& newBoardPos,
-                                                std::pair<bool,std::pair<int32_t,BoardPos>>& pair); // BoardUtils::doCastling() is NOT added by Zhivko
+    static void checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece, BoardPos& newBoardPos,
+                                                std::pair<int32_t,BoardPos>& pair); // BoardUtils::checkForCastling() is NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_UTILS_BOARDUTILS_H_

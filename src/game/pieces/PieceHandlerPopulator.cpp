@@ -113,7 +113,7 @@ int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, int32_
 std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceType, GameProxy* gameProxy){
     switch(pieceType){
     case PieceType::ROOK:
-        return std::make_unique<Rook>(gameProxy);
+        return std::make_unique<Rook>();
     case PieceType::PAWN:
         return std::make_unique<Pawn>(gameProxy);
     case PieceType::BISHOP:
@@ -123,7 +123,7 @@ std::unique_ptr<ChessPiece> PieceHandlerPopulator::createPiece(PieceType pieceTy
     case PieceType::QUEEN:
         return std::make_unique<Queen>();
     case PieceType::KING:
-        return std::make_unique<King>(gameProxy);
+        return std::make_unique<King>();
     default:
         std::cerr<<"Error, received unknown PieceType: "<<static_cast<int32_t>(pieceType)<<std::endl;
         break;

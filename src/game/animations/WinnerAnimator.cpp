@@ -89,6 +89,7 @@ void WinnerAnimator::activate(int32_t playerId){
         std::cerr<<"Error, trying to active WinnerAnimator which is already active!"<<std::endl;
         return;
     }
+    _pieceHandlerProxy->shiftWinnerPiecesPos();
     Defines::WHITE_PLAYER_ID == playerId ? _onWinText.setText("White pieces win the game!") : _onWinText.setText("Black pieces win the game!");
     TimerClient::startTimer(75,_nextAnimTimerId,TimerType::PULSE);
     TimerClient::startTimer(60000,_endAnimTimerId,TimerType::ONESHOT);

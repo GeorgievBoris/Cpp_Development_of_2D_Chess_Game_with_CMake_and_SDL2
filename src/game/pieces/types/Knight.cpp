@@ -52,6 +52,11 @@ std::vector<MoveDirection> Knight::getBoardMoves() const {
 }
 
 std::vector<TileData> Knight::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
+
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
+    
     constexpr int32_t maxKnightMoves=8;
 
     std::vector<TileData> moveTiles;
@@ -73,4 +78,12 @@ std::vector<TileData> Knight::getMoveTiles(const std::array<ChessPiece::PlayerPi
         }
     }
     return moveTiles;
+}
+
+void Knight::setIsTaken(bool isTaken){
+    _isTaken=isTaken;
+}
+
+bool Knight::getIsTaken() const {
+    return _isTaken;
 }

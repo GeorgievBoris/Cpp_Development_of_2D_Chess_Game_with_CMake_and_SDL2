@@ -16,6 +16,7 @@ public:
     virtual void rotateWinnerPieces(double angle)=0;
     virtual void onTurnTimeElapsed()=0;
     virtual const ChessPiece::PlayerPieces& getWinnerPieces()=0;
+    virtual void shiftWinnerPiecesPos()=0;
 };
 
 

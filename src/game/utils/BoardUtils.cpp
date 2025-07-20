@@ -12,13 +12,18 @@
 #include "game/pieces/types/Rook.h" // NOT added by Zhivko
 #include "game/pieces/types/King.h"// NOT added by Zhivko
 
+extern const int32_t GAME_X_POS_SHIFT;
+extern const int32_t GAME_Y_POS_SHIFT;
+
 // NOTE: if these four variables DO NOT need to go out of this source file / be visible outside of it...
 // ... use them either in a "namespace" or set them as "static"
 
 static constexpr auto BOARD_SIZE=8;
-static constexpr auto FIRST_TILE_X_POS=58;
-static constexpr auto FIRST_TILE_Y_POS=60;
-static constexpr auto TILE_SIZE=98;
+// static constexpr auto FIRST_TILE_X_POS=58; // used initially by Zhivko
+// static constexpr auto FIRST_TILE_Y_POS=60; // used initially by Zhivko
+static constexpr auto FIRST_TILE_X_POS=111; // not added by Zhivko
+static constexpr auto FIRST_TILE_Y_POS=114; // not added by Zhivko
+static constexpr auto TILE_SIZE=98; 
 
 
 BoardPos BoardUtils::getBoardPos(const Point& absPos){
@@ -109,8 +114,7 @@ BoardPos BoardUtils::getAdjacentPos(Defines::Directions dir,const BoardPos& curr
     return pos;
 }
 
-bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiece::PlayerPieces& pieces,
-                                            int32_t& outCollisionRelativeId){
+bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiece::PlayerPieces& pieces, int32_t& outCollisionRelativeId){
     const size_t size=pieces.size();
     for(size_t i=0;i<size;++i){
         if(pieces[i]->getBoardPos()==selectedPos){
@@ -124,8 +128,7 @@ bool BoardUtils::doCollideWithPiece(const BoardPos& selectedPos, const ChessPiec
     return false;
 }
 
-TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces,
-                                                            const ChessPiece::PlayerPieces& enemyPieces){
+TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::PlayerPieces& playerPieces, const ChessPiece::PlayerPieces& enemyPieces){
     int32_t collisionIdx=-1;
     if(doCollideWithPiece(boardPos,playerPieces,collisionIdx)){
         return TileType::GUARD;
@@ -138,13 +141,13 @@ TileType BoardUtils::getTileType(const BoardPos& boardPos, const ChessPiece::Pla
     return TileType::MOVE;
 }
 
-BoardPos BoardUtils::shiftBoardPositions(const Point& gameBoardImgAbsPos, const BoardPos& boardPos) { //BoardUtils::shiftBoardPositions() is NOT added by Zhivko
-    const Point boardPosToAbsPoint=BoardUtils::getAbsPos(boardPos);
-    return BoardUtils::getBoardPos(Point(gameBoardImgAbsPos.x+boardPosToAbsPoint.x,gameBoardImgAbsPos.y+boardPosToAbsPoint.y));
+BoardPos BoardUtils::shiftBoardPositions(const BoardPos& boardPos) { //BoardUtils::shiftBoardPositions() is NOT added by Zhivko
+    const Point absPos=BoardUtils::getAbsPos(boardPos);
+    return BoardUtils::getBoardPos(Point(GAME_X_POS_SHIFT+absPos.x,GAME_Y_POS_SHIFT+absPos.y));
 }
 
 void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
-                                        BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() method is NOT added by Zhivko  
+                                        BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() is NOT added by Zhivko  
     
     if(PieceType::PAWN!=selectedPiece->getPieceType()){
         return;
@@ -163,7 +166,6 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
     
     for(const std::unique_ptr<ChessPiece>& piece:enemyPieces){
         ++i;
-
         if(PieceType::PAWN!=piece->getPieceType()){
             continue;
         }
@@ -194,13 +196,13 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
 
         if(outCollisionRelativeId==i){
             break;
-        }       
+        }     
     }
 }
 
 void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
                                             BoardPos& newBoardPos,
-                                            std::pair<bool, std::pair<int32_t, BoardPos>>& pair){ // BoardUtils::doCastling() is NOT added by Zhivko
+                                            std::pair<int32_t, BoardPos>& pair){ // BoardUtils::doCastling() is NOT added by Zhivko
 
     const PieceType& pieceType=piece->getPieceType();
 
@@ -222,19 +224,18 @@ void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const 
         int32_t counter=-1;
         for(const std::unique_ptr<ChessPiece>& currPiece:pieces){
             ++counter;
-            if(PieceType::ROOK!=currPiece->getPieceType()){
+            if(PieceType::ROOK!=currPiece->getPieceType() || currPiece->getIsTaken()){
                 continue;
             }
 
-            pair.second.second.row=pieceBoardPos.row;
-            pair.second.first=counter;
-            pair.first=true;                
+            pair.second.row=pieceBoardPos.row;
+            pair.first=counter;             
 
             if(newBoardPos.col>pieceBoardPos.col){
                 if(0==currPiece->getBoardPos().col){
                     continue;
                 }
-                pair.second.second.col=kingColRight;
+                pair.second.col=kingColRight;
                 return;
             }
 
@@ -242,7 +243,7 @@ void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const 
                 continue;
             }
 
-            pair.second.second.col=kingColLeft;        
+            pair.second.col=kingColLeft;        
             return;
         }
         return;
@@ -257,11 +258,10 @@ void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const 
             return;
         }
     
-        pair.second.first=static_cast<int32_t>(i);
-        pair.second.second=pieces[i]->getBoardPos();
-        pair.first=true;
-        0==pieceBoardPos.col ? (pair.second.second.col-=2, newBoardPos.col=pair.second.second.col+1) 
-                             :  (pair.second.second.col+=2, newBoardPos.col=pair.second.second.col-1);        
+        pair.first=static_cast<int32_t>(i);
+        pair.second=pieces[i]->getBoardPos();
+        0==pieceBoardPos.col ? (pair.second.col-=2, newBoardPos.col=pair.second.col+1) 
+                             :  (pair.second.col+=2, newBoardPos.col=pair.second.col-1);        
         break;
     }
 }

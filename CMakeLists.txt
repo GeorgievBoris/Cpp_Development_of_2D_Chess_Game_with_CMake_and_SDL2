@@ -44,7 +44,7 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/panels/buttons/PiecePromotionButton.h
                 ${_INC_DIR}/game/panels/config/PiecePromotionPanelCfg.h
                 ${_INC_DIR}/game/panels/config/PiecePromotionButtonCfg.h
-                # classes created by me:
+                # headers created by me:
                 ${_INC_DIR}/game/pieces/types/Bishop.h
                 ${_INC_DIR}/game/pieces/types/Knight.h
                 ${_INC_DIR}/game/pieces/types/Queen.h
@@ -57,6 +57,7 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/buttons/QuitGameButton.h
                 ${_INC_DIR}/game/animations/WinnerAnimator.h
                 ${_INC_DIR}/game/proxies/PieceHandlerProxy.h
+                ${_INC_DIR}/game/pieces/PieceMoveAnimator.h
                 
 
                 ${_SRC_DIR}/engine/Engine.cpp
@@ -77,7 +78,7 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/panels/PiecePromotionPanel.cpp
                 ${_SRC_DIR}/game/panels/buttons/PiecePromotionButton.cpp
                 ${_SRC_DIR}/main.cpp
-                # classes created by me:
+                # source files created by me:
                 ${_SRC_DIR}/game/pieces/types/Bishop.cpp
                 ${_SRC_DIR}/game/pieces/types/Knight.cpp
                 ${_SRC_DIR}/game/pieces/types/Queen.cpp
@@ -86,6 +87,7 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/StartScreen/buttons/StartScreenButton.cpp
                 ${_SRC_DIR}/game/buttons/QuitGameButton.cpp
                 ${_SRC_DIR}/game/animations/WinnerAnimator.cpp
+                ${_SRC_DIR}/game/pieces/PieceMoveAnimator.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

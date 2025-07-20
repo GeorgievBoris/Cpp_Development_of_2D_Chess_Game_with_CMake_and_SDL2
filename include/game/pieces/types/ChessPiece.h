@@ -44,7 +44,9 @@ public:
     virtual void draw() const;
     virtual void setBoardPos(const BoardPos& boardPos);
     virtual std::vector<TileData> getMoveTiles(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const=0; // a pure-virtual method
-    
+    virtual void setIsTaken(bool isTaken)=0; // ChessPiece::setIsTaken() is NOT added by Zhivko
+    virtual bool getIsTaken() const=0; // ChessPiece::getIsTaken() is NOT added by Zhivko 
+
     bool containsEvent(const InputEvent& e) const;
     BoardPos getBoardPos() const;
     int32_t getPlayerId() const;
@@ -53,10 +55,9 @@ public:
     PieceType getPieceType()const; // ChessPiece::getPieceType() is NOT added by Zhivko
     void setRotationAngle(double angle); // ChessPiece::setRotationAngle() is NOT added by Zhivko
     double getRotationAngle() const; // ChessPiece::getRotationAngle() is NOT added by Zhivko
-
 protected:
     Image _pieceImg;
-    BoardPos _boardPos;
+    mutable BoardPos _boardPos; // "mutable" is NOT added by Zhivko
     int32_t _playerId;
     PieceType _pieceType;
 };

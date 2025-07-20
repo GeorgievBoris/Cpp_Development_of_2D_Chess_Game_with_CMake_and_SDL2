@@ -16,7 +16,8 @@ int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showSt
         return EXIT_FAILURE;
     }
 
-    const Point pos = Point::ZERO;
+    // const Point pos = Point::ZERO;
+    const Point pos(1050,0);
     Image::create(rsrcId,pos);
     Widget::show();
     _showStartScreenCallBack=showStartScreenCallBack;

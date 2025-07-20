@@ -37,6 +37,11 @@ std::vector<MoveDirection> Queen::getBoardMoves() const {
 }
 
 std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const {
+
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
+        
     constexpr int32_t maxQueenMoves=28;
     std::vector<TileData> moveTiles;
     moveTiles.reserve(maxQueenMoves); // not entirely accurate - try to obtain the actual number of possible moves !!!
@@ -60,4 +65,12 @@ std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPie
         }
     }
     return moveTiles;
+}
+
+void Queen::setIsTaken(bool isTaken){
+    _isTaken=isTaken;
+}
+
+bool Queen::getIsTaken() const {
+    return _isTaken;
 }

@@ -18,30 +18,12 @@ Pawn::Pawn(GameProxy* gameProxy) :_gameProxy(gameProxy) {
     }
 }
 
-void Pawn::setBoardPos(const BoardPos& boardPos) {
-    
-    ChessPiece::setBoardPos(boardPos);
-
-    if(_gameProxy->isCurrPlayerKingInCheck()){ // this IF statement and its content is NOT added by Zhivko
-        return;
-    }
-    
-    if(Defines::WHITE_PLAYER_ID==_playerId) {
-        if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
-            _gameProxy->onPawnPromotion();
-        }
-    } else {
-        if(_gameProxy->isAutomaticWin()){ // this IF statement and its content is NOT added by Zhivko        
-            return;
-        }
-        if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
-            _gameProxy->onPawnPromotion();
-        }
-    }
-}
-
 std::vector<TileData> Pawn::getMoveTiles(const std::array<ChessPiece::PlayerPieces,
                                                 Defines::PLAYERS_COUNT>& activePieces) const{
+    if(_isTaken){
+        return std::vector<TileData>();
+    }
+
     int32_t playerId=getPlayerId();
     if(Defines::WHITE_PLAYER_ID==playerId){
         return getWhiteMoveTiles(activePieces);
@@ -51,9 +33,8 @@ std::vector<TileData> Pawn::getMoveTiles(const std::array<ChessPiece::PlayerPiec
 
 void Pawn::checkStateForEnPassant(const BoardPos& newBoardPos,
                                   const ChessPiece::PlayerPieces& currPlayerPieces, PieceType pieceType) { // Pawn::checkStateForEnPassant() is NOT added by Zhivko
-    
     for(const std::unique_ptr<ChessPiece>& piece: currPlayerPieces){
-        if(PieceType::PAWN!=piece->getPieceType()){
+        if(PieceType::PAWN!=piece->getPieceType() || piece->getIsTaken()){
             continue;
         }
 
@@ -220,6 +201,10 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
 
 bool Pawn::isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces) const{ // Pawn::isEnPassantValid() method is NOT added by Zhivko
     
+    if(_isTaken){
+        return false;
+    }
+
     const int32_t currPlayerId = BoardUtils::getOpponentId(enemyPieces.front()->getPlayerId());
 
     const BoardPos pos = Defines::WHITE_PLAYER_ID==currPlayerId ? 
@@ -254,4 +239,27 @@ bool Pawn::isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPi
         return true;
     }
     return false;
+}
+
+void Pawn::setIsTaken(bool isTaken){ // Pawn::setIsTaken() is NOT added by Zhivko
+    if(_isPawnTargetedForEnPassant){
+        _isPawnTargetedForEnPassant=false;
+    }
+    _isTaken=isTaken;
+}
+
+bool Pawn::getIsTaken() const { // Pawn::getIsTaken() is NOT added by Zhivko
+    return _isTaken;
+}
+
+void Pawn::checkForPawnPromotion(){ // Pawn::checkForPawnPromotion() is NOT added by Zhivko
+    if(Defines::WHITE_PLAYER_ID==_playerId) {
+        if(Defines::WHITE_PLAYER_START_END_ROW==_boardPos.row) {
+            _gameProxy->onPawnPromotion();
+        }
+    } else {
+        if(Defines::BLACK_PLAYER_START_END_ROW==_boardPos.row) {
+            _gameProxy->onPawnPromotion();
+        }
+    }
 }

@@ -20,12 +20,13 @@ public:
     virtual void onGameFinish()=0; // GameProxy::onGameFinish() method NOT added by Zhivko
     virtual void castleTextShow()=0; // GameProxy::castleTextShow() method is NOT added by Zhivko
     virtual void castleTextHide()=0; // GameProxy::castleTextHide() method is NOT added by Zhivko
-    virtual void setCurrPlayerKingInCheck(bool isCurrPlayerKingInCheck)=0; // Game::setCurrPlayerKingInCheck() is NOT added by Zhivko
-    virtual bool isCurrPlayerKingInCheck()=0; // GameProxy::isCurrPlayerKingInCheck() method is NOT added by Zhivko
     virtual void setAutomaticWin(bool isAutomaticWin)=0; // GameProxy::setAutomaticWin() method is NOT added by Zhivko
     virtual bool isAutomaticWin()=0; // GameProxy::isAutomaticWin() method is NOT added by Zhivko
     virtual bool isWinnerAnimatorActive()=0; // GameProxy::isWinnerAnimatorActive() method is NOT added by Zhivko
     virtual bool isPromotionActive()=0; // GameProxy::isPromotionActive() method is NOT added by Zhivko
+    virtual void setPieceMovementActive(bool isPieceMovementActive)=0; // GameProxy::setPieceMovementActive() method is NOT added by Zhivko
+    virtual bool isPieceMovementActive()=0; // GameProxy::isPieceMovementActive() method is NOT added by Zhivko
+    // virtual void stopPlayersTimer()=0; // GameProxy::stopPlayersTimer() method is NOT added by Zhivko
 };
 
 

@@ -17,7 +17,10 @@
 #include "game/pieces/types/King.h" // NOT added by Zhivko
 #include "game/pieces/types/Pawn.h" // NOT added by Zhivko
 
-int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId){
+extern const int32_t GAME_X_POS_SHIFT;
+extern const int32_t GAME_Y_POS_SHIFT;
+
+int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t movePieceTimerId){
 
     if(nullptr==gameBoardProxy){
         std::cerr<<"Error, nullptr provided for gameBoardProxy"<<std::endl;
@@ -36,18 +39,53 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
         std::cerr<<"PieceHandlerPopulator::populatePieceHandler() failed"<<std::endl;
         return EXIT_FAILURE;
     }
+
+    const Point absPosZeros=BoardUtils::getAbsPos(BoardPos(0,0));
+    const Point absPosOnes=BoardUtils::getAbsPos(BoardPos(1,1));
+    const int32_t TILE_SIZE=absPosOnes.x-absPosZeros.x; // "absPosOnes.y-absPosZeros.y" gives the same result
+    const int32_t FIRST_TILE_X_POS=absPosZeros.x;
+    const int32_t FIRST_TILE_Y_POS=absPosZeros.y;
+
+    if(EXIT_SUCCESS!=_pieceMoveAnimator.init(gameProxy,movePieceTimerId,TILE_SIZE,FIRST_TILE_X_POS,FIRST_TILE_Y_POS,_collisionIdx,
+                                    [&](){return PieceHandler::isOpponentKingInCheck();},
+                                    [&](){PieceHandler::isOpponentInStalemate();})){
+        std::cerr<<"PieceMoveAnimator::init() failed\n";
+        return EXIT_FAILURE;
+    }
+
     return EXIT_SUCCESS;
 }
 
 void PieceHandler::drawOnFbo(Fbo& fbo) const {
     if(_gameProxy->isWinnerAnimatorActive()){
+        const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
             // The entire IF statement and its content are NOT added by Zhivko
-        for(const std::unique_ptr<ChessPiece>& piece:_pieces[BoardUtils::getOpponentId(_currPlayerId)]){
+        for(const std::unique_ptr<ChessPiece>& piece:_pieces[opponentId]){
             piece->drawOnFbo(fbo);
         }
         return;
     }
-
+    
+    if(_gameProxy->isPieceMovementActive()){
+        // The entire IF statement and its content are NOT added by Zhivko
+        const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+        for(size_t i=0;i<_pieces.size();++i){
+            for(size_t j=0;j<_pieces[i].size();++j){
+                if(static_cast<int32_t>(j)==_selectedPieceId && static_cast<int32_t>(i)==_currPlayerId){
+                    continue;
+                }
+                if(static_cast<int32_t>(j)==pair.first && static_cast<int32_t>(i)==_currPlayerId){
+                    continue;
+                }
+                if(static_cast<int32_t>(j)==_collisionIdx && static_cast<int32_t>(i)==opponentId){
+                    continue;
+                }
+                _pieces[i][j]->drawOnFbo(fbo);
+            }
+        }
+        return;
+    }
+   
     for(const ChessPiece::PlayerPieces& playerPieces:_pieces){
         for(const std::unique_ptr<ChessPiece>& piece:playerPieces){
             piece->drawOnFbo(fbo);
@@ -64,9 +102,21 @@ void PieceHandler::draw() const{
         }
     }
     */
-
+   
    // The below code is NOT added by Zhivko
     if(!_gameProxy->isWinnerAnimatorActive()){
+        if(!_gameProxy->isPieceMovementActive()){
+            return;
+        }
+        _pieces[_currPlayerId][_selectedPieceId]->draw();
+        if(INVALID_RSRC_ID!=_collisionIdx){
+            const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+            _pieces[opponentId][_collisionIdx]->draw();
+        }
+        
+        if(INVALID_RSRC_ID!=pair.first){
+            _pieces[_currPlayerId][pair.first]->draw();
+        }
         return;
     }
 
@@ -105,44 +155,42 @@ void PieceHandler::handlePieceGrabbedEvent(const InputEvent& e){
 
     if(!BoardUtils::isInsideBoard(e.pos)){
         _gameBoardProxy->onPieceUngrabbed();
-        _isCastlingPossible=false;
         return;
     }
 
-    BoardPos boardPos=BoardUtils::getBoardPos(e.pos); // "const BoardPos boardPos" originally used by Zhivko
-    if(!_gameBoardProxy->isMoveAllowed(boardPos)){
+    _targetBoardPos=BoardUtils::getBoardPos(e.pos);
+    if(!_gameBoardProxy->isMoveAllowed(_targetBoardPos)){
         _gameBoardProxy->onPieceUngrabbed();
-        _isCastlingPossible=false;
         return;
     }
 
-    std::unique_ptr<ChessPiece>& currPlayerSelectedPiece=_pieces[_currPlayerId][_selectedPieceId]; // NOT added by Zhivko
-    
-    std::pair<bool,std::pair<int32_t,BoardPos>> pair {false,{INVALID_RSRC_ID,BoardPos{INVALID_RSRC_ID,INVALID_RSRC_ID}}}; // NOT added by Zhivko
+    const std::unique_ptr<ChessPiece>& currPlayerSelectedPiece=_pieces[_currPlayerId][_selectedPieceId]; // NOT added by Zhivko
     
     if(_isCastlingPossible){
-        BoardUtils::checkForCastling(_pieces[_currPlayerId],currPlayerSelectedPiece,boardPos,pair); // NOT added by Zhivko
-        _isCastlingPossible=false;
+        BoardUtils::checkForCastling(_pieces[_currPlayerId],currPlayerSelectedPiece,_targetBoardPos,pair); // NOT added by Zhivko
     }
     
-    int32_t collisionIdx=INVALID_RSRC_ID; // NOT added by Zhivko
-
-    if(!PieceHandler::isMoveValid(boardPos,pair.first,collisionIdx)){ // NOT added by Zhivko
-        _gameBoardProxy->onPieceUngrabbed(); // NOT added by Zhivko
-        _isCastlingPossible=false;
-        return;
+    if(INVALID_RSRC_ID==pair.first){ // NOT added by Zhivko
+        if(!PieceHandler::isMoveValid()){ // NOT added by Zhivko
+            _gameBoardProxy->onPieceUngrabbed();
+            return;
+        }        
     }
-
-    doMovePiece(boardPos,collisionIdx,currPlayerSelectedPiece,pair); // "collisionIdx", "currPlayerSelectedPiece" and "pair" are NOT added by Zhivko
+    PieceHandler::doMovePiece();
 }
 
 void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
     if(TouchEvent::TOUCH_RELEASE!=e.type){
         return;
     }
-
-    int32_t relativePieceId=0;
+    _isCastlingPossible=false;
+    int32_t relativePieceId=-1;
     for(const std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+        ++relativePieceId;
+        if(piece->getIsTaken()){
+            continue; // this entire IF statement is NOT added by Zhivk
+        }
+
         if(piece->containsEvent(e)){
             _selectedPieceId=relativePieceId;
             _isPieceGrabbed=true;
@@ -154,50 +202,21 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
             _gameBoardProxy->shiftMoveTilesPos(BoardUtils::getBoardPos(e.pos)); // NOT added by Zhivko 
             return;
         }
-        ++relativePieceId;
     }
 }
 
-void PieceHandler::doMovePiece(const BoardPos& boardPos, int32_t& collisionIdx,
-                                std::unique_ptr<ChessPiece>& selectedPiece, 
-                                const std::pair<bool,std::pair<int32_t, BoardPos>>& pair){ // "collisionIdx", "selectedPiece" and "pair" are NOT added by Zhivko
-
-    if(pair.first){ // NOT added by Zhivko
-        // if Castling is performed, the KING or the ROOK positions get changed here
-        _pieces[_currPlayerId][pair.second.first]->setBoardPos(pair.second.second); // NOT added by Zhivko
-    } // NOT added by Zhivko
-
-    if(INVALID_RSRC_ID!=collisionIdx){ // NOT added by Zhivko
-        const auto opponentId=BoardUtils::getOpponentId(selectedPiece->getPlayerId());
-        _pieces[opponentId].erase(_pieces[opponentId].begin()+collisionIdx); // NOT added by Zhivko
-    }
-
-    /* the commented code here, is originally added by Zhivko
-
-    int32_t collisionIdx=-1;
-    if(BoardUtils::doCollideWithPiece(boardPos,_pieces[opponentId],collisionIdx)){
-        _pieces[opponentId].erase(_pieces[opponentId].begin()+collisionIdx); // remmeber this - very important !!!
-    }
-    */
-
-    PieceHandler::checkPawnsStateForEnPassant(boardPos,selectedPiece);
-    selectedPiece->setBoardPos(boardPos);
-   
-    if(!_gameProxy->isPromotionActive()){
-        if(!PieceHandler::isOpponentKingInCheck()){
-            PieceHandler::isOpponentInStalemate();
-        }
-    }
-
+void PieceHandler::doMovePiece(){
+    PieceHandler::checkPawnsStateForEnPassant();
+    _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_collisionIdx);
+    _gameProxy->setPieceMovementActive(true);
     _gameBoardProxy->onPieceUngrabbed();
-    _gameProxy->onGameTurnFinished();
 }
 
-void PieceHandler::checkPawnsStateForEnPassant(const BoardPos& newBoardPos, const std::unique_ptr<ChessPiece>& selectedPiece){ // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
+void PieceHandler::checkPawnsStateForEnPassant(){ // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
 
-    const std::unique_ptr<ChessPiece>* chessPieceUnqPtr=&selectedPiece;
-
-    const PieceType selectedPieceType=selectedPiece->getPieceType();
+    const std::unique_ptr<ChessPiece>* chessPieceUnqPtr=&_pieces[_currPlayerId][_selectedPieceId];
+    ChessPiece* const chessPiecePtr=chessPieceUnqPtr->get();
+    const PieceType selectedPieceType=chessPiecePtr->getPieceType();
 
     if(PieceType::PAWN!=selectedPieceType){
         const size_t size=_pieces[_currPlayerId].size();
@@ -208,31 +227,29 @@ void PieceHandler::checkPawnsStateForEnPassant(const BoardPos& newBoardPos, cons
             }
         }
     }
-
-    ChessPiece* const chessPiecePtr=chessPieceUnqPtr->get();
     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
-    pawnPtr->checkStateForEnPassant(newBoardPos,_pieces[_currPlayerId],selectedPieceType);
+    pawnPtr->checkStateForEnPassant(_targetBoardPos,_pieces[_currPlayerId],selectedPieceType);
 }
 
-bool PieceHandler::isMoveValid(BoardPos& boardPos, bool isCastlingDone, int32_t& collisionIdx){ // PieceHandler::isMoveValid() is NOT added by Zhivko
-
-    if(isCastlingDone){
-        return true; 
-    }
-
+bool PieceHandler::isMoveValid(){ // PieceHandler::isMoveValid() is NOT added by Zhivko
     const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
 
-    BoardUtils::doCollideWithPiece(boardPos,_pieces[opponentId],collisionIdx); 
-    BoardUtils::checkForEnPassant(_pieces[_currPlayerId][_selectedPieceId],_pieces[opponentId],boardPos,collisionIdx);
+    BoardUtils::doCollideWithPiece(_targetBoardPos,_pieces[opponentId],_collisionIdx);
+    BoardUtils::checkForEnPassant(_pieces[_currPlayerId][_selectedPieceId],_pieces[opponentId],_targetBoardPos,_collisionIdx);
+    const int32_t collisionIdx=_collisionIdx;
 
-    if(PieceHandler::isNextMoveCheckForKing(_currPlayerId,_selectedPieceId,collisionIdx,boardPos)){
+    if(PieceHandler::isNextMoveCheckForKing()){
         return false;
     }
+    _collisionIdx=collisionIdx;
 
-    if(_gameProxy->isCurrPlayerKingInCheck()){ 
-        _gameProxy->setCurrPlayerKingInCheck(false);
+    const int32_t kingIdx=PieceHandler::getKingIndex(_currPlayerId);
+    ChessPiece* const chessPiecePtr=_pieces[_currPlayerId][kingIdx].get();
+    King* const kingPiecePtr=static_cast<King*>(chessPiecePtr);
+
+    if(kingPiecePtr->isInCheck()){
+        kingPiecePtr->setIsInCheck(false);
     }
-        
     return true;
 }
 
@@ -282,10 +299,8 @@ bool PieceHandler::alertGameBoardIfCastling(const std::unique_ptr<ChessPiece>& p
     const ChessPiece* const chessPiecePtr=piece.get();
 
     if(PieceType::ROOK==pieceType){
-        
         const Rook* const rookPiecePtr=static_cast<const Rook*>(chessPiecePtr);
-        
-        if(!rookPiecePtr->getIsCastlePossible()){
+        if(!rookPiecePtr->getIsCastlingPossible()){
             return false;
         }
         const int32_t kingIdx=PieceHandler::getKingIndex(_currPlayerId);
@@ -297,13 +312,12 @@ bool PieceHandler::alertGameBoardIfCastling(const std::unique_ptr<ChessPiece>& p
 
     const King* const kingPiecePtr=static_cast<const King*>(chessPiecePtr);
 
-    if(kingPiecePtr->getIsCastlePossible()){
-        _gameProxy->castleTextShow();
-        return true;
+    if(!kingPiecePtr->getIsCastlePossible()){
+        return false;
     }
-    return false;
+    _gameProxy->castleTextShow();
+    return true;
 }
-
 
 bool PieceHandler::isOpponentKingInCheck() { // PieceHandler::isOpponentKingInCheck() is NOT added by Zhivko
     const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
@@ -320,42 +334,53 @@ bool PieceHandler::isOpponentKingInCheck() { // PieceHandler::isOpponentKingInCh
             if(opponentPlayerKingPosition!=tileData.boardPos){
                 continue;
             }
-            _gameProxy->setCurrPlayerKingInCheck(true);
+            ChessPiece* const chessPiecePtr=_pieces[opponentId][opponentPlayerKingIndex].get();
+            King* const kingPiecePtr=static_cast<King*>(chessPiecePtr);
+            kingPiecePtr->setIsInCheck(true);
             std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
-            if(!PieceHandler::isOpponentKingInMate()){
+            if(!PieceHandler::isOpponentKingInMate(true)){
                 std::cerr<<"pieces is in CHECK!"<<std::endl;
             }
             return true;
         }
     }
-
     return false;
 }
 
-bool PieceHandler::isOpponentKingInMate(){ // PieceHandler::checkKingForMate() is NOT added by Zhivko
-    const int32_t opponentPlayerId=BoardUtils::getOpponentId(_currPlayerId);
+bool PieceHandler::isOpponentKingInMate(bool isKingInCheck){ // PieceHandler::isOpponentKingInMate() is NOT added by Zhivko
+    const int32_t currPlayerId=_currPlayerId; // save the initial value
+    const int32_t selectedPieceId=_selectedPieceId; // save the initial value
+    const BoardPos targetBoardPos=_targetBoardPos; // save the initial value
 
-    int32_t selectedPieceId=-1;
-    for(const std::unique_ptr<ChessPiece>& piece:_pieces[opponentPlayerId]){
-        ++selectedPieceId;
-        std::vector<TileData> moveTiles=piece->getMoveTiles(_pieces);
-        for(TileData& tileData : moveTiles){
+    _currPlayerId=BoardUtils::getOpponentId(_currPlayerId);
+    
+    _selectedPieceId=0;
+
+    for(const std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+        const std::vector<TileData> moveTiles=piece->getMoveTiles(_pieces);
+        for(const TileData& tileData : moveTiles){
             if(TileType::GUARD==tileData.tileType){
                 continue;
             }
 
-            int32_t collisionIdx=INVALID_RSRC_ID;
+            const int32_t oppPlayerId=BoardUtils::getOpponentId(_currPlayerId);
+            _targetBoardPos=tileData.boardPos;
+
             if(TileType::TAKE==tileData.tileType){
-                BoardUtils::doCollideWithPiece(tileData.boardPos,_pieces[_currPlayerId],collisionIdx);
+                BoardUtils::doCollideWithPiece(_targetBoardPos,_pieces[oppPlayerId],_collisionIdx);
             }
-            BoardUtils::checkForEnPassant(piece,_pieces[_currPlayerId],tileData.boardPos,collisionIdx);
+            BoardUtils::checkForEnPassant(piece,_pieces[oppPlayerId],_targetBoardPos,_collisionIdx);
             
-            if(!PieceHandler::isNextMoveCheckForKing(opponentPlayerId,selectedPieceId,collisionIdx,tileData.boardPos)){
+            if(!PieceHandler::isNextMoveCheckForKing()){
+                _currPlayerId=currPlayerId; _selectedPieceId=selectedPieceId; _targetBoardPos=targetBoardPos;
                 return false;
             }
         }
+        ++_selectedPieceId;
     }
-    if(_gameProxy->isCurrPlayerKingInCheck()){
+
+    _currPlayerId=currPlayerId; _selectedPieceId=selectedPieceId; _targetBoardPos=targetBoardPos; 
+    if(isKingInCheck){
         std::cerr<<"pieces is in CHECKMATE."<<std::endl;
         std::cerr<<"The game has finished."<<std::endl;
         std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID==_currPlayerId? std::cerr<<"white " : std::cerr<<"black ";
@@ -374,57 +399,39 @@ void PieceHandler::isOpponentInStalemate(){ // PieceHandler::isOpponentInStalema
     std::cerr<<"pieces is in STALEMATE. The game ends in a draw!"<<std::endl;
 }
 
-bool PieceHandler::isNextMoveCheckForKing(int32_t playerId, int32_t selectedPieceId, int32_t collisionIdx,const BoardPos& boardPos){ // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko
+bool PieceHandler::isNextMoveCheckForKing(){ // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko 
     // the function checks if the King of player "playerId" is given check by any of the chess pieces of player "opponentPlayerID"
-
-    const int32_t playerKingIdx=getKingIndex(playerId);
-    const int32_t opponentPlayerId=BoardUtils::getOpponentId(playerId);
+    const int32_t playerKingIdx=getKingIndex(_currPlayerId);
+    const int32_t opponentPlayerId=BoardUtils::getOpponentId(_currPlayerId);
 
     if(INVALID_RSRC_ID==playerKingIdx){
-        std::cerr<<"Error, PieceHandler::getKingIndex() cannot find KING piece for player with ID: "<<playerId<<std::endl;
+        std::cerr<<"Error, PieceHandler::getKingIndex() cannot find KING piece for player with ID: "<<_currPlayerId<<std::endl;
         return true;
     }
 
-    const std::unique_ptr<ChessPiece>& playerSelectedPiece=_pieces[playerId][selectedPieceId]; // why put a "const" qualifier in front ?
+    const std::unique_ptr<ChessPiece>& playerSelectedPiece=_pieces[_currPlayerId][_selectedPieceId]; // why put a "const" qualifier in front ?
     const BoardPos playerSelectedPieceOldPosition=playerSelectedPiece->getBoardPos();
-    playerSelectedPiece->setBoardPos(boardPos);
-    const BoardPos& currPlayerKingBoardPos=_pieces[playerId][playerKingIdx]->getBoardPos(); // the position of the king of the current Player
-
-    if(INVALID_RSRC_ID==collisionIdx){
-        const bool isTaken=isPositionTaken(opponentPlayerId,currPlayerKingBoardPos);
-        playerSelectedPiece->setBoardPos(playerSelectedPieceOldPosition);
-        
-        if(isTaken){
-            return true;
-        }
-        return false;
-    }
-
-    const std::unique_ptr<ChessPiece>& opponentCollidedPiece=_pieces[opponentPlayerId][collisionIdx]; // why put a "const" qualifier in front ?
-    const BoardPos opponentCollidedPieceOldPosition=opponentCollidedPiece->getBoardPos();
+    playerSelectedPiece->setBoardPos(_targetBoardPos);
+    const BoardPos currPlayerKingBoardPos=_pieces[_currPlayerId][playerKingIdx]->getBoardPos(); // the position of the king of the current Player
     
-    opponentCollidedPiece->setBoardPos(BoardUtils::getBoardPos(Point::UNDEFINED));
-
-    const bool isTaken=PieceHandler::isPositionTaken(opponentPlayerId,currPlayerKingBoardPos);
- 
+    const bool isTaken=isPositionTaken(opponentPlayerId,currPlayerKingBoardPos);
     playerSelectedPiece->setBoardPos(playerSelectedPieceOldPosition);
-    opponentCollidedPiece->setBoardPos(opponentCollidedPieceOldPosition);
+    if(0<=_collisionIdx){
+        _collisionIdx=INVALID_RSRC_ID;
+    }
     if(isTaken){
         return true;
     }
     return false;
 }
 
-bool PieceHandler::isPositionTaken(int32_t nonAttackedPlayerId, const BoardPos& attackedKingPos) const { // PieceHandler::isPositionTaken() is NOT added by Zhivko
+bool PieceHandler::isPositionTaken(const int32_t nonAttackedPlayerId, const BoardPos& attackedKingPos) const { // PieceHandler::isPositionTaken() is NOT added by Zhivko
     const int32_t numOfPieces = static_cast<int32_t>(_pieces[nonAttackedPlayerId].size());
     for(int32_t idx=0;idx<numOfPieces;++idx){
-
         const std::unique_ptr<ChessPiece>& piece=_pieces[nonAttackedPlayerId][idx];
-        const Point pieceAbsPos=BoardUtils::getAbsPos(piece->getBoardPos());
-
-        if(PieceType::KING!=piece->getPieceType() && Point::UNDEFINED==pieceAbsPos){
+        if(idx==_collisionIdx){
             continue;
-        }
+        }        
 
         const std::vector<TileData> moveTiles=piece->getMoveTiles(_pieces);
         for(const TileData& tileData : moveTiles){
@@ -452,11 +459,12 @@ int32_t PieceHandler::getKingIndex(int32_t playerId) const { // PieceHandler::ge
 }
 
 void PieceHandler::promotePiece(PieceType pieceType){
-    const auto boardPos=_pieces[_currPlayerId][_selectedPieceId]->getBoardPos();
-    const auto piecePlayerId=_pieces[_currPlayerId][_selectedPieceId]->getPlayerId();
-    const auto pieceRsrcId=_pieces[_currPlayerId][_selectedPieceId]->getRsrcId();
+    std::unique_ptr<ChessPiece>& currPiece=_pieces[_currPlayerId][_selectedPieceId];
+    const auto boardPos=currPiece->getBoardPos();
+    const auto piecePlayerId=currPiece->getPlayerId();
+    const auto pieceRsrcId=currPiece->getRsrcId();
 
-    _pieces[_currPlayerId][_selectedPieceId].reset();
+    currPiece.reset();
 
     ChessPieceCfg pieceCfg;
     pieceCfg.boardPos=boardPos;
@@ -464,12 +472,24 @@ void PieceHandler::promotePiece(PieceType pieceType){
     pieceCfg.pieceType=pieceType;
     pieceCfg.rsrcId=pieceRsrcId;
 
-    _pieces[_currPlayerId][_selectedPieceId]=PieceHandlerPopulator::createPiece(pieceType,_gameProxy);
-    if(EXIT_SUCCESS!=_pieces[_currPlayerId][_selectedPieceId]->init(pieceCfg)){
+    currPiece=PieceHandlerPopulator::createPiece(pieceType,_gameProxy);
+    if(EXIT_SUCCESS!=currPiece->init(pieceCfg)){
         std::cerr<<"Error, PieceHandlerPopulator::createPiece() failed. Pawn promotion failed!"<<std::endl;
         return;
     }
 
+    if(Defines::BLACK_PLAYER_ID==_currPlayerId){ // the entire IF statement is NOT added by Zhivko
+        currPiece->setBoardPos(_targetBoardPos);
+        if(INVALID_RSRC_ID!=_collisionIdx){
+            const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+            const BoardPos boardPosTaken=_pieces[opponentId][_collisionIdx]->getBoardPos();
+            const BoardPos boardPosTakenInv=_pieceMoveAnimator.getTakenPieceBoardPosInv(boardPosTaken);
+            _pieces[opponentId][_collisionIdx]->setBoardPos(boardPosTakenInv);
+            _collisionIdx=INVALID_RSRC_ID;         
+        }
+    }
+
+    _gameProxy->setPieceMovementActive(false); // NOT added by Zhivko
     if(!PieceHandler::isOpponentKingInCheck()){ // NOT added by Zhivko
         PieceHandler::isOpponentInStalemate(); // NOT added by Zhivko
     }
@@ -495,12 +515,15 @@ int32_t PieceHandler::restart(){
     PieceHandler::setCurrentPlayerId(Defines::WHITE_PLAYER_ID);
     _isPieceGrabbed=false;
     _isCastlingPossible=false;
-    
     return EXIT_SUCCESS;
 }
 
 void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
-    if(_gameProxy->isCurrPlayerKingInCheck()){
+    const int32_t kingIdx=PieceHandler::getKingIndex(_currPlayerId);
+    const ChessPiece* chessPiecePtr=_pieces[_currPlayerId][kingIdx].get();
+    const King* kingPiecePtr=static_cast<const King*>(chessPiecePtr);
+
+    if(kingPiecePtr->isInCheck()){
         std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID==_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
         std::cerr<<"pieces has run out of time to move a chess piece."<<std::endl;
         std::cerr<<"The game has finished."<<std::endl;
@@ -510,6 +533,7 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
         _gameProxy->setAutomaticWin(true);
     }
     _isPieceGrabbed=false;
+    _gameBoardProxy->onPieceUngrabbed();
     _gameProxy->onGameTurnFinished();
 }
 
@@ -528,7 +552,7 @@ void PieceHandler::rotateWinnerPieces(double angle){
     }
 }
 
-void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivko
+void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
 
     if(Defines::BLACK_PLAYER_ID==_currPlayerId){
         if(_gameProxy->isAutomaticWin()){
@@ -536,7 +560,7 @@ void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivk
                 const BoardPos& pieceOldBoardPos=piece->getBoardPos();
                 const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
                 const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
-                const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
+                const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+GAME_X_POS_SHIFT,invertedPieceAbsPos.y+GAME_Y_POS_SHIFT));
                 piece->setBoardPos(pieceNewBoardPos);
                 piece->setWidgetFlip(WidgetFlip::NONE);
             }
@@ -545,7 +569,7 @@ void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivk
         for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
             const BoardPos& pieceOldBoardPos=piece->getBoardPos();
             const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
-            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
+            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+GAME_X_POS_SHIFT,pieceAbsPos.y+GAME_Y_POS_SHIFT));
             piece->setBoardPos(pieceNewBoardPos);
         }
         return;
@@ -555,7 +579,7 @@ void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivk
         for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
             const BoardPos& pieceOldBoardPos=piece->getBoardPos();
             const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
-            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+pos.x,pieceAbsPos.y+pos.y));
+            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+GAME_X_POS_SHIFT,pieceAbsPos.y+GAME_Y_POS_SHIFT));
             piece->setBoardPos(pieceNewBoardPos);
         }
         return;
@@ -564,7 +588,7 @@ void PieceHandler::shiftWinnerPiecesPos(const Point& pos){ // NOT added by Zhivk
         const BoardPos& pieceOldBoardPos=piece->getBoardPos();
         const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
         const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
-        const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+pos.x,invertedPieceAbsPos.y+pos.y));
+        const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+GAME_X_POS_SHIFT,invertedPieceAbsPos.y+GAME_Y_POS_SHIFT));
         piece->setBoardPos(pieceNewBoardPos);
         piece->setWidgetFlip(WidgetFlip::NONE);
     }

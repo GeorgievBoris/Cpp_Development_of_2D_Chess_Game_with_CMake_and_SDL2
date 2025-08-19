@@ -17,6 +17,7 @@ public:
     virtual void onTurnTimeElapsed()=0;
     virtual const ChessPiece::PlayerPieces& getWinnerPieces()=0;
     virtual void shiftWinnerPiecesPos()=0;
+    virtual void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pair, const BoardPos& boardPos)=0;
 };
 
 

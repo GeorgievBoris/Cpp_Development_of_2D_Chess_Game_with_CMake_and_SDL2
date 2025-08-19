@@ -39,26 +39,48 @@ std::vector<TileData> Bishop::getMoveTiles(const std::array<ChessPiece::PlayerPi
     const int32_t activePlayerId=getPlayerId();
     const int32_t opponentId=BoardUtils::getOpponentId(activePlayerId);
 
+    const bool isAnotherPieceGetMoveTilesCalled=ChessPiece::isGetMoveTilesCalled(activePlayers);
+    BoardPos kingBoardPos;
+    if(!isAnotherPieceGetMoveTilesCalled){
+        kingBoardPos=BoardUtils::getKingBoardPos(activePlayers[_playerId]);
+        _isFncGetMoveTilesCalled=true;
+    }
+
     TileType tileType;
     for(const MoveDirection& moveDir:boardMoves){
         if(moveDir.empty()){
             continue;
         }
-        for (const BoardPos& pos:moveDir){
+        for(const BoardPos& pos:moveDir){
             tileType=BoardUtils::getTileType(pos,activePlayers[activePlayerId],activePlayers[opponentId]);
-            moveTiles.emplace_back(pos,tileType);
-            if(TileType::MOVE!=tileType){
+
+            if(TileType::GUARD==tileType){
+                moveTiles.emplace_back(pos,tileType);
                 break;
+            }
+
+            if(isAnotherPieceGetMoveTilesCalled){
+                moveTiles.emplace_back(pos,tileType);
+                if(TileType::MOVE!=tileType){
+                    break;
+                }                
+                continue;
+            }            
+
+            if(TileType::TAKE==tileType){
+                if(ChessPiece::isTakeTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
+                break;      
+            }        
+
+            if(TileType::MOVE==tileType){
+                if(ChessPiece::isMoveTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
             }
         }
     }
+    _isFncGetMoveTilesCalled=false;
     return moveTiles;
-}
-
-void Bishop::setIsTaken(bool isTaken){
-    _isTaken=isTaken;
-}
-
-bool Bishop::getIsTaken() const {
-    return _isTaken;
 }

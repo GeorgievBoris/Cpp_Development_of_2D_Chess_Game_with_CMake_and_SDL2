@@ -8,12 +8,6 @@
 #include "game/utils/BoardUtils.h"
 #include "game/pieces/types/Rook.h"
 
-extern bool isCastleEnquiryMadeOnce;
-bool isCastleEnquiryMadeOnce=false;
-
-extern bool isMoveOrTakeTileEnquiryMadeOnce;
-bool isMoveOrTakeTileEnquiryMadeOnce=false;
-
 std::vector<MoveDirection> King::getBoardMoves() const {
     // Note: Probably can use std::unordered_map instead of std::vector ?
     constexpr int32_t kingMaxDirs=8;
@@ -122,48 +116,6 @@ bool King::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
     return true;
 }
 
-bool King::isMoveTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
-    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
-    const BoardPos oldBoardPos=_boardPos;
-    _boardPos=boardPos;
-
-    for(const std::unique_ptr<ChessPiece>& piece : activePlayers[opponentId]){
-        const std::vector<TileData>& moveTiles=piece->getMoveTiles(activePlayers);
-        for(const TileData& tileData:moveTiles){
-            if(TileType::TAKE!=tileData.tileType){
-                continue;
-            }
-
-            if(boardPos!=tileData.boardPos){
-                continue;
-            }
-            _boardPos=oldBoardPos;
-            return false;
-        }
-    }
-    _boardPos=oldBoardPos;
-    return true;
-}
-
-bool King::isTakeTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
-    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
-
-    for(const std::unique_ptr<ChessPiece>& piece : activePlayers[opponentId]){
-
-        const std::vector<TileData>& moveTiles=piece->getMoveTiles(activePlayers);
-        for(const TileData& tileData:moveTiles){
-            if(TileType::GUARD!=tileData.tileType){
-                continue;
-            }
-            if(boardPos!=tileData.boardPos){
-                continue;
-            }
-            return false;
-        }
-    }
-    return true;
-}
-
 std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
     const std::vector<MoveDirection> boardMoves=getBoardMoves();
     const size_t maxKingMoves=boardMoves.size();
@@ -172,6 +124,11 @@ std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPiec
 
     const int32_t opponentId=BoardUtils::getOpponentId(_playerId);
 
+    const bool isAnotherPieceGetMoveTilesCalled=ChessPiece::isGetMoveTilesCalled(activePlayers);
+    if(!isAnotherPieceGetMoveTilesCalled){
+        _isFncGetMoveTilesCalled=true;
+    }
+    
     TileType tileType;
     for(const MoveDirection& moveDir:boardMoves){
         if(moveDir.empty()){
@@ -181,47 +138,41 @@ std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         BoardPos pos=moveDir.front();
         tileType=BoardUtils::getTileType(pos,activePlayers[_playerId],activePlayers[opponentId]);
 
-
-        if(isMoveOrTakeTileEnquiryMadeOnce){
-            moveTiles.emplace_back(pos,tileType);
-            continue;
-        }
-
         if(TileType::GUARD==tileType){
             moveTiles.emplace_back(pos,tileType);
             continue;
         }
 
-        isMoveOrTakeTileEnquiryMadeOnce=true;
+        if(isAnotherPieceGetMoveTilesCalled){
+            moveTiles.emplace_back(pos,tileType);
+            continue;
+        }        
+
         if(TileType::TAKE==tileType){
-            if(King::isTakeTileValid(pos,activePlayers)){
+            if(ChessPiece::isTakeTileValid(pos,_boardPos,activePlayers)){
                 moveTiles.emplace_back(pos,tileType);
-            }      
+            }
+            continue;      
         }        
 
         if(TileType::MOVE==tileType){
-            if(King::isMoveTileValid(pos,activePlayers)){
+            if(ChessPiece::isMoveTileValid(pos,_boardPos,activePlayers)){
                 moveTiles.emplace_back(pos,tileType);
             }      
         }
-        isMoveOrTakeTileEnquiryMadeOnce=false;
     }
 
-    if(isMoveOrTakeTileEnquiryMadeOnce){
-        return moveTiles;
-    }
-
-    if(_isMoved || _isInCheck) {
-        _isCastlePossible=false;
-        return moveTiles;
-    }
-
-    if(isCastleEnquiryMadeOnce) {
+    if(isAnotherPieceGetMoveTilesCalled){
         return moveTiles;
     }    
 
+    if(_isMoved || _isInCheck) {
+        _isCastlePossible=false;
+        _isFncGetMoveTilesCalled=false;
+        return moveTiles;
+    }
+
     _isCastlePossible=false;
-    isCastleEnquiryMadeOnce=true;
 
     for(const std::unique_ptr<ChessPiece>& piece:activePlayers[_playerId]){
         if(PieceType::ROOK!=piece->getPieceType()){
@@ -244,9 +195,7 @@ std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPiec
                                 : moveTiles.emplace_back(BoardPos(rookBoardPos.row,(rookBoardPos.col-1)),TileType::MOVE);
         }
     }
-
-    isCastleEnquiryMadeOnce=false;
-
+    _isFncGetMoveTilesCalled=false;
     return moveTiles;
 }
 
@@ -264,15 +213,6 @@ bool King::isInCheck() const{
 
 void King::setIsInCheck(bool isInCheck){
     _isInCheck=isInCheck;
-}
-
-void King::setIsTaken(bool isTaken){
-    (void)isTaken;
-    return;
-}
-
-bool King::getIsTaken() const {
-    return false;
 }
 
 void King::setWhenFirstMoveIsMade() {

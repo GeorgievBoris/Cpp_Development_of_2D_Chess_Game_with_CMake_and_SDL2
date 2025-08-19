@@ -146,7 +146,7 @@ BoardPos BoardUtils::shiftBoardPositions(const BoardPos& boardPos) { //BoardUtil
     return BoardUtils::getBoardPos(Point(GAME_X_POS_SHIFT+absPos.x,GAME_Y_POS_SHIFT+absPos.y));
 }
 
-void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
+void BoardUtils::getBoardPosIfEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
                                         BoardPos& boardPos, int32_t& outCollisionRelativeId){ // BoardUtils::checkForEnPassant() is NOT added by Zhivko  
     
     if(PieceType::PAWN!=selectedPiece->getPieceType()){
@@ -200,7 +200,7 @@ void BoardUtils::checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPi
     }
 }
 
-void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
+void BoardUtils::getBoardPosIfCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece,
                                             BoardPos& newBoardPos,
                                             std::pair<int32_t, BoardPos>& pair){ // BoardUtils::doCastling() is NOT added by Zhivko
 
@@ -264,4 +264,15 @@ void BoardUtils::checkForCastling(const ChessPiece::PlayerPieces& pieces, const 
                              :  (pair.second.col+=2, newBoardPos.col=pair.second.col-1);        
         break;
     }
+}
+
+BoardPos BoardUtils::getKingBoardPos(const ChessPiece::PlayerPieces& pieces) {
+    const size_t piecesNum=pieces.size();
+    for(size_t i=0;i<piecesNum;++i){
+        if(PieceType::KING==pieces[i]->getPieceType()){
+            return pieces[i]->getBoardPos();
+        }
+    }
+    std::cerr<<"Error, BoardUtils::getKingBoardPos() returns an invalid board position for king\n";
+    return BoardPos(INVALID_RSRC_ID,INVALID_RSRC_ID);
 }

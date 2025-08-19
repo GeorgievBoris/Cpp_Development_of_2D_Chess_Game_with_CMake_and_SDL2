@@ -8,8 +8,6 @@
 #include "game/utils/BoardUtils.h"
 #include "game/pieces/types/King.h" // NOT added by Zhivko
 
-extern bool isCastleEnquiryMadeOnce;
-
 int32_t Rook::init(const ChessPieceCfg& cfg){ // Rook::init() method is NOT added by Zhivko
     if(EXIT_SUCCESS!=ChessPiece::init(cfg)){
         std::cerr<<"ChessPiece::init() failed"<<std::endl;
@@ -137,6 +135,13 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
     std::vector<TileData> moveTiles;
     const auto opponentId=BoardUtils::getOpponentId(_playerId);
 
+    const bool isAnotherPieceGetMoveTilesCalled=ChessPiece::isGetMoveTilesCalled(activePlayers);
+    BoardPos kingBoardPos;
+    if(!isAnotherPieceGetMoveTilesCalled){
+        kingBoardPos=BoardUtils::getKingBoardPos(activePlayers[_playerId]);
+        _isFncGetMoveTilesCalled=true;
+    }    
+
     TileData tileData;
 
     for(const MoveDirection& moveDir:boardMoves){
@@ -147,24 +152,46 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
             const TileType tileType=BoardUtils::getTileType(boardPos,activePlayers[_playerId],activePlayers[opponentId]);
             tileData.tileType=tileType;
             tileData.boardPos=boardPos;
-            moveTiles.push_back(tileData);
-            if(TileType::MOVE!=tileType){
+
+            if(TileType::GUARD==tileType){
+                moveTiles.push_back(tileData);
                 break;
+            }
+
+            if(isAnotherPieceGetMoveTilesCalled){
+                moveTiles.push_back(tileData);
+                if(TileType::MOVE!=tileType){
+                    break;
+                }
+                continue;
+            }              
+
+            if(TileType::TAKE==tileType){
+                if(ChessPiece::isTakeTileValid(boardPos,kingBoardPos,activePlayers)){
+                    moveTiles.push_back(tileData);
+                }
+                break;   
+            }        
+
+            if(TileType::MOVE==tileType){
+                if(ChessPiece::isMoveTileValid(boardPos,kingBoardPos,activePlayers)){
+                    moveTiles.push_back(tileData);
+                }
             }
         }
     }
 
-    if(_isMoved) {
-        _isCastlingPossible=false;
+    if(isAnotherPieceGetMoveTilesCalled){
         return moveTiles;
     }
 
-    if(isCastleEnquiryMadeOnce) {
+    if(_isMoved) {
+        _isCastlingPossible=false;
+        _isFncGetMoveTilesCalled=false;
         return moveTiles;
-    }    
+    }
 
     _isCastlingPossible=false;
-    isCastleEnquiryMadeOnce=true;
 
     for(const std::unique_ptr<ChessPiece>& piece:activePlayers[_playerId]){
         if(PieceType::KING!=piece->getPieceType()){
@@ -180,7 +207,7 @@ std::vector<TileData> Rook::getMoveTiles(const std::array<ChessPiece::PlayerPiec
         _isCastlingPossible=Rook::isCastlePossible(activePlayers,piece->getBoardPos());
         break;
     }
-    isCastleEnquiryMadeOnce=false;
+    _isFncGetMoveTilesCalled=false;
     return moveTiles;
 }
 
@@ -190,14 +217,6 @@ bool Rook::getIsCastlingPossible() const{ // Rook::getIsCastlingPossible() is NO
 
 bool Rook::isMoved() const { // Rook::isMoved() is NOT added by Zhivko
     return _isMoved;
-}
-
-void Rook::setIsTaken(bool isTaken){ // Rook::setIsTaken() is NOT added by Zhivko
-    _isTaken=isTaken;
-}
-
-bool Rook::getIsTaken() const { // Rook::getIsTaken() is NOT added by Zhivko
-    return _isTaken;
 }
 
 void Rook::setWhenFirstMoveIsMade() { // Rook::setWhenFirstMoveIsMade() is NOT added by Zhivko

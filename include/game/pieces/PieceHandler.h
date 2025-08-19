@@ -37,7 +37,8 @@ private:
 
     void doMovePiece();
 
-    void checkPawnsStateForEnPassant(); // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
+    // void checkPawnsStateForEnPassant(); // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
+    void checkPawnMoveForEnPassant(); // PieceHandler::checkPawnMoveForEnPassant() is NOT added by Zhivko
     
     bool isMoveValid(); // PieceHandler::isMoveValid() is NOT added by Zhivko
 
@@ -56,6 +57,7 @@ private:
     void shiftWinnerPiecesPos() final; // PieceHandler::shiftWinnerPiecesPos() is NOT added by Zhivko
     void onTurnTimeElapsed() final; // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
     const ChessPiece::PlayerPieces& getWinnerPieces() final; // PieceHandler::getWinnerPieces() is NOT added by Zhivko
+    void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos) final; // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
     
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;
@@ -69,6 +71,7 @@ private:
     bool _isCastlingPossible=false; // NOT added by Zhivko
     BoardPos _targetBoardPos; // NOT added by Zhivko
     int32_t _collisionIdx=INVALID_RSRC_ID;  // NOT added by Zhivko
+    std::unique_ptr<ChessPiece>* _enPassantPawnId=nullptr; // NOT added by Zhivko
     std::pair<int32_t,BoardPos> pair {INVALID_RSRC_ID,BoardPos{INVALID_RSRC_ID,INVALID_RSRC_ID}}; // NOT added by Zhivko
 };
 

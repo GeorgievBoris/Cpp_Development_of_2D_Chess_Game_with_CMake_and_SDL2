@@ -67,6 +67,13 @@ std::vector<TileData> Knight::getMoveTiles(const std::array<ChessPiece::PlayerPi
     int32_t activePlayerId=getPlayerId();
     int32_t opponentId=BoardUtils::getOpponentId(activePlayerId);
 
+    const bool isAnotherPieceGetMoveTilesCalled=ChessPiece::isGetMoveTilesCalled(activePlayers);
+    BoardPos kingBoardPos;
+    if(!isAnotherPieceGetMoveTilesCalled){
+        kingBoardPos=BoardUtils::getKingBoardPos(activePlayers[_playerId]);
+        _isFncGetMoveTilesCalled=true;
+    }    
+
     TileType tileType;
     for(const MoveDirection& movDir:boardMoves){
         if(movDir.empty()){
@@ -74,16 +81,31 @@ std::vector<TileData> Knight::getMoveTiles(const std::array<ChessPiece::PlayerPi
         }
         for(const BoardPos& pos:movDir){
             tileType=BoardUtils::getTileType(pos,activePlayers[activePlayerId],activePlayers[opponentId]);
-            moveTiles.emplace_back(pos,tileType);
+
+            if(TileType::GUARD==tileType){
+                moveTiles.emplace_back(pos,tileType);
+                continue;
+            }
+
+            if(isAnotherPieceGetMoveTilesCalled){
+                moveTiles.emplace_back(pos,tileType);               
+                continue;
+            }            
+
+            if(TileType::TAKE==tileType){
+                if(ChessPiece::isTakeTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
+                continue;      
+            }        
+
+            if(TileType::MOVE==tileType){
+                if(ChessPiece::isMoveTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
+            }
         }
     }
+    _isFncGetMoveTilesCalled=false;
     return moveTiles;
-}
-
-void Knight::setIsTaken(bool isTaken){
-    _isTaken=isTaken;
-}
-
-bool Knight::getIsTaken() const {
-    return _isTaken;
 }

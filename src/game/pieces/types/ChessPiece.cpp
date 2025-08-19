@@ -53,11 +53,22 @@ bool ChessPiece::containsEvent(const InputEvent& e) const{
 
 void ChessPiece::setBoardPos(const BoardPos& boardPos){
     _boardPos=boardPos;
-    // _pieceImg.setPosition(BoardUtils::getAbsPos(_boardPos));
+    // _pieceImg.setPosition(BoardUtils::getAbsPos(_boardPos)); // added by Zhivko
     const Point absPosTemporary=BoardUtils::getAbsPos(_boardPos);
     const Point absPos(absPosTemporary.x+_boardPos.remCol,absPosTemporary.y+_boardPos.remRow);
     _pieceImg.setPosition(absPos); // NOT added by Zhivko
 }
+
+void ChessPiece::setIsTaken(bool isTaken){
+    if(PieceType::KING==_pieceType){
+        return;
+    }
+    _isTaken=isTaken;
+}
+
+bool ChessPiece::getIsTaken() const {
+    return _isTaken;
+} 
 
 BoardPos ChessPiece::getBoardPos() const{
     return _boardPos;
@@ -85,4 +96,104 @@ void ChessPiece::setRotationAngle(double angle) { // ChessPiece::setRotationAngl
 
 double ChessPiece::getRotationAngle() const{ // ChessPiece::getRotationAngle() is NOT added by Zhivko
     return _pieceImg.getRotationAngle();
+}
+
+bool ChessPiece::isGetMoveTilesCalled(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const{
+    for(const PlayerPieces& player:activePlayers){
+        for(const std::unique_ptr<ChessPiece>& piece:player){
+            if(piece->_isFncGetMoveTilesCalled){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool ChessPiece::isMoveTileValid(const BoardPos& boardPos, const BoardPos& kingBoardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
+    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
+    const ChessPiece::PlayerPieces& opponentPieces=activePlayers[opponentId];
+    const BoardPos initialBoardPos=_boardPos;
+    _boardPos=boardPos;
+
+    if(PieceType::KING!=_pieceType){
+        for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
+            const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
+            for(const TileData& tileData:moveTiles){
+                if(TileType::TAKE!=tileData.tileType){
+                    continue;
+                }
+                if(kingBoardPos!=tileData.boardPos){
+                    continue;
+                }
+                _boardPos=initialBoardPos;
+                return false;            
+            }        
+        }
+        _boardPos=initialBoardPos;
+        return true;        
+    }
+
+    for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
+        const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
+        for(const TileData& tileData:moveTiles){
+            if(TileType::TAKE!=tileData.tileType){
+                continue;
+            }
+            if(boardPos!=tileData.boardPos){
+                continue;
+            }
+            _boardPos=initialBoardPos;
+            return false;
+        }
+    }
+    _boardPos=initialBoardPos;
+    return true;
+}
+
+bool ChessPiece::isTakeTileValid(const BoardPos& boardPos, const BoardPos& kingBoardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
+    int32_t opponentId=BoardUtils::getOpponentId(_playerId);
+    const ChessPiece::PlayerPieces& opponentPieces=activePlayers[opponentId];
+    
+    if(PieceType::KING!=_pieceType){
+        const BoardPos initialBoardPos=_boardPos;
+        _boardPos=boardPos;
+        for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
+            if(boardPos==piece->getBoardPos()){
+                continue;
+            }
+            
+            const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
+            for(const TileData& tileData:moveTiles){
+                if(TileType::TAKE!=tileData.tileType){
+                    continue;
+                }
+                if(kingBoardPos!=tileData.boardPos){
+                    continue;
+                }
+                _boardPos=initialBoardPos;
+                return false;            
+            }        
+        }
+        _boardPos=initialBoardPos;
+        return true;
+    }
+
+
+    for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
+        if(boardPos==piece->getBoardPos()){
+            continue;
+        }
+
+        const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
+        for(const TileData& tileData:moveTiles){
+            if(TileType::GUARD!=tileData.tileType){
+                continue;
+            }
+            if(boardPos!=tileData.boardPos){
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
 }

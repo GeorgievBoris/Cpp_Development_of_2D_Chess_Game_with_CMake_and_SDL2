@@ -35,7 +35,7 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
     _gameBoardProxy=gameBoardProxy;
     _gameProxy=gameProxy;
 
-    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy, whitePiecesRsrcId,blackPiecesRsrcId, _pieces)){
+    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy, static_cast<PieceHandlerProxy*>(this), whitePiecesRsrcId,blackPiecesRsrcId, _pieces)){
         std::cerr<<"PieceHandlerPopulator::populatePieceHandler() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -167,7 +167,7 @@ void PieceHandler::handlePieceGrabbedEvent(const InputEvent& e){
     const std::unique_ptr<ChessPiece>& currPlayerSelectedPiece=_pieces[_currPlayerId][_selectedPieceId]; // NOT added by Zhivko
     
     if(_isCastlingPossible){
-        BoardUtils::checkForCastling(_pieces[_currPlayerId],currPlayerSelectedPiece,_targetBoardPos,pair); // NOT added by Zhivko
+        BoardUtils::getBoardPosIfCastling(_pieces[_currPlayerId],currPlayerSelectedPiece,_targetBoardPos,pair); // NOT added by Zhivko
     }
     
     if(INVALID_RSRC_ID==pair.first){ // NOT added by Zhivko
@@ -206,36 +206,57 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
 }
 
 void PieceHandler::doMovePiece(){
-    PieceHandler::checkPawnsStateForEnPassant();
+    PieceHandler::checkPawnMoveForEnPassant();
     _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_collisionIdx);
     _gameProxy->setPieceMovementActive(true);
     _gameBoardProxy->onPieceUngrabbed();
 }
 
-void PieceHandler::checkPawnsStateForEnPassant(){ // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
-
-    const std::unique_ptr<ChessPiece>* chessPieceUnqPtr=&_pieces[_currPlayerId][_selectedPieceId];
-    ChessPiece* const chessPiecePtr=chessPieceUnqPtr->get();
-    const PieceType selectedPieceType=chessPiecePtr->getPieceType();
-
-    if(PieceType::PAWN!=selectedPieceType){
-        const size_t size=_pieces[_currPlayerId].size();
-        for(size_t indx=0; indx<size;++indx){
-            if(PieceType::PAWN==_pieces[_currPlayerId][indx]->getPieceType()){
-                chessPieceUnqPtr=&_pieces[_currPlayerId][indx];
-                break;
-            }
-        }
+void PieceHandler::checkPawnMoveForEnPassant(){
+    if(nullptr!=_enPassantPawnId){
+        ChessPiece* const chessPiecePtr=_enPassantPawnId->get();
+        Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
+        pawnPtr->setIsPawnTargetedForEnPassant(false);
+        _enPassantPawnId=nullptr;
     }
+    
+    std::unique_ptr<ChessPiece>& pieceRef=_pieces[_currPlayerId][_selectedPieceId];
+    if(PieceType::PAWN!=pieceRef->getPieceType()){
+        return;
+    }
+
+    ChessPiece* const chessPiecePtr=pieceRef.get();
     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
-    pawnPtr->checkStateForEnPassant(_targetBoardPos,_pieces[_currPlayerId],selectedPieceType);
+    pawnPtr->checkMoveForEnPassant(_targetBoardPos);
+    if(pawnPtr->isPawnTargetedForEnPassant()){
+        _enPassantPawnId=&pieceRef;
+    }
 }
+
+// void PieceHandler::checkPawnsStateForEnPassant(){ // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
+
+//     const std::unique_ptr<ChessPiece>* chessPieceUnqPtr=&_pieces[_currPlayerId][_selectedPieceId];
+//     ChessPiece* const chessPiecePtr=chessPieceUnqPtr->get();
+//     const PieceType selectedPieceType=chessPiecePtr->getPieceType();
+
+//     if(PieceType::PAWN!=selectedPieceType){
+//         const size_t size=_pieces[_currPlayerId].size();
+//         for(size_t indx=0; indx<size;++indx){
+//             if(PieceType::PAWN==_pieces[_currPlayerId][indx]->getPieceType()){
+//                 chessPieceUnqPtr=&_pieces[_currPlayerId][indx];
+//                 break;
+//             }
+//         }
+//     }
+//     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
+//     pawnPtr->checkStateForEnPassant(_targetBoardPos,_pieces[_currPlayerId],selectedPieceType);
+// }
 
 bool PieceHandler::isMoveValid(){ // PieceHandler::isMoveValid() is NOT added by Zhivko
     const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
 
     BoardUtils::doCollideWithPiece(_targetBoardPos,_pieces[opponentId],_collisionIdx);
-    BoardUtils::checkForEnPassant(_pieces[_currPlayerId][_selectedPieceId],_pieces[opponentId],_targetBoardPos,_collisionIdx);
+    BoardUtils::getBoardPosIfEnPassant(_pieces[_currPlayerId][_selectedPieceId],_pieces[opponentId],_targetBoardPos,_collisionIdx);
     const int32_t collisionIdx=_collisionIdx;
 
     if(PieceHandler::isNextMoveCheckForKing()){
@@ -369,7 +390,7 @@ bool PieceHandler::isOpponentKingInMate(bool isKingInCheck){ // PieceHandler::is
             if(TileType::TAKE==tileData.tileType){
                 BoardUtils::doCollideWithPiece(_targetBoardPos,_pieces[oppPlayerId],_collisionIdx);
             }
-            BoardUtils::checkForEnPassant(piece,_pieces[oppPlayerId],_targetBoardPos,_collisionIdx);
+            BoardUtils::getBoardPosIfEnPassant(piece,_pieces[oppPlayerId],_targetBoardPos,_collisionIdx);
             
             if(!PieceHandler::isNextMoveCheckForKing()){
                 _currPlayerId=currPlayerId; _selectedPieceId=selectedPieceId; _targetBoardPos=targetBoardPos;
@@ -472,7 +493,7 @@ void PieceHandler::promotePiece(PieceType pieceType){
     pieceCfg.pieceType=pieceType;
     pieceCfg.rsrcId=pieceRsrcId;
 
-    currPiece=PieceHandlerPopulator::createPiece(pieceType,_gameProxy);
+    currPiece=PieceHandlerPopulator::createPiece(pieceType,_gameProxy,static_cast<PieceHandlerProxy*>(this));
     if(EXIT_SUCCESS!=currPiece->init(pieceCfg)){
         std::cerr<<"Error, PieceHandlerPopulator::createPiece() failed. Pawn promotion failed!"<<std::endl;
         return;
@@ -507,7 +528,8 @@ int32_t PieceHandler::restart(){
         pieces.clear(); // investigate further if the std::unique_ptr() will take care for deleting ChessPiece
     }
 
-    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy,piecesWhitesRsrcId,piecesBlackRsrcId,_pieces)){
+    if(EXIT_SUCCESS!=PieceHandlerPopulator::populatePieceHandler(_gameProxy,static_cast<PieceHandlerProxy*>(this),
+                                                                    piecesWhitesRsrcId,piecesBlackRsrcId,_pieces)){
         std::cerr<<"PieceHandlerPopulator::populatePieceHandler() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -539,6 +561,11 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
 
 const ChessPiece::PlayerPieces& PieceHandler::getWinnerPieces(){
     return _pieces[_currPlayerId];
+}
+
+void PieceHandler::changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos){ // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
+    // NOTE: this method is only used in the Pawn::areEnPassantTilesValid() method
+    _pieces[pawnPair.first][pawnPair.second]->setBoardPos(boardPos);
 }
 
 void PieceHandler::rotateWinnerPieces(double angle){

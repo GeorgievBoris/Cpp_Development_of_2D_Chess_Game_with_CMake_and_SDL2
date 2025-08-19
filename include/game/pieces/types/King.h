@@ -34,11 +34,6 @@ public:
 private:
     std::vector<MoveDirection> getBoardMoves() const;
     bool isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const BoardPos& rookBoardPos) const;
-    bool isMoveTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;
-    bool isTakeTileValid(const BoardPos& boardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;
-    bool getIsTaken() const final;
-    void setIsTaken(bool isTaken) final;
-    
     mutable bool _isCastlePossible=false;
     bool _isMoved=false;
     bool _isInCheck=false;

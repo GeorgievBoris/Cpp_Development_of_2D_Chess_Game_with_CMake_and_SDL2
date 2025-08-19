@@ -10,30 +10,29 @@
 #include "game/pieces/types/ChessPiece.h"
 // Forward Declarations
 class GameProxy;
+class PieceHandlerProxy;
 
 class Pawn : public ChessPiece {
 public:
-    Pawn(GameProxy* gameProxy);
-    // void setBoardPos(const BoardPos& boardPos) final;
+    Pawn(GameProxy* gameProxy, PieceHandlerProxy* pieceHandlerProxy);
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                        Defines::PLAYERS_COUNT>& activePieces) const final;
-    void checkStateForEnPassant(const BoardPos& newBoardPos,
-                                const ChessPiece::PlayerPieces& currPlayerPieces, PieceType pieceType); // Pawn::checkStateForEnPassant() is NOT added by Zhivko
+                                    Defines::PLAYERS_COUNT>& activePieces) const final;
+    void checkMoveForEnPassant(const BoardPos& boardPos); // Pawn::checkMoveForEnPassant() is NOT added by Zhivko
     bool isPawnTargetedForEnPassant() const; // Pawn::isPawnTargetedForEnPassant() is NOT added by Zhivko
-    bool getIsTaken() const final; // Pawn::getIsTaken() is NOT added by Zhivko
     void checkForPawnPromotion(); // Pawn::checkForPawnPromotion() is NOT added by Zhivko
+    void setIsPawnTargetedForEnPassant(bool isPawnTargetedForEnPassant); // Pawn::setIsPawnTargetedForEnPassant() is NOT added by Zhivko
 private:
-    bool isEnPassantValid(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces) const; // Pawn::isEnPassantValid() method is NOT added by Zhivko
-    void setIsTaken(bool isTaken) final; // Pawn::setIsTaken() is NOT added by Zhivko
-    std::vector<TileData> getWhiteMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                                                            Defines::PLAYERS_COUNT>& activePieces) const;
-    std::vector<TileData> getBlackMoveTiles(const std::array<ChessPiece::PlayerPieces,
-                                                            Defines::PLAYERS_COUNT>& activePiece) const;
+    bool isEnPassantPossible(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces, int32_t& enemyPawnIndx) const; // Pawn::isEnPassantValid() method is NOT added by Zhivko
+    bool areEnPassantTilesValid(const BoardPos& boardPos,const BoardPos& kingBoardPos,const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const int32_t enemyPawnIndx) const; // Pawn::areEnPassantTilesValid() is NOT added by Zhivko
+    std::vector<TileData> getWhiteMoveTiles(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces, 
+                                            const BoardPos& kingBoardPos, const bool isAnotherPieceGetMoveTilesCalled) const; // "BoardPos& kingBoardPos" is NOT added by Zhivko
+    std::vector<TileData> getBlackMoveTiles(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces,
+                                            const BoardPos& kingBoardPos, const bool isAnotherPieceGetMoveTilesCalled) const; // "BoardPos& kingBoardPos" is NOT added by Zhivko
     std::unordered_map<Defines::Directions,MoveDirection> getWhiteBoardMoves() const;
     std::unordered_map<Defines::Directions,MoveDirection> getBlackBoardMoves() const;
-    GameProxy* _gameProxy;
+    GameProxy* _gameProxy=nullptr;;
+    PieceHandlerProxy* _pieceHandlerProxy=nullptr;; // NOT added by Zhivko;
     bool _isPawnTargetedForEnPassant=false; // NOT added by Zhivko
-    bool _isTaken=false; // NOT added by Zhivko
 };
 
 

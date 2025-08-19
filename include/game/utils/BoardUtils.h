@@ -34,11 +34,12 @@ public:
 
     static BoardPos shiftBoardPositions(const BoardPos& boardPos); // BoardUtils::shiftBoardPositions() is NOT added by Zhivko
         
-    static void checkForEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
-                                        BoardPos& boardPos, int32_t& outCollisionRelativeId); // BoardUtils::checkForEnPassant() method is NOT added by Zhivko    
+    static void getBoardPosIfEnPassant(const std::unique_ptr<ChessPiece>& selectedPiece, const ChessPiece::PlayerPieces& enemyPieces,
+                                        BoardPos& boardPos, int32_t& outCollisionRelativeId); // BoardUtils::getBoardPosIfEnPassant() method is NOT added by Zhivko    
     
-    static void checkForCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece, BoardPos& newBoardPos,
-                                                std::pair<int32_t,BoardPos>& pair); // BoardUtils::checkForCastling() is NOT added by Zhivko
+    static void getBoardPosIfCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece, BoardPos& newBoardPos,
+                                                std::pair<int32_t,BoardPos>& pair); // BoardUtils::getBoardPosIfCastling() is NOT added by Zhivko
+    static BoardPos getKingBoardPos(const ChessPiece::PlayerPieces& pieces); // BoardUtils::getBoardPosIfCastling() is NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_UTILS_BOARDUTILS_H_

@@ -51,6 +51,13 @@ std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPie
     const int32_t currActivePlayerId=getPlayerId();
     const int32_t opponentId=BoardUtils::getOpponentId(currActivePlayerId);
 
+    const bool isAnotherPieceGetMoveTilesCalled=ChessPiece::isGetMoveTilesCalled(activePlayers);
+    BoardPos kingBoardPos;
+    if(!isAnotherPieceGetMoveTilesCalled){
+        kingBoardPos=BoardUtils::getKingBoardPos(activePlayers[_playerId]);
+        _isFncGetMoveTilesCalled=true;
+    }    
+
     TileType tileType;
     for(const MoveDirection& moveDir:boardMoves){
         if(moveDir.empty()){
@@ -58,19 +65,34 @@ std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPie
         }
         for(const BoardPos& pos:moveDir){
             tileType=BoardUtils::getTileType(pos,activePlayers[currActivePlayerId],activePlayers[opponentId]);
-            moveTiles.emplace_back(pos,tileType);
-            if(TileType::MOVE!=tileType){
+
+            if(TileType::GUARD==tileType){
+                moveTiles.emplace_back(pos,tileType);
                 break;
+            }
+
+            if(isAnotherPieceGetMoveTilesCalled){
+                moveTiles.emplace_back(pos,tileType);
+                if(TileType::MOVE!=tileType){
+                    break;
+                }                
+                continue;
+            }
+
+            if(TileType::TAKE==tileType){
+                if(ChessPiece::isTakeTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
+                break; 
+            }        
+
+            if(TileType::MOVE==tileType){
+                if(ChessPiece::isMoveTileValid(pos,kingBoardPos,activePlayers)){
+                    moveTiles.emplace_back(pos,tileType);
+                }
             }
         }
     }
+    _isFncGetMoveTilesCalled=false;
     return moveTiles;
-}
-
-void Queen::setIsTaken(bool isTaken){
-    _isTaken=isTaken;
-}
-
-bool Queen::getIsTaken() const {
-    return _isTaken;
 }

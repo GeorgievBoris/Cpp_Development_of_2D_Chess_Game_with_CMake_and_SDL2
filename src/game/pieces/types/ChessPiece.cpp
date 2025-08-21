@@ -98,6 +98,25 @@ double ChessPiece::getRotationAngle() const{ // ChessPiece::getRotationAngle() i
     return _pieceImg.getRotationAngle();
 }
 
+void ChessPiece::activateAlphaModulation(){
+    _pieceImg.activateAlphaModulation();
+}
+
+void ChessPiece::setOpacity(int32_t opacity){
+    if(0>opacity){
+        return;
+    }
+    _pieceImg.setOpacity(opacity);
+}
+
+int32_t ChessPiece::getOpacity() const{
+    return _pieceImg.getOpacity();
+}
+
+void ChessPiece::deactivateAlphaModulation(){
+    _pieceImg.deactivateAlphaModulation();
+}
+
 bool ChessPiece::isGetMoveTilesCalled(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const{
     for(const PlayerPieces& player:activePlayers){
         for(const std::unique_ptr<ChessPiece>& piece:player){

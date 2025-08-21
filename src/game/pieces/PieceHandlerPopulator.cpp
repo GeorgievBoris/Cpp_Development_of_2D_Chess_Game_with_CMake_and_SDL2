@@ -32,6 +32,7 @@ static int32_t populateWhitePieces(GameProxy* gameProxy, PieceHandlerProxy* piec
             std::cerr<<"whites["<<i<<"].init() failed"<<std::endl;
             return EXIT_FAILURE;
         }
+        whites[i]->activateAlphaModulation(); // NOT added by Zhivko
     }
 
     constexpr int32_t nonPawnCount=Defines::PAWNS_COUNT;
@@ -48,6 +49,7 @@ static int32_t populateWhitePieces(GameProxy* gameProxy, PieceHandlerProxy* piec
             std::cerr<<"whites["<<i<<"].init()"<<std::endl;
             return EXIT_FAILURE;
         }
+        whites[i]->activateAlphaModulation(); // NOT added by Zhivko
     }
     return EXIT_SUCCESS;
 }
@@ -68,6 +70,7 @@ static int32_t populateBlackPieces(GameProxy* gameProxy, PieceHandlerProxy* piec
             std::cerr<<"blacks["<<i<<"].init() failed"<<std::endl;
             return EXIT_FAILURE;
         }
+        blacks[i]->activateAlphaModulation(); // NOT added by Zhivko
     }
     
     constexpr int32_t nonPawnCount=Defines::PAWNS_COUNT;
@@ -86,6 +89,7 @@ static int32_t populateBlackPieces(GameProxy* gameProxy, PieceHandlerProxy* piec
             std::cerr<<"blacks["<<i<<"].init() failed"<<std::endl;
             return EXIT_FAILURE;
         }
+        blacks[i]->activateAlphaModulation(); // NOT added by Zhivko
     }
 
     return EXIT_SUCCESS;
@@ -106,7 +110,6 @@ int32_t PieceHandlerPopulator::populatePieceHandler(GameProxy* gameProxy, PieceH
         std::cerr<<"Error, PieceHandler::populateBlackPieces() failed"<<std::endl;
         return EXIT_FAILURE;
     }
-
     return EXIT_SUCCESS;
 }
 

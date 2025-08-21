@@ -1,8 +1,8 @@
 // Corresponding header
 #include "game/utils/BoardUtils.h"
 // C system headers
-// C++ system headers
 #include <cstdlib>
+// C++ system headers
 #include <iostream>
 // Third-party headers
 // Own headers
@@ -273,6 +273,41 @@ BoardPos BoardUtils::getKingBoardPos(const ChessPiece::PlayerPieces& pieces) {
             return pieces[i]->getBoardPos();
         }
     }
-    std::cerr<<"Error, BoardUtils::getKingBoardPos() returns an invalid board position for king\n";
+    std::cerr<<"Error, BoardUtils::getKingBoardPos() returns an invalid board position of king for playerId: "<<pieces.front()->getPlayerId()<<'\n';
     return BoardPos(INVALID_RSRC_ID,INVALID_RSRC_ID);
+}
+
+std::pair<int32_t,int32_t> BoardUtils::getTakenPieceMoveDirections(const BoardPos& targetBoardPos, const BoardPos& boardPos){
+    const int32_t diffCol=targetBoardPos.col-boardPos.col;
+    const int32_t diffRow=targetBoardPos.row-boardPos.row;
+    constexpr size_t magnitude=5;
+
+    if(0<diffCol){
+        if(0<diffRow){
+            return std::pair(-1*magnitude,-1*magnitude);
+        }
+        if(0>diffRow){
+            return std::pair(-1*magnitude,1*magnitude);
+        }
+        return std::pair(-1*magnitude,0);
+    }
+
+    if(0>diffCol){
+        if(0<diffRow){
+            return std::pair(1*magnitude,-1*magnitude);
+        }
+        if(0>diffRow){
+            return std::pair(1*magnitude,1*magnitude);
+        }
+        return std::pair(1*magnitude,0);
+    }
+
+    if(0>diffRow){
+        return std::pair(0,1*magnitude);
+    }
+    if(0<diffRow){
+        return std::pair(0,-1*magnitude);
+    }
+
+    return std::pair(0,0);
 }

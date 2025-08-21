@@ -40,6 +40,7 @@ public:
     static void getBoardPosIfCastling(const ChessPiece::PlayerPieces& pieces, const std::unique_ptr<ChessPiece>& piece, BoardPos& newBoardPos,
                                                 std::pair<int32_t,BoardPos>& pair); // BoardUtils::getBoardPosIfCastling() is NOT added by Zhivko
     static BoardPos getKingBoardPos(const ChessPiece::PlayerPieces& pieces); // BoardUtils::getBoardPosIfCastling() is NOT added by Zhivko
+    static std::pair<int32_t,int32_t> getTakenPieceMoveDirections(const BoardPos& targetBoardPos, const BoardPos& boardPos); // BoardUtils::getTakenPieceMoveDirection() is NOT added by Zhivko
 };
 
 #endif // INCLUDE_GAME_UTILS_BOARDUTILS_H_

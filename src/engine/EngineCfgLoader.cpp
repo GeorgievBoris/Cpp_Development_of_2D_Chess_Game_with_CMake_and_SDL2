@@ -101,7 +101,6 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
         imageCfg.frames.clear();
     }
 
-
     // the board does not have transparency, so it is ".jpg" -> no point in using ".png", therefore it saves some information
     imageCfg.location=getFilePath("resources/p/chessBoard.png");
     imageCfg.frames.emplace_back(0,0,CHESS_BOARD_WIDTH,CHESS_BOARD_HEIGHT);
@@ -129,6 +128,7 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     cfg.imageConfigs.emplace(TextureId::PROMOTION_BUTTON,imageCfg);
     imageCfg.frames.clear();
 
+    // NOTE: all of the below assets that are added to "cfg" are NOT added by Zhivko
     imageCfg.location=getFilePath("resources/p/startScreenButtons.png");
     
     for(int32_t frameId=0;frameId<START_SCREEN_BUTTONS_FRAMES;++frameId){
@@ -177,7 +177,7 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.location=getFilePath("resources/p/winnerMedal.png");
     imageCfg.frames.emplace_back(0,0,WINNER_MEDAL_WIDTH,WINNER_MEDAL_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::WINNER_MEDAL,imageCfg);
-    imageCfg.frames.clear();
+    imageCfg.frames.clear(); 
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){

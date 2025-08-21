@@ -76,6 +76,8 @@ void PieceMoveAnimator::start(std::array<ChessPiece::PlayerPieces,Defines::PLAYE
     PieceMoveAnimator::shiftBoardPosOfMovedPiece(takenPiece,currPlayerId);
     _takenPiecePtr=&takenPiece;
     _opponentPiecesPtr=&pieces[opponentId];
+
+    _deltaPosXY=BoardUtils::getTakenPieceMoveDirections(targetBoardPos,selectedPiece->getBoardPos());
 }
 
 BoardPos PieceMoveAnimator::getTakenPieceBoardPosInv(const BoardPos& takenPieceBoardPos){
@@ -103,11 +105,11 @@ void PieceMoveAnimator::onTimeout(int32_t timerId) {
 
     if(nullptr!=_takenPiecePtr){
         if(PieceMoveAnimator::doPiecesPosOverlap(targetAbsPos,absPosMoved)){
-            // const int32_t opponentId=BoardUtils::getOpponentId(currPlayerId);
             ChessPiece* const opponentPiece=_takenPiecePtr->get();
             const Point absPosOppPiece=PieceMoveAnimator::getAbsPosForAnim(opponentPiece->getBoardPos());
-            const BoardPos boardPosOppPieceShifted=PieceMoveAnimator::getBoardPosForAnim({absPosOppPiece.x-5,absPosOppPiece.y});
-            opponentPiece->setBoardPos(boardPosOppPieceShifted);    
+            const BoardPos boardPosOppPieceShifted=PieceMoveAnimator::getBoardPosForAnim({absPosOppPiece.x+_deltaPosXY.first,absPosOppPiece.y+_deltaPosXY.second});
+            opponentPiece->setBoardPos(boardPosOppPieceShifted);
+            opponentPiece->setOpacity(opponentPiece->getOpacity()-25);
         }
     }
 
@@ -188,6 +190,7 @@ void PieceMoveAnimator::onTimeout(int32_t timerId) {
                 opponentPiece->setBoardPos(boardPosTakenInv);
             } 
         }
+        opponentPiece->setOpacity(FULL_OPACITY);
     }
 
     _movedPiecePtr=nullptr; _takenPiecePtr=nullptr; _opponentPiecesPtr=nullptr; _targetBoardPos=nullptr;
@@ -326,7 +329,7 @@ void PieceMoveAnimator::shiftBoardPosOfMovedPiece(std::unique_ptr<ChessPiece>& p
     return;
 }
 
-bool PieceMoveAnimator::doPiecesPosOverlap(const Point& targetPos, const Point& posTopLeft){ // BoardUtils::isInsideBorder() is NOT added by Zhivko
+bool PieceMoveAnimator::doPiecesPosOverlap(const Point& targetPos, const Point& posTopLeft){
     const Rectangle border(targetPos.x,targetPos.y,_tileSize,_tileSize);
     const Point posTopRight(posTopLeft.x+_tileSize,posTopLeft.y);
     const Point posBottLeft(posTopLeft.x,posTopLeft.y+_tileSize);
@@ -335,7 +338,7 @@ bool PieceMoveAnimator::doPiecesPosOverlap(const Point& targetPos, const Point& 
            border.isPointInside(posBottLeft) || border.isPointInside(posBottRight);
 }
 
-Point PieceMoveAnimator::getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces) { // BoardUtils::getAbsPosOfTakenPiece() is NOT added by Zhivko
+Point PieceMoveAnimator::getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces) {
     const size_t size=pieces.size();
     const int32_t playerId=pieces.front()->getPlayerId();
     uint32_t counter{0};

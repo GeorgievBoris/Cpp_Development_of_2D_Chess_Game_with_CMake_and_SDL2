@@ -42,6 +42,7 @@ private:
     int32_t _firstTilePosX{};
     int32_t _firstTilePosY{};
     int32_t _BOARD_SIZE=8;
+    std::pair<int32_t,int32_t> _deltaPosXY;
 
     std::unique_ptr<ChessPiece>* _movedPiecePtr=nullptr;
     std::unique_ptr<ChessPiece>* _takenPiecePtr=nullptr;

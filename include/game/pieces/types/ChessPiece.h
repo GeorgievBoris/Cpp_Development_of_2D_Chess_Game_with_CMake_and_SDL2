@@ -55,6 +55,11 @@ public:
     PieceType getPieceType()const; // ChessPiece::getPieceType() is NOT added by Zhivko
     void setRotationAngle(double angle); // ChessPiece::setRotationAngle() is NOT added by Zhivko
     double getRotationAngle() const; // ChessPiece::getRotationAngle() is NOT added by Zhivko
+
+    void activateAlphaModulation(); // ChessPiece::activateAlphaModulation() is NOT added by Zhivko
+    void setOpacity(int32_t opacity); // ChessPiece::setOpacity() is NOT added by Zhivko
+    int32_t getOpacity() const; // ChessPiece::getOpacity() is NOT added by Zhivko
+    void deactivateAlphaModulation(); // ChessPiece::deactivateAlphaModulation() is NOT added by Zhivko
 protected:
     bool isGetMoveTilesCalled(const std::array<PlayerPieces, Defines::PLAYERS_COUNT>& activePlayers) const; // NOT added by Zhivko
     bool isMoveTileValid(const BoardPos& boardPos, const BoardPos& kingBoardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;

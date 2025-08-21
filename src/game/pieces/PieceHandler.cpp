@@ -233,25 +233,6 @@ void PieceHandler::checkPawnMoveForEnPassant(){
     }
 }
 
-// void PieceHandler::checkPawnsStateForEnPassant(){ // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
-
-//     const std::unique_ptr<ChessPiece>* chessPieceUnqPtr=&_pieces[_currPlayerId][_selectedPieceId];
-//     ChessPiece* const chessPiecePtr=chessPieceUnqPtr->get();
-//     const PieceType selectedPieceType=chessPiecePtr->getPieceType();
-
-//     if(PieceType::PAWN!=selectedPieceType){
-//         const size_t size=_pieces[_currPlayerId].size();
-//         for(size_t indx=0; indx<size;++indx){
-//             if(PieceType::PAWN==_pieces[_currPlayerId][indx]->getPieceType()){
-//                 chessPieceUnqPtr=&_pieces[_currPlayerId][indx];
-//                 break;
-//             }
-//         }
-//     }
-//     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
-//     pawnPtr->checkStateForEnPassant(_targetBoardPos,_pieces[_currPlayerId],selectedPieceType);
-// }
-
 bool PieceHandler::isMoveValid(){ // PieceHandler::isMoveValid() is NOT added by Zhivko
     const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
 
@@ -498,6 +479,7 @@ void PieceHandler::promotePiece(PieceType pieceType){
         std::cerr<<"Error, PieceHandlerPopulator::createPiece() failed. Pawn promotion failed!"<<std::endl;
         return;
     }
+    currPiece->activateAlphaModulation();
 
     if(Defines::BLACK_PLAYER_ID==_currPlayerId){ // the entire IF statement is NOT added by Zhivko
         currPiece->setBoardPos(_targetBoardPos);
@@ -516,13 +498,14 @@ void PieceHandler::promotePiece(PieceType pieceType){
     }
 }
 
-// PieceHandler::restart() is added by me
 int32_t PieceHandler::restart(){
     int32_t piecesWhitesRsrcId=INVALID_RSRC_ID;
     int32_t piecesBlackRsrcId=INVALID_RSRC_ID;
     for(ChessPiece::PlayerPieces& pieces:_pieces){
+        for(std::unique_ptr<ChessPiece>&piece:pieces){
+            piece->deactivateAlphaModulation();
+        }
         std::unique_ptr<ChessPiece>& firstPiece=pieces.front();
-
         Defines::WHITE_PLAYER_ID==firstPiece->getPlayerId() ? piecesWhitesRsrcId=firstPiece->getRsrcId() : piecesBlackRsrcId=firstPiece->getRsrcId();
    
         pieces.clear(); // investigate further if the std::unique_ptr() will take care for deleting ChessPiece

@@ -37,7 +37,6 @@ private:
 
     void doMovePiece();
 
-    // void checkPawnsStateForEnPassant(); // PieceHandler::checkPawnsForEnPassant() is NOT added by Zhivko
     void checkPawnMoveForEnPassant(); // PieceHandler::checkPawnMoveForEnPassant() is NOT added by Zhivko
     
     bool isMoveValid(); // PieceHandler::isMoveValid() is NOT added by Zhivko

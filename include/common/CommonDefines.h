@@ -23,6 +23,8 @@ enum ResourceId{
     WINNER_STAR, // NOT added by Zhivko
     FIREWORKS, // NOT added by Zhivko
     WINNER_MEDAL, // NOT added by Zhivko
+    WHITE_PIECES_HALVES, // NOT added by Zhivko
+    BLACK_PIECES_HALVES, // NOT added by Zhivko    
     COUNT
 };
 
@@ -50,6 +52,7 @@ enum Keys{
     NEW_WINNER_ANIM_TIMER_ID, // NOT added by Zhivko
     WINNER_ANIM_END_TIMER_ID, // NOT added by Zhivko
     MOVE_PIECE_TIMER_ID, // NOT added by Zhivko
+    MOVE_PIECE_HALVES_TIMER_ID, // NOT added by Zhivko
     COUNT
 };
 

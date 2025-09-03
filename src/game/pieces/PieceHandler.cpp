@@ -20,7 +20,10 @@
 extern const int32_t GAME_X_POS_SHIFT;
 extern const int32_t GAME_Y_POS_SHIFT;
 
-int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId, int32_t movePieceTimerId){
+int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
+                 int32_t whitePiecesRsrcId, int32_t blackPiecesRsrcId,
+                 int32_t whitePiecesHalvesRsrcId, int32_t blackPiecesHalvesRsrcId,
+                 int32_t movePieceTimerId, int32_t movePieceHalvesTimerId){
 
     if(nullptr==gameBoardProxy){
         std::cerr<<"Error, nullptr provided for gameBoardProxy"<<std::endl;
@@ -46,13 +49,14 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
     const int32_t FIRST_TILE_X_POS=absPosZeros.x;
     const int32_t FIRST_TILE_Y_POS=absPosZeros.y;
 
-    if(EXIT_SUCCESS!=_pieceMoveAnimator.init(gameProxy,movePieceTimerId,TILE_SIZE,FIRST_TILE_X_POS,FIRST_TILE_Y_POS,_collisionIdx,
-                                    [&](){return PieceHandler::isOpponentKingInCheck();},
-                                    [&](){PieceHandler::isOpponentInStalemate();})){
+    if(EXIT_SUCCESS!=_pieceMoveAnimator.init(gameProxy, whitePiecesHalvesRsrcId, blackPiecesHalvesRsrcId,
+                                             movePieceTimerId,movePieceHalvesTimerId,
+                                             TILE_SIZE,FIRST_TILE_X_POS,FIRST_TILE_Y_POS, _collisionIdx,
+                                            [&](){return PieceHandler::isOpponentKingInCheck();},
+                                            [&](){PieceHandler::isOpponentInStalemate();})){
         std::cerr<<"PieceMoveAnimator::init() failed\n";
         return EXIT_FAILURE;
     }
-
     return EXIT_SUCCESS;
 }
 
@@ -110,8 +114,12 @@ void PieceHandler::draw() const{
         }
         _pieces[_currPlayerId][_selectedPieceId]->draw();
         if(INVALID_RSRC_ID!=_collisionIdx){
-            const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
-            _pieces[opponentId][_collisionIdx]->draw();
+            if(_pieceMoveAnimator.isCapturedPieceActive()){
+                _pieceMoveAnimator.draw();
+            } else {
+                const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+                _pieces[opponentId][_collisionIdx]->draw();
+            }
         }
         
         if(INVALID_RSRC_ID!=pair.first){
@@ -207,29 +215,42 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
 
 void PieceHandler::doMovePiece(){
     PieceHandler::checkPawnMoveForEnPassant();
-    _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_collisionIdx);
+    _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_collisionIdx,_pawnEnPassantPtr);
     _gameProxy->setPieceMovementActive(true);
     _gameBoardProxy->onPieceUngrabbed();
 }
 
 void PieceHandler::checkPawnMoveForEnPassant(){
-    if(nullptr!=_enPassantPawnId){
-        ChessPiece* const chessPiecePtr=_enPassantPawnId->get();
-        Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
-        pawnPtr->setIsPawnTargetedForEnPassant(false);
-        _enPassantPawnId=nullptr;
-    }
+    std::unique_ptr<ChessPiece>& currPieceRef=_pieces[_currPlayerId][_selectedPieceId];    
     
-    std::unique_ptr<ChessPiece>& pieceRef=_pieces[_currPlayerId][_selectedPieceId];
-    if(PieceType::PAWN!=pieceRef->getPieceType()){
+    if(PieceType::PAWN!=currPieceRef->getPieceType()){
+        if(nullptr!=_pawnEnPassantPtr){
+            ChessPiece* const chessPiecePtr=_pawnEnPassantPtr->get();
+            Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
+            pawnPtr->setIsPawnTargetedForEnPassant(false);
+            _pawnEnPassantPtr=nullptr;
+        }
         return;
     }
 
-    ChessPiece* const chessPiecePtr=pieceRef.get();
+    if(PieceType::PAWN==currPieceRef->getPieceType()){
+        if(nullptr!=_pawnEnPassantPtr){
+            if(_targetBoardPos.row!=currPieceRef->getBoardPos().row){
+                ChessPiece* const chessPiecePtr=_pawnEnPassantPtr->get();
+                Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
+                pawnPtr->setIsPawnTargetedForEnPassant(false);
+                _pawnEnPassantPtr=nullptr;                
+            } else {
+                return;
+            }
+        }
+    }
+
+    ChessPiece* const chessPiecePtr=currPieceRef.get();
     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);
     pawnPtr->checkMoveForEnPassant(_targetBoardPos);
     if(pawnPtr->isPawnTargetedForEnPassant()){
-        _enPassantPawnId=&pieceRef;
+        _pawnEnPassantPtr=&currPieceRef;
     }
 }
 

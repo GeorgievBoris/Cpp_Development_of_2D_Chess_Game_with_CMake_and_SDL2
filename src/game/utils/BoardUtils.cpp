@@ -188,11 +188,13 @@ void BoardUtils::getBoardPosIfEnPassant(const std::unique_ptr<ChessPiece>& selec
 
         if(piece->getBoardPos()==boardPos){
             outCollisionRelativeId=i;
+        } else {
+            Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
+                                                boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);
         }
 
-        Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
-                                                boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);            
-
+        // Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
+        //                                         boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);            
 
         if(outCollisionRelativeId==i){
             break;
@@ -283,16 +285,22 @@ std::pair<int32_t,int32_t> BoardUtils::getTakenPieceMoveDirections(const BoardPo
     constexpr size_t magnitude=5;
 
     if(0<diffCol){
+        // if(isPawnEnPassantPossible || 0==diffRow){
+        //     return std::pair(-1*magnitude,0);
+        // }
         if(0<diffRow){
             return std::pair(-1*magnitude,-1*magnitude);
         }
         if(0>diffRow){
             return std::pair(-1*magnitude,1*magnitude);
         }
-        return std::pair(-1*magnitude,0);
+        return std::pair(-1*magnitude,0); 
     }
 
     if(0>diffCol){
+        // if(isPawnEnPassantPossible || 0==diffRow){
+        //     return std::pair(1*magnitude,0);
+        // }
         if(0<diffRow){
             return std::pair(1*magnitude,-1*magnitude);
         }

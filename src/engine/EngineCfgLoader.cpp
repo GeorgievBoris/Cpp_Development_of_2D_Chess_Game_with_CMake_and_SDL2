@@ -177,7 +177,22 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.location=getFilePath("resources/p/winnerMedal.png");
     imageCfg.frames.emplace_back(0,0,WINNER_MEDAL_WIDTH,WINNER_MEDAL_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::WINNER_MEDAL,imageCfg);
-    imageCfg.frames.clear(); 
+    imageCfg.frames.clear();
+
+	constexpr TextureId::ResourceId chessResourcesHalves[numOfChessPlayers]={TextureId::WHITE_PIECES_HALVES,
+                                                                             TextureId::BLACK_PIECES_HALVES};
+    constexpr int32_t yPosHalf=CHESS_PIECES_WIDTH_HEIGHT/numOfChessPlayers;
+    constexpr int32_t yPos[numOfChessPlayers]={yPosHalf,CHESS_PIECES_WIDTH_HEIGHT-yPosHalf};
+    for(int32_t i=0;i<numOfChessPlayers;++i){
+        imageCfg.location=getFilePath(chessPiecesPaths[i]);
+        for(auto j=0;j<CHESS_PIECES_FRAMES;++j){
+            for(auto k=0;k<numOfChessPlayers;++k){
+                imageCfg.frames.emplace_back(j*CHESS_PIECES_WIDTH_HEIGHT,yPosHalf*k,CHESS_PIECES_WIDTH_HEIGHT,yPos[k]);
+            }
+        }
+        cfg.imageConfigs.emplace(chessResourcesHalves[i],imageCfg);
+        imageCfg.frames.clear();
+    }
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -209,6 +224,8 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.winnerStarRsrcId=TextureId::WINNER_STAR; // NOT added by Zhivko
     cfg.fireworksRsrcId=TextureId::FIREWORKS;  // NOT added by Zhivko
     cfg.winnerMedalRsrcId=TextureId::WINNER_MEDAL; // NOT added by Zhivko
+    cfg.whitePiecesHalvesRsrcId=TextureId::WHITE_PIECES_HALVES; // NOT added by Zhivko
+    cfg.blackPiecesHalvesRsrcId=TextureId::BLACK_PIECES_HALVES; // NOT added by Zhivko
     
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
@@ -221,6 +238,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.nextWinnerAnimTimerId=TimerId::NEW_WINNER_ANIM_TIMER_ID; // NOT added by Zhivko
     cfg.winnerAnimEndTimerId=TimerId::WINNER_ANIM_END_TIMER_ID; // NOT added by Zhivko
     cfg.movePieceTimerId=TimerId::MOVE_PIECE_TIMER_ID; // NOT added by Zhivko
+    cfg.movePieceHalvesTimerId=TimerId::MOVE_PIECE_HALVES_TIMER_ID; // NOT added by Zhivko
     cfg.windowHeight=WINDOW_HEIGHT; // NOT added by Zhivko
     cfg.windowWidth=WINDOW_WIDTH; // NOT added by Zhivko
     

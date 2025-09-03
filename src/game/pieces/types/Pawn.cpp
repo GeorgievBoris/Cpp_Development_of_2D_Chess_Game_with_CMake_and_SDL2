@@ -258,7 +258,7 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
     return moveTiles;
 }
 
-bool Pawn::isEnPassantPossible(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces, int32_t& enemyPawnIndx) const{ // Pawn::isEnPassantValid() method is NOT added by Zhivko
+bool Pawn::isEnPassantPossible(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces, int32_t& enemyPawnIndx) const{ // Pawn::isEnPassantPossible() method is NOT added by Zhivko
     
     if(_isTaken){
         return false;

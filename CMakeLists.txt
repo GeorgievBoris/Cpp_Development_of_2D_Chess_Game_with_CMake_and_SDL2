@@ -49,6 +49,7 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/pieces/types/Knight.h
                 ${_INC_DIR}/game/pieces/types/Queen.h
                 ${_INC_DIR}/game/pieces/types/King.h
+                ${_INC_DIR}/game/pieces/types/CapturedPiece.h
                 ${_INC_DIR}/StartScreen/StartScreen.h
                 ${_INC_DIR}/StartScreen/defines/StartScreenDefines.h
                 ${_INC_DIR}/StartScreen/config/StartScreenCfg.h
@@ -58,7 +59,6 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/animations/WinnerAnimator.h
                 ${_INC_DIR}/game/proxies/PieceHandlerProxy.h
                 ${_INC_DIR}/game/pieces/PieceMoveAnimator.h
-                
 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
@@ -82,7 +82,8 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/pieces/types/Bishop.cpp
                 ${_SRC_DIR}/game/pieces/types/Knight.cpp
                 ${_SRC_DIR}/game/pieces/types/Queen.cpp
-                ${_SRC_DIR}/game/pieces/types/King.cpp                
+                ${_SRC_DIR}/game/pieces/types/King.cpp
+                ${_SRC_DIR}/game/pieces/types/CapturedPiece.cpp            
                 ${_SRC_DIR}/StartScreen/StartScreen.cpp
                 ${_SRC_DIR}/StartScreen/buttons/StartScreenButton.cpp
                 ${_SRC_DIR}/game/buttons/QuitGameButton.cpp

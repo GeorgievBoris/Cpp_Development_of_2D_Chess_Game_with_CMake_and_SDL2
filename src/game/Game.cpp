@@ -20,7 +20,9 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     }
 
     if(EXIT_SUCCESS!=_pieceHandler.init(static_cast<GameBoardProxy*>(&_gameBoard), static_cast<GameProxy*>(this),
-                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId,cfg.movePieceTimerId)){
+                                            cfg.whitePiecesRsrcId, cfg.blackPiecesRsrcId,
+                                            cfg.whitePiecesHalvesRsrcId,cfg.blackPiecesHalvesRsrcId,
+                                            cfg.movePieceTimerId, cfg.movePieceHalvesTimerId)){
 
         std::cerr<<"_pieceHandler.init() failed"<<std::endl;
         return EXIT_FAILURE;

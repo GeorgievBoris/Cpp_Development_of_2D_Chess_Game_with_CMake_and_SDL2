@@ -57,14 +57,16 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
         std::cerr<<"PieceMoveAnimator::init() failed\n";
         return EXIT_FAILURE;
     }
+  
     return EXIT_SUCCESS;
 }
 
 void PieceHandler::drawOnFbo(Fbo& fbo) const {
     if(_gameProxy->isWinnerAnimatorActive()){
-        const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
-            // The entire IF statement and its content are NOT added by Zhivko
-        for(const std::unique_ptr<ChessPiece>& piece:_pieces[opponentId]){
+        int32_t playerId;
+        _gameProxy->isAutomaticWin() ? playerId=_currPlayerId : playerId=BoardUtils::getOpponentId(_currPlayerId);
+        // The entire IF statement and its content are NOT added by Zhivko
+        for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
             piece->drawOnFbo(fbo);
         }
         return;
@@ -98,15 +100,6 @@ void PieceHandler::drawOnFbo(Fbo& fbo) const {
 }
 
 void PieceHandler::draw() const{
-    /* Original code used by Zhivko
-    
-    for(const ChessPiece::PlayerPieces& playerPieces:_pieces){
-        for(const std::unique_ptr<ChessPiece>& piece:playerPieces){
-            piece->draw();
-        }
-    }
-    */
-   
    // The below code is NOT added by Zhivko
     if(!_gameProxy->isWinnerAnimatorActive()){
         if(!_gameProxy->isPieceMovementActive()){
@@ -128,7 +121,10 @@ void PieceHandler::draw() const{
         return;
     }
 
-    for(const std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+    int32_t playerId;
+    _gameProxy->isAutomaticWin() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
+   
+    for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
         piece->draw();
     }       
 }
@@ -215,7 +211,7 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
 
 void PieceHandler::doMovePiece(){
     PieceHandler::checkPawnMoveForEnPassant();
-    _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_collisionIdx,_pawnEnPassantPtr);
+    _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_pawnEnPassantPtr);
     _gameProxy->setPieceMovementActive(true);
     _gameBoardProxy->onPieceUngrabbed();
 }
@@ -564,7 +560,12 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
 }
 
 const ChessPiece::PlayerPieces& PieceHandler::getWinnerPieces(){
+    if(_gameProxy->isAutomaticWin()){
+        const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+        return _pieces[opponentId];
+    }
     return _pieces[_currPlayerId];
+    // return _pieces[_currPlayerId];
 }
 
 void PieceHandler::changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos){ // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
@@ -576,25 +577,46 @@ void PieceHandler::rotateWinnerPieces(double angle){
 
     // obtain the current rotation angle of an arbitrary chess piece (i.e the first one)...
     // the remaining chess pieces feature the same current rotation angle
-    const double currAngle=_pieces[_currPlayerId].front()->getRotationAngle();
+    int32_t playerId;
+    _gameProxy->isAutomaticWin() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
 
-    for(const std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+    const double currAngle=_pieces[playerId].front()->getRotationAngle();
+
+    for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
         piece->setRotationAngle(currAngle+angle);
     }
 }
 
-void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
+const BoardPos PieceHandler::getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const {
 
+    if(_gameProxy->isAutomaticWin()){
+        if(playerId==_currPlayerId){
+            const int32_t kingIndx=PieceHandler::getKingIndex(playerId);
+            return _pieces[playerId][kingIndx]->getBoardPos();
+        }
+
+        const int32_t lastMovedPieceId=_pieceMoveAnimator.getLastMovedPieceId();
+        if(lastMovedPieceId==_selectedPieceId){
+            return _pieces[playerId][_selectedPieceId]->getBoardPos();
+        }
+        return _pieces[playerId][lastMovedPieceId]->getBoardPos();
+    }
+
+    if(playerId!=_currPlayerId){
+        const int32_t kingIndx=PieceHandler::getKingIndex(playerId);
+        return _pieces[playerId][kingIndx]->getBoardPos();
+    }
+    
+    const int32_t lastMovedPieceId=_pieceMoveAnimator.getLastMovedPieceId();
+    if(lastMovedPieceId==_selectedPieceId){
+        return _pieces[_currPlayerId][_selectedPieceId]->getBoardPos();
+    }
+    return _pieces[_currPlayerId][lastMovedPieceId]->getBoardPos();
+}
+
+void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
     if(Defines::BLACK_PLAYER_ID==_currPlayerId){
         if(_gameProxy->isAutomaticWin()){
-            for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
-                const BoardPos& pieceOldBoardPos=piece->getBoardPos();
-                const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
-                const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
-                const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+GAME_X_POS_SHIFT,invertedPieceAbsPos.y+GAME_Y_POS_SHIFT));
-                piece->setBoardPos(pieceNewBoardPos);
-                piece->setWidgetFlip(WidgetFlip::NONE);
-            }
             return;
         }
         for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
@@ -607,14 +629,18 @@ void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
     }
 
     if(_gameProxy->isAutomaticWin()){
-        for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
+        const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+        for(std::unique_ptr<ChessPiece>& piece:_pieces[opponentId]){
             const BoardPos& pieceOldBoardPos=piece->getBoardPos();
-            const Point& pieceAbsPos=BoardUtils::getAbsPos(pieceOldBoardPos);
-            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(pieceAbsPos.x+GAME_X_POS_SHIFT,pieceAbsPos.y+GAME_Y_POS_SHIFT));
+            const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+            const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
+            const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+GAME_X_POS_SHIFT,invertedPieceAbsPos.y+GAME_Y_POS_SHIFT));
             piece->setBoardPos(pieceNewBoardPos);
+            piece->setWidgetFlip(WidgetFlip::NONE);
         }
         return;
     }
+    
     for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
         const BoardPos& pieceOldBoardPos=piece->getBoardPos();
         const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);

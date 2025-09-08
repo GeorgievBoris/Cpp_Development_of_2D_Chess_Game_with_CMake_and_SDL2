@@ -25,13 +25,16 @@ public:
                 const std::function<bool()>& isKingInCheckCb, const std::function<void()>& isInStalemateCb);
                 
     void start(std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& pieces, BoardPos& targetBoardPos,
-                        std::pair<int32_t,BoardPos>& pair, const int32_t currPlayerId, const int32_t selectedPieceIdx, const int32_t collisionIdx,
+                        std::pair<int32_t,BoardPos>& pair, const int32_t currPlayerId, const int32_t selectedPieceIdx,
                         std::unique_ptr<ChessPiece>*& pawnEnPassantPtr);
     void draw() const;
     BoardPos getTakenPieceBoardPosInv(const BoardPos& takenPieceBoardPos);
     bool isCapturedPieceActive() const;
+    int32_t getLastMovedPieceId() const;
 private:
     void onTimeout(int32_t timerId) final;
+    void movePieceHalves();
+    void movePieces();
     void finaliseMove();
 
     Point getPosOfMovedPiece(const Point& currPos, const Point& targetPos, const PieceType pieceType);
@@ -46,6 +49,7 @@ private:
     Point getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces);
     bool isTargetPosChangedIfEnPassant();
 
+    int32_t _lastMovedPieceId=INVALID_RSRC_ID;
     int32_t _movePieceTimerId=INVALID_RSRC_ID;
     int32_t _movePieceHalvesTimerId=INVALID_RSRC_ID;
     int32_t _tileSize{};
@@ -53,7 +57,7 @@ private:
     int32_t _firstTilePosY{};
     int32_t _BOARD_SIZE=8;
     int32_t _whitePiecesHalvesRsrcId=INVALID_RSRC_ID;
-    int32_t _blackPiecesHalvesRsrcId=INVALID_RSRC_ID;    
+    int32_t _blackPiecesHalvesRsrcId=INVALID_RSRC_ID;  
     
     std::pair<int32_t,int32_t> _deltaPosXY;
 

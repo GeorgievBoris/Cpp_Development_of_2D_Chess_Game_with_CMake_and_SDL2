@@ -20,7 +20,8 @@ extern const int32_t GAME_Y_POS_SHIFT;
 int32_t PieceMoveAnimator::init(GameProxy* gameProxy, int32_t whitePiecesHalvesRsrcId, int32_t blackPiecesHalvesRsrcId,
                                 int32_t movePieceTimerId, int32_t movePieceHalvesTimerId, int32_t tileSize, int32_t firstTilePosX,
                                 int32_t firstTilePosY, int32_t& collisionIdx,
-                                const std::function<bool()>& isKingInCheckCb, const std::function<void()>& isInStalemateCb){
+                                const std::function<bool()>& isKingInCheckCb, const std::function<void()>& isInStalemateCb){  
+    
     if(INVALID_RSRC_ID==movePieceTimerId){
         std::cerr<<"Received unsupported timerId\n";
         return EXIT_FAILURE;
@@ -51,7 +52,7 @@ int32_t PieceMoveAnimator::init(GameProxy* gameProxy, int32_t whitePiecesHalvesR
 
 void PieceMoveAnimator::start(std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& pieces, BoardPos& targetBoardPos, 
                                         std::pair<int32_t,BoardPos>& pair, const int32_t currPlayerId, const int32_t selectedPieceIdx,
-                                        const int32_t collisionIdx,std::unique_ptr<ChessPiece>*& pawnEnPassantPtr){
+                                        std::unique_ptr<ChessPiece>*& pawnEnPassantPtr){
     
     TimerClient::startTimer(20,_movePieceTimerId,TimerType::PULSE);
 
@@ -60,6 +61,7 @@ void PieceMoveAnimator::start(std::array<ChessPiece::PlayerPieces,Defines::PLAYE
     }
     _targetBoardPos=&targetBoardPos;
     _pawnEnPassantPtr=pawnEnPassantPtr;
+    _lastMovedPieceId=selectedPieceIdx;
 
     std::unique_ptr<ChessPiece>& selectedPiece=pieces[currPlayerId][selectedPieceIdx];
     _movedPiecePtr=&selectedPiece;
@@ -78,6 +80,7 @@ void PieceMoveAnimator::start(std::array<ChessPiece::PlayerPieces,Defines::PLAYE
         return;
     }
 
+    const int32_t collisionIdx=*_collisionIdxPtr;
     if(INVALID_RSRC_ID==collisionIdx){
         return;
     }
@@ -113,6 +116,10 @@ bool PieceMoveAnimator::isCapturedPieceActive() const{
     return _capturedPiece->isActive();
 }
 
+int32_t PieceMoveAnimator::getLastMovedPieceId() const{
+    return _lastMovedPieceId;
+}
+
 void PieceMoveAnimator::onTimeout(int32_t timerId) {
     if(timerId!=_movePieceTimerId && timerId!=_movePieceHalvesTimerId){
         std::cerr<<"PieceHandler received unsupported timerId: "<<timerId<<std::endl;
@@ -120,47 +127,53 @@ void PieceMoveAnimator::onTimeout(int32_t timerId) {
     }   
     
     if(timerId==_movePieceHalvesTimerId){
-        _capturedPiece->moveHalves();
-        _capturedPiece->setHalvesOpacity();
-        if(0!=_capturedPiece->getHalvesOpacity()){
-            return;
-        }
-    
-        ChessPiece* const currPiecePtr=_movedPiecePtr->get();
-        const int32_t currPlayerId=currPiecePtr->getPlayerId();
-        if(Defines::BLACK_PLAYER_ID==currPlayerId){
-            BoardPos& targetBoardPos=*_targetBoardPos;
-            targetBoardPos=PieceMoveAnimator::getInvBoardPosForAnim(targetBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
-            currPiecePtr->setBoardPos(targetBoardPos);
-        }
+        PieceMoveAnimator::movePieceHalves();
+        return;
+    }
+    PieceMoveAnimator::movePieces();
+}
 
-        if(PieceType::PAWN==currPiecePtr->getPieceType()){
-            Pawn* const pawnPiecePtr=static_cast<Pawn*>(currPiecePtr);
-            pawnPiecePtr->checkForPawnPromotion();
-        }
-
-        ChessPiece* const opponentPiece=_takenPiecePtr->get();
-        
-        TimerClient::stopTimer(_movePieceHalvesTimerId);
-        
-        _capturedPiece.reset(); _capturedPiece=nullptr;
-
-        opponentPiece->setIsTaken(true);
-        const Point absPosTaken=PieceMoveAnimator::getAbsPosOfTakenPiece(*_opponentPiecesPtr);
-        const BoardPos boardPosTaken=PieceMoveAnimator::getBoardPosForAnim(absPosTaken);
-        opponentPiece->setBoardPos(boardPosTaken);
-        if(_gameProxy->isPromotionActive()){
-            if(Defines::BLACK_PLAYER_ID==currPlayerId){
-                const Point absPosTakenInv=PieceMoveAnimator::getInvAbsPosForAnim(absPosTaken,WidgetFlip::HORIZONTAL_AND_VERTICAL);
-                const BoardPos boardPosTakenInv=PieceMoveAnimator::getBoardPosForAnim(absPosTakenInv);
-                opponentPiece->setBoardPos(boardPosTakenInv);
-            } 
-        }
-        PieceMoveAnimator::finaliseMove();
+void PieceMoveAnimator::movePieceHalves(){
+    _capturedPiece->moveHalves();
+    _capturedPiece->setHalvesOpacity();
+    if(0!=_capturedPiece->getHalvesOpacity()){
         return;
     }
 
+    ChessPiece* const currPiecePtr=_movedPiecePtr->get();
+    const int32_t currPlayerId=currPiecePtr->getPlayerId();
+    if(Defines::BLACK_PLAYER_ID==currPlayerId){
+        BoardPos& targetBoardPos=*_targetBoardPos;
+        targetBoardPos=PieceMoveAnimator::getInvBoardPosForAnim(targetBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+        currPiecePtr->setBoardPos(targetBoardPos);
+    }
 
+    if(PieceType::PAWN==currPiecePtr->getPieceType()){
+        Pawn* const pawnPiecePtr=static_cast<Pawn*>(currPiecePtr);
+        pawnPiecePtr->checkForPawnPromotion();
+    }
+
+    ChessPiece* const opponentPiece=_takenPiecePtr->get();
+    
+    TimerClient::stopTimer(_movePieceHalvesTimerId);
+    
+    _capturedPiece.reset(); _capturedPiece=nullptr;
+
+    opponentPiece->setIsTaken(true);
+    const Point absPosTaken=PieceMoveAnimator::getAbsPosOfTakenPiece(*_opponentPiecesPtr);
+    const BoardPos boardPosTaken=PieceMoveAnimator::getBoardPosForAnim(absPosTaken);
+    opponentPiece->setBoardPos(boardPosTaken);
+    if(_gameProxy->isPromotionActive()){
+        if(Defines::BLACK_PLAYER_ID==currPlayerId){
+            const Point absPosTakenInv=PieceMoveAnimator::getInvAbsPosForAnim(absPosTaken,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+            const BoardPos boardPosTakenInv=PieceMoveAnimator::getBoardPosForAnim(absPosTakenInv);
+            opponentPiece->setBoardPos(boardPosTakenInv);
+        } 
+    }
+    PieceMoveAnimator::finaliseMove();
+}
+
+void PieceMoveAnimator::movePieces(){
     BoardPos& targetBoardPos=*_targetBoardPos;
     ChessPiece* const currPiecePtr=_movedPiecePtr->get();
     const int32_t currPlayerId=currPiecePtr->getPlayerId();
@@ -263,7 +276,7 @@ void PieceMoveAnimator::onTimeout(int32_t timerId) {
         }
         return;
     }
-    PieceMoveAnimator::finaliseMove();
+    PieceMoveAnimator::finaliseMove();    
 }
 
 void PieceMoveAnimator::finaliseMove(){
@@ -473,10 +486,6 @@ bool PieceMoveAnimator::isTargetPosChangedIfEnPassant(){
 
     BoardPos& targetBoardPos=*_targetBoardPos;
     targetBoardPos=BoardUtils::getAdjacentPos(Defines::UP,targetBoardPos);
-    // Defines::WHITE_PLAYER_ID==currPlayerId ? 
-    //                             targetBoardPos=BoardUtils::getAdjacentPos(Defines::UP,targetBoardPos) :
-    //                             targetBoardPos=BoardUtils::getAdjacentPos(Defines::DOWN,targetBoardPos) ;
-
     
     ChessPiece* const chessPiecePtr=_pawnEnPassantPtr->get();
     Pawn* const pawnPtr=static_cast<Pawn*>(chessPiecePtr);

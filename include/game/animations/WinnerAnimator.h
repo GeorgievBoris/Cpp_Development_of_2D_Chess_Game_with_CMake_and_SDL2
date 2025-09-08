@@ -21,9 +21,10 @@ class PieceHandlerProxy;
 class WinnerAnimator : public TimerClient {
 public:
     int32_t init(PieceHandlerProxy* pieceHandlerProxy, const std::function<void()>& showStartScreenCb, int32_t nextAnimTimerId, int32_t endAnimTimerId,
-                int32_t starRsrcId,int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t fontId, int32_t windowWidth, int32_t windowHeight);
+                int32_t starRsrcId,int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t targetsRsrcId, 
+                int32_t fontId, int32_t windowWidth, int32_t windowHeight);
     void draw() const;
-    void activate(int32_t playerId);
+    void activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType);
     void deactivate();
     bool isActive() const;
     void restart();
@@ -46,10 +47,15 @@ private:
         COUNT
     };
 
+    enum class TargetImgs : uint8_t{
+        KING,
+        ATTACKING_PIECE,
+        COUNT
+    };
+
     void onTimeout(const int32_t timerId) final;
     void rotate();
     void moveText();
-    // void rotateText();
     void createStars();
     void createFireworks();
     void updateFireworks();
@@ -57,11 +63,13 @@ private:
     Point calcStarPos(const CurveTypes type, const int32_t absX=-1);
     void calcFireworkPos(const Point& pos, std::unique_ptr<Image>& fireworkRef);
     void createMedals();
+    // void rotateText();
 
     PieceHandlerProxy* _pieceHandlerProxy=nullptr;
     std::function<void()> _showStartScreenCb;
     Rectangle _windowFrame=Rectangle::UNDEFINED;
     Text _onWinText;
+    Image _targetImgs[static_cast<int32_t>(TargetImgs::COUNT)];
     
     std::vector<Image> _medals;
     std::list<std::pair<CurveTypes,std::unique_ptr<Image>>> _stars;
@@ -75,12 +83,14 @@ private:
     int32_t _starRsrcId;
     int32_t _fireworksRsrcId;
     int32_t _medalRsrcId;
+    int32_t _targetsRsrcId;
 
     double _currRotAngle=0.0;
     double _deltaRotAngle=1.0;
     bool _isClockwiseRotation=true;
     bool _moveUp=false;
     bool _isActive=false;
+    
     // // use below parameters if WinnerAnimator::rotateText() is enabled
     // int32_t _textWidth=0;
     // int32_t _textHeight=0;

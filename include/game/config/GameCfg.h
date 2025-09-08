@@ -17,7 +17,7 @@ struct GameCfg{
     int32_t chessBoardRsrcId;
     int32_t whitePiecesRsrcId;
     int32_t blackPiecesRsrcId;
-    int32_t targetRsrcId;
+    // int32_t targetRsrcId;
 
     int32_t moveTilesRsrcId;
     
@@ -41,6 +41,7 @@ struct GameCfg{
     int32_t winnerAnimEndTimerId; // NOT added by Zhivko
     int32_t movePieceTimerId; // NOT added by Zhivko
     int32_t movePieceHalvesTimerId; // NOT added by Zhivko
+    int32_t targetsRsrcId; // NOT added by Zhivko
 
     int32_t windowWidth; // NOT added by Zhivko
     int32_t windowHeight; // NOT added by Zhivko

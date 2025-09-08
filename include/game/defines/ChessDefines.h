@@ -61,4 +61,10 @@ enum class TileType : uint8_t{
     MOVE, GUARD, TAKE
 };
 
+enum class TargetType : uint8_t{ // NOT added by Zhivko
+    SELECTED_PIECE,
+    END_GAME,
+    COUNT
+};
+
 #endif // INCLUDE_DEFINES_CHESSDEFINES_H_

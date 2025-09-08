@@ -47,13 +47,14 @@ void MoveSelector::unmarkTiles(){
 
 }
 
-void MoveSelector::shiftMoveTilesPos(WidgetFlip flipType,const Point& pos) { // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
+void MoveSelector::shiftMoveTilesPos(WidgetFlip flipType,const Point& pos, const Point& deltaXY) { // MoveSelector::shiftMoveTilesPos() is NOT added by Zhivko
     for(size_t i=0;i<_activeTiles;++i){
         const Point tileImgAbsPos=_tileImgs[i].getPosition();
         const BoardPos tileImgBoardPos=BoardUtils::getBoardPos(tileImgAbsPos);
         const BoardPos invertedTileImgBoardPos=BoardUtils::getInvertedBoardPos(tileImgBoardPos,flipType);
         const Point invertedTileImgAbsPos=BoardUtils::getAbsPos(invertedTileImgBoardPos);
-        _tileImgs[i].setPosition(invertedTileImgAbsPos.x+pos.x,invertedTileImgAbsPos.y+pos.y);
+        const Point invertedTileImgAbsPosShifted(invertedTileImgAbsPos.x+deltaXY.x,invertedTileImgAbsPos.y+deltaXY.y);
+        _tileImgs[i].setPosition(invertedTileImgAbsPosShifted.x+pos.x,invertedTileImgAbsPosShifted.y+pos.y);
     }
 }
 

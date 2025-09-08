@@ -16,7 +16,7 @@ class Fbo;
 class GameBoard : public GameBoardProxy , public TimerClient {
 public:
     ~GameBoard();
-    int32_t init(int32_t boardRsrcId, int32_t targetRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId,
+    int32_t init(int32_t boardRsrcId, int32_t targetsRsrcId, int32_t moveTilesRsrcId, int32_t blinkTimerId,
                         int32_t enPassantTimerId, int32_t castlingTimerId); // "int32_t enPassantTimerId" is NOT added by Zhivko
     void drawGameBoardOnFbo(Fbo& fbo) const;
     void drawGameBoardOnly() const;
@@ -25,6 +25,7 @@ public:
     void show(); // GameBoard::show() method is NOT added by Zhivko
     void hide(); // GameBoard::hide() method is NOT added by Zhivko
     void setWidgetFlip(WidgetFlip flipType); // GameBoard::setWidgetFlip() is NOT added by Zhivko
+    WidgetFlip getWidgetFlip() const; // GameBoard::getWidgetFlip() is NOT added by Zhivko
 private:
     void onPieceGrabbed(const BoardPos& boardPos, const std::vector<TileData>& moveTiles) final;
     void onPieceUngrabbed() final;

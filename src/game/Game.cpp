@@ -13,7 +13,7 @@ extern const int32_t GAME_X_POS_SHIFT;
 extern const int32_t GAME_Y_POS_SHIFT;
 
 int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScreenCb){
-    if(EXIT_SUCCESS!=_gameBoard.init(cfg.chessBoardRsrcId, cfg.targetRsrcId,
+    if(EXIT_SUCCESS!=_gameBoard.init(cfg.chessBoardRsrcId, cfg.targetsRsrcId,
                                             cfg.moveTilesRsrcId, cfg.blinkTargetTimerId, cfg.blinkEnPassantTimerId, cfg.blinkTileCastlingTimerId)){
         std::cerr<<"_gameBoard.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -67,7 +67,7 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
 
     if(EXIT_SUCCESS!=_winnerAnimator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),showStartScreenCb,
                                                 cfg.nextWinnerAnimTimerId, cfg.winnerAnimEndTimerId,cfg.winnerStarRsrcId,cfg.fireworksRsrcId,
-                                                cfg.winnerMedalRsrcId, cfg.textFontId,cfg.windowWidth,cfg.windowHeight)){ 
+                                                cfg.winnerMedalRsrcId, cfg.targetsRsrcId, cfg.textFontId,cfg.windowWidth,cfg.windowHeight)){ 
         // NOT added by Zhivko
         std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -200,11 +200,7 @@ void Game::onBoardAnimFinished(){
     }
 
     if(_isGameFinished){ // NOT added by Zhivko
-        if(_isAutomaticWin){
-            _gameLogic.finishTurn();
-            _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
-        }
-        _winnerAnimator.activate(_gameLogic.getActivePlayerId());
+        _winnerAnimator.activate(_gameLogic.getActivePlayerId(),_isAutomaticWin,_gameBoard.getWidgetFlip());
         regenerateGameFbo();
         return;
     }        
@@ -248,9 +244,6 @@ void Game::regenerateGameFbo() {
 
     // Zhivko: "Should the _gameBoard be part of the _gameFbo? Both yes and no, but for the moment it should not be."
     _gameBoard.drawGameBoardOnFbo(_gameFbo);
-    // if(_gameBoardAnimator.isActive()){
-    //     _gameBoard.drawGameBoardOnFbo(_gameFbo);
-    // }
     _pieceHandler.drawOnFbo(_gameFbo);
     
     _gameFbo.update();

@@ -17,7 +17,8 @@
 
 
 int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::function<void()>& showStartScreenCb,int32_t nextAnimTimerId,
-                                int32_t endAnimTimerId, int32_t starRsrcId, int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t fontId, int32_t windowWidth, int32_t windowHeight){
+                                int32_t endAnimTimerId, int32_t starRsrcId, int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t targetsRsrcId,
+                                int32_t fontId, int32_t windowWidth, int32_t windowHeight){
     if(nullptr==pieceHandlerProxy){
         std::cerr<<"Error, nullptr received for PieceHandlerProxy"<<std::endl;
         return EXIT_FAILURE;
@@ -38,6 +39,11 @@ int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::fu
         return EXIT_FAILURE;
     }
 
+    if(INVALID_RSRC_ID==targetsRsrcId){
+        std::cerr<<"Error, invalid resource Id provided"<<std::endl;
+        return EXIT_FAILURE;
+    }    
+
     if(INVALID_RSRC_ID==nextAnimTimerId){
         std::cerr<<"Error, invalid timer Id provided"<<std::endl;
         return EXIT_FAILURE;
@@ -53,6 +59,7 @@ int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::fu
     _starRsrcId=starRsrcId;
     _fireworksRsrcId=fireworksRsrcId;
     _medalRsrcId=medalRsrcId;
+    _targetsRsrcId=targetsRsrcId;
     _nextAnimTimerId=nextAnimTimerId;
     _endAnimTimerId=endAnimTimerId;
 
@@ -68,6 +75,8 @@ int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::fu
 
 void WinnerAnimator::draw() const{
     _onWinText.draw();
+    _targetImgs[static_cast<int32_t>(TargetImgs::KING)].draw();
+    _targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)].draw();
 
     for(const Image& image:_medals){
         image.draw();
@@ -84,18 +93,55 @@ void WinnerAnimator::draw() const{
     }
 }
 
-void WinnerAnimator::activate(int32_t playerId){
+void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType){
     if(_isActive){
         std::cerr<<"Error, trying to active WinnerAnimator which is already active!"<<std::endl;
         return;
     }
     _pieceHandlerProxy->shiftWinnerPiecesPos();
-    Defines::WHITE_PLAYER_ID == playerId ? _onWinText.setText("White pieces win the game!") : _onWinText.setText("Black pieces win the game!");
+    
     TimerClient::startTimer(75,_nextAnimTimerId,TimerType::PULSE);
     TimerClient::startTimer(60000,_endAnimTimerId,TimerType::ONESHOT);
     _isActive=(TimerClient::isActiveTimerId(_nextAnimTimerId) && TimerClient::isActiveTimerId(_endAnimTimerId));
     _onWinText.show();
     WinnerAnimator::createMedals();
+
+    Image& kingPieceImg=_targetImgs[static_cast<int32_t>(TargetImgs::KING)];
+    Image& attackingPieceImg=_targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)];
+    const int32_t opponentId=BoardUtils::getOpponentId(playerId);
+    BoardPos kingBoardPos;
+    BoardPos attackingPieceBoardPos;
+
+    if(isAutomaticWin){
+        kingBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(playerId);
+        attackingPieceBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(opponentId);
+        Defines::WHITE_PLAYER_ID==playerId ? _onWinText.setText("Black pieces win the game!") : _onWinText.setText("White pieces win the game!");
+    } else {
+        kingBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(opponentId);
+        attackingPieceBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(playerId);
+        Defines::WHITE_PLAYER_ID==playerId ? _onWinText.setText("White pieces win the game!") : _onWinText.setText("Black pieces win the game!");
+    }
+
+    if(Defines::WHITE_PLAYER_ID==playerId){
+        kingBoardPos=BoardUtils::getInvertedBoardPos(kingBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+    }    
+
+    Point deltaXY; // this fix is done in order to position more accurately the "_targetImgs" - from aesthetics point of view!
+    if(WidgetFlip::HORIZONTAL_AND_VERTICAL==flipType){
+        deltaXY.x=-2; deltaXY.y=-4;
+    }
+    if(WidgetFlip::NONE==flipType){
+        deltaXY.x=0; deltaXY.y=-2;
+    }
+
+    const Point kingAbsPos=BoardUtils::getAbsPos(kingBoardPos);
+    const Point attackingPieceAbsPos=BoardUtils::getAbsPos(attackingPieceBoardPos);
+    kingPieceImg.create(_targetsRsrcId,{kingAbsPos.x+deltaXY.x,kingAbsPos.y+deltaXY.y});
+    attackingPieceImg.create(_targetsRsrcId,{attackingPieceAbsPos.x+deltaXY.x,attackingPieceAbsPos.y+deltaXY.y});
+    kingPieceImg.setFrame(static_cast<int32_t>(TargetType::END_GAME));
+    attackingPieceImg.setFrame(static_cast<int32_t>(TargetType::END_GAME));
+    kingPieceImg.show();
+    attackingPieceImg.show();
 
     // // use below parameters if WinnerAnimator::rotateText() is enabled
     // _textWidth=_onWinText.getWidth();
@@ -132,6 +178,14 @@ void WinnerAnimator::onTimeout(const int32_t timerId){
 
         WinnerAnimator::createFireworks();
         WinnerAnimator::updateFireworks();
+
+        if(_targetImgs[static_cast<int32_t>(TargetImgs::KING)].isVisible()){
+            _targetImgs[static_cast<int32_t>(TargetImgs::KING)].hide();
+            _targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)].hide();
+            return;
+        }
+        _targetImgs[static_cast<int32_t>(TargetImgs::KING)].show();
+        _targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)].show();
         return;
     }
 
@@ -201,48 +255,6 @@ void WinnerAnimator::moveText(){
 
     _onWinText.setPosition(Point(880,*_yRangeIter));
 }
-
-// void WinnerAnimator::rotateText(){
-//     const int32_t currWidth=_onWinText.getWidth();
-//     const int32_t currHeight=_onWinText.getHeight();
-//     const double currRotAngle=_onWinText.getRotationAngle();
-
-//     if(currWidth<_textWidth){
-//         _textWidth!=_textHeight ? 
-//         (_textWidth>_textHeight ? _onWinText.setWidth(currWidth+static_cast<int32_t>(ceil(5.0*static_cast<double>(_textWidth/_textHeight)))) : 
-//                                   _onWinText.setWidth(currWidth+5)) : (_onWinText.setWidth(currWidth+5), _onWinText.setHeight(currHeight+5)) ;
-//     }
-
-//     if(currHeight<_textHeight){
-//         _textWidth!=_textHeight ? 
-//         (_textWidth>_textHeight ? _onWinText.setHeight(currHeight+5) : 
-//                                   _onWinText.setHeight(currHeight+static_cast<int32_t>(ceil(5.0*static_cast<double>(_textHeight/_textWidth))))) : 
-//                                   (_onWinText.setWidth(currWidth+5), _onWinText.setHeight(currHeight+5)) ;
-//     }
- 
-//     if(currWidth<_textWidth || currHeight<_textHeight){
-//         _onWinText.setRotationCenter({_onWinText.getWidth()/2,_onWinText.getHeight()/2});
-//         360.0<=currRotAngle ? _onWinText.setRotationAngle(currRotAngle-360.0+10.0) : _onWinText.setRotationAngle(currRotAngle+10.0);
-//         return;
-//     }
-
-//     if(360.0!=currRotAngle){
-//         _onWinText.setRotationAngle(currRotAngle+10.0);
-//         return;
-//     }
-
-//     if(--_textCounter){
-//         return;
-//     }
-
-//     _textCounter=30;
-
-//     _onWinText.setHeight(_textHeight/50);
-//     _onWinText.setWidth(_textWidth/50);
-//     _onWinText.setRotationCenter({_onWinText.getWidth()/2,_onWinText.getHeight()/2});
-//     _onWinText.setRotationAngle(0.0);
-
-// }
 
 void WinnerAnimator::createStars(){
     static uint32_t executionsStars=0;
@@ -435,3 +447,45 @@ void WinnerAnimator::createMedals(){
         currMedal.setPosition(Point(piecePos.x+centeredPos.x,piecePos.y+centeredPos.y));
     }
 }
+
+// void WinnerAnimator::rotateText(){
+//     const int32_t currWidth=_onWinText.getWidth();
+//     const int32_t currHeight=_onWinText.getHeight();
+//     const double currRotAngle=_onWinText.getRotationAngle();
+
+//     if(currWidth<_textWidth){
+//         _textWidth!=_textHeight ? 
+//         (_textWidth>_textHeight ? _onWinText.setWidth(currWidth+static_cast<int32_t>(ceil(5.0*static_cast<double>(_textWidth/_textHeight)))) : 
+//                                   _onWinText.setWidth(currWidth+5)) : (_onWinText.setWidth(currWidth+5), _onWinText.setHeight(currHeight+5)) ;
+//     }
+
+//     if(currHeight<_textHeight){
+//         _textWidth!=_textHeight ? 
+//         (_textWidth>_textHeight ? _onWinText.setHeight(currHeight+5) : 
+//                                   _onWinText.setHeight(currHeight+static_cast<int32_t>(ceil(5.0*static_cast<double>(_textHeight/_textWidth))))) : 
+//                                   (_onWinText.setWidth(currWidth+5), _onWinText.setHeight(currHeight+5)) ;
+//     }
+ 
+//     if(currWidth<_textWidth || currHeight<_textHeight){
+//         _onWinText.setRotationCenter({_onWinText.getWidth()/2,_onWinText.getHeight()/2});
+//         360.0<=currRotAngle ? _onWinText.setRotationAngle(currRotAngle-360.0+10.0) : _onWinText.setRotationAngle(currRotAngle+10.0);
+//         return;
+//     }
+
+//     if(360.0!=currRotAngle){
+//         _onWinText.setRotationAngle(currRotAngle+10.0);
+//         return;
+//     }
+
+//     if(--_textCounter){
+//         return;
+//     }
+
+//     _textCounter=30;
+
+//     _onWinText.setHeight(_textHeight/50);
+//     _onWinText.setWidth(_textWidth/50);
+//     _onWinText.setRotationCenter({_onWinText.getWidth()/2,_onWinText.getHeight()/2});
+//     _onWinText.setRotationAngle(0.0);
+
+// }

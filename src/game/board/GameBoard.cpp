@@ -19,11 +19,12 @@ GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture
     }
 }
 
-int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetRsrcId,
+int32_t GameBoard::init(int32_t boardRsrcId, int32_t targetsRsrcId,
                                 int32_t moveTilesRsrcId, int32_t blinkTimerId, int32_t enPassantTimerId, int32_t castlingTimerId){ // "int32_t enPassantTimerId" is NOT added by Zhivko
                                 
     _boardImg.create(boardRsrcId, Point(GAME_X_POS_SHIFT,GAME_Y_POS_SHIFT)); // Point(FIRST_TILE_X_POS_SHIFT,FIRST_TILE_Y_POS_SHIFT) added by me
-    _targetImg.create(targetRsrcId);
+    _targetImg.create(targetsRsrcId);
+    _targetImg.setFrame(static_cast<int32_t>(TargetType::SELECTED_PIECE)); // NOT added by Zhivko
     _targetImg.hide();
 
     _blinkTimerId=blinkTimerId;
@@ -171,12 +172,19 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
 
 void GameBoard::shiftMoveTilesPos(const BoardPos& boardPos){ // GameBoard::shiftMoveTilesPos() is NOT added by Zhivko
     const Point boardImgAbsPos=_boardImg.getPosition(); // NOT added by Zhivko
-    _moveSelector.shiftMoveTilesPos(_flipType,boardImgAbsPos); // this correction is NOT added by Zhivko
 
+    Point deltaXY; // this fix is done in order to position more accurately the MOVE, TAKE, GUARD tiles on the chess board - from aesthetics point of view!
+    if(WidgetFlip::HORIZONTAL_AND_VERTICAL==_flipType){
+        deltaXY.x=-2; deltaXY.y=-4;
+    }
+    if(WidgetFlip::NONE==_flipType){
+        deltaXY.x=0; deltaXY.y=-2;
+    }
+    _moveSelector.shiftMoveTilesPos(_flipType,boardImgAbsPos,deltaXY); // this correction is NOT added by Zhivko
     const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(boardPos,_flipType); // NOT added by Zhivko
     const Point invertedAbsPos=BoardUtils::getAbsPos(invertedBoardPos); // NOT added by Zhivko
-    // const Point posBoardImg=_boardImg.getPosition(); // NOT added by Zhivko
-    _targetImg.setPosition(invertedAbsPos.x+boardImgAbsPos.x,invertedAbsPos.y+boardImgAbsPos.y); // NOT added by Zhivko      
+    const Point invertedAbsPosShifted(invertedAbsPos.x+deltaXY.x,invertedAbsPos.y+deltaXY.y);
+    _targetImg.setPosition(invertedAbsPosShifted.x+boardImgAbsPos.x,invertedAbsPosShifted.y+boardImgAbsPos.y); // NOT added by Zhivko      
 }
 
 void GameBoard::onEnPassant(const BoardPos& boardPos){ // GameBoard::onEnPassant() is NOT added by Zhivko
@@ -194,4 +202,8 @@ void GameBoard::onCastling(const BoardPos& boardPos) { // GameBoard::onCastling(
 
 void GameBoard::setWidgetFlip(WidgetFlip flipType) { // GameBoard::setWidgetFlip() is NOT added by Zhivko
     _flipType=flipType;
+}
+
+WidgetFlip GameBoard::getWidgetFlip() const{
+    return _flipType;
 }

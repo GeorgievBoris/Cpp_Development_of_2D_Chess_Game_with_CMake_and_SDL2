@@ -107,11 +107,6 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     cfg.imageConfigs.emplace(TextureId::CHESS_BOARD,imageCfg);
     imageCfg.frames.clear(); 
 
-    imageCfg.location=getFilePath("resources/p/target.png");
-    imageCfg.frames.emplace_back(0,0,TARGET_IMG_WIDTH_HEIGHT,TARGET_IMG_WIDTH_HEIGHT);
-    cfg.imageConfigs.emplace(TextureId::TARGET,imageCfg);
-    imageCfg.frames.clear();
-
     imageCfg.location=getFilePath("resources/p/moveTiles.png");
     for(int32_t frameId=0;frameId<MOVE_TILES_FRAMES;++frameId){
         imageCfg.frames.emplace_back(frameId*MOVE_TILES_IMG_WIDTH_HEIGHT,0,
@@ -193,6 +188,14 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
         cfg.imageConfigs.emplace(chessResourcesHalves[i],imageCfg);
         imageCfg.frames.clear();
     }
+
+    constexpr int32_t numOfTargets=2;
+    imageCfg.location=getFilePath("resources/p/targets.png");
+    for(int32_t i=0;i<numOfTargets;++i){
+        imageCfg.frames.emplace_back(i*TARGET_IMG_WIDTH_HEIGHT,0,TARGET_IMG_WIDTH_HEIGHT,TARGET_IMG_WIDTH_HEIGHT);
+    }
+    cfg.imageConfigs.emplace(TextureId::TARGETS,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -218,7 +221,6 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.chessBoardRsrcId=TextureId::CHESS_BOARD;
     cfg.whitePiecesRsrcId=TextureId::WHITE_PIECES;
     cfg.blackPiecesRsrcId=TextureId::BLACK_PIECES;
-    cfg.targetRsrcId=TextureId::TARGET;
     cfg.moveTilesRsrcId=TextureId::MOVE_TILES;
     cfg.quitGameButtonRsrcId=TextureId::QUIT_GAME_BUTTON; // NOT added by Zhivko
     cfg.winnerStarRsrcId=TextureId::WINNER_STAR; // NOT added by Zhivko
@@ -226,6 +228,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.winnerMedalRsrcId=TextureId::WINNER_MEDAL; // NOT added by Zhivko
     cfg.whitePiecesHalvesRsrcId=TextureId::WHITE_PIECES_HALVES; // NOT added by Zhivko
     cfg.blackPiecesHalvesRsrcId=TextureId::BLACK_PIECES_HALVES; // NOT added by Zhivko
+    cfg.targetsRsrcId=TextureId::TARGETS; // NOT added by Zhivko
     
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;

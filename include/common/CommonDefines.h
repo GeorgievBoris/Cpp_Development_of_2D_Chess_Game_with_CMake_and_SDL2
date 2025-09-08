@@ -12,7 +12,7 @@ namespace TextureId{
 
 enum ResourceId{
     CHESS_BOARD,
-    TARGET,
+    // TARGET,
     WHITE_PIECES,
     BLACK_PIECES,
     MOVE_TILES,
@@ -25,6 +25,7 @@ enum ResourceId{
     WINNER_MEDAL, // NOT added by Zhivko
     WHITE_PIECES_HALVES, // NOT added by Zhivko
     BLACK_PIECES_HALVES, // NOT added by Zhivko    
+    TARGETS, // NOT added by Zhivko
     COUNT
 };
 

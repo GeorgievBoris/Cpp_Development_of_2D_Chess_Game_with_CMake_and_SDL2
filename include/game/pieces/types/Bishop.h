@@ -17,7 +17,10 @@ class Bishop : public ChessPiece{
 public:
     std::vector<TileData> getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const final;
 private:
+    bool isDeadPosition(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, int32_t& idx) final;
     std::vector<MoveDirection> getBoardMoves() const;
+    void clearVecBoardPos();
+    std::vector<BoardPos> _vecBoardPos;
 };
 
 

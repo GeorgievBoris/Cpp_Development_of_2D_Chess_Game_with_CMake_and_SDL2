@@ -50,15 +50,14 @@ private:
 
     void correctInputEvent(InputEvent& e); // Game::correctInputEvent() is NOT added by Zhivko
 
-    void onGameFinish() final; // Game::onGameFinish() is NOT added by Zhivko
     void castleTextShow() final; // Game::castleTextShow() is NOT added by Zhivko
     void castleTextHide() final; // Game::castleTextHide() is NOT added by Zhivko
-    void setAutomaticWin(bool isAutomaticWin) final; // Game::setAutomaticWin() method is NOT added by Zhivko
-    bool isAutomaticWin() final; // Game::isAutomaticWin() method is NOT added by Zhivko
-    bool isWinnerAnimatorActive() final; // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
-    bool isPromotionActive() final; // Game::isPromotionActive() method is NOT added by Zhivko
+    bool isGameBoardAnimatorActive() const final; // Game::isGameBoardAnimatorActive() method is NOT added by Zhivko
+    bool isPromotionActive() const final; // Game::isPromotionActive() method is NOT added by Zhivko
     void setPieceMovementActive(bool isPieceMovementActive) final; // Game::setPieceMovementActive() method is NOT added by Zhivko
-    bool isPieceMovementActive() final; // Game::isPieceMovementActive() method is NOT added by Zhivko
+    bool isPieceMovementActive() const final; // Game::isPieceMovementActive() method is NOT added by Zhivko
+    void setGameEndType(const GameEndType gameEndType) final; // Game::setGameEndType() method is NOT added by Zhivko
+    GameEndType getGameEndType() const final; // Game::getGameEndType() method is NOT added by Zhivko
 
     // NOTE: think about grouping GameBoardAnimator, WinnerAnimator and PieceAnimator into one Animator classs
     GameBoard _gameBoard;
@@ -73,10 +72,9 @@ private:
     WinnerAnimator _winnerAnimator; // NOT added by Zhivko
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
-    bool _isGameFinished=false; // NOT added by Zhivko
-    bool _isAutomaticWin=false; // NOT added by Zhivko
     bool _isGameHidden=true; // NOT added by Zhivko
     bool _isPieceMovementActive=false; // NOT added by Zhivko
+    GameEndType _gameEndType=GameEndType::NONE; // NOT added by Zhivko
 
     // NOTE: write down !!!!
     // Code refactoring means : to distribute functionalities amongst different classes...

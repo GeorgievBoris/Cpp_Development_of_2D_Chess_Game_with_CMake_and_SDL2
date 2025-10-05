@@ -40,6 +40,8 @@ enum PawnDefines {
 
 enum nonPawnDefines { // enum is NOT added by Zhivko
     KING_STARTING_COLUMN_POSITION=4,
+    BISHOPS_AND_KNIGHTS_COUNT=8,
+    TOTAL_PIECES_COUNT=16
 };
 
 } // end of namespace Defines
@@ -64,6 +66,14 @@ enum class TileType : uint8_t{
 enum class TargetType : uint8_t{ // NOT added by Zhivko
     SELECTED_PIECE,
     END_GAME,
+    COUNT
+};
+
+enum class GameEndType : uint8_t{
+    NONE,
+    WINNER_AUTOMATIC,
+    WINNER_NON_AUTOMATIC,
+    DRAW,
     COUNT
 };
 

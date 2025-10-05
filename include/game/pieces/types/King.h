@@ -32,11 +32,14 @@ public:
     void setIsInCheck(bool isInCheck);
     void setWhenFirstMoveIsMade();
 private:
+    bool isDeadPosition(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, int32_t& idx) final;
     std::vector<MoveDirection> getBoardMoves() const;
     bool isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const BoardPos& rookBoardPos) const;
+    void clearBoardPosVec();
     mutable bool _isCastlePossible=false;
     bool _isMoved=false;
     bool _isInCheck=false;
+    std::vector<BoardPos> _boardPosVec;
 };
 
 #endif // INCLUDE_GAME_PIECES_TYPES_KING_H

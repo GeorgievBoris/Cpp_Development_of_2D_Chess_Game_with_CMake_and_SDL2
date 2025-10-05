@@ -3,6 +3,7 @@
 // C system headers
 // C++ system headers
 #include <iostream>
+#include <algorithm>
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
@@ -116,6 +117,14 @@ bool King::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::P
     return true;
 }
 
+void King::clearBoardPosVec(){
+    if(_boardPosVec.empty()){
+        return;
+    }
+    ChessPiece::setBoardPos(_boardPosVec.front());
+    _boardPosVec.clear();
+}
+
 std::vector<TileData> King::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
     const std::vector<MoveDirection> boardMoves=getBoardMoves();
     const size_t maxKingMoves=boardMoves.size();
@@ -209,6 +218,43 @@ bool King::isMoved() const{
 
 bool King::isInCheck() const{
     return _isInCheck;
+}
+
+bool King::isDeadPosition(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, int32_t& idx){
+    if(_boardPosVec.empty()){
+        _boardPosVec.push_back(_boardPos);
+    }
+    const std::vector<TileData> moveTiles=King::getMoveTiles(activePlayers);
+    std::vector<BoardPos>::iterator cIter;
+    for(const TileData& tileData:moveTiles){
+        if(TileType::TAKE==tileData.tileType){
+            King::clearBoardPosVec();
+            return false;
+        }
+        if(TileType::GUARD==tileData.tileType){
+            continue;
+        }
+        cIter=std::find(_boardPosVec.begin(),_boardPosVec.end(),tileData.boardPos);
+        if(_boardPosVec.end()==cIter){
+            _boardPosVec.push_back(tileData.boardPos);
+        }
+    }
+    
+    const size_t sizeVec=_boardPosVec.size();
+    
+    ++idx;
+    if(static_cast<int32_t>(sizeVec)<=idx){
+        King::clearBoardPosVec();
+        return true;
+    }
+
+    ChessPiece::setBoardPos(_boardPosVec[idx]);
+    if(King::isDeadPosition(activePlayers,idx)){
+        King::clearBoardPosVec();
+        return true;
+    }
+    King::clearBoardPosVec();
+    return false;
 }
 
 void King::setIsInCheck(bool isInCheck){

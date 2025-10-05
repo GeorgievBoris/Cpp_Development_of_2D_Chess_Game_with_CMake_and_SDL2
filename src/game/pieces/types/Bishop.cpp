@@ -2,6 +2,7 @@
 #include "game/pieces/types/Bishop.h"
 // C system headers
 // C++ system headers
+#include <algorithm>
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
@@ -24,6 +25,14 @@ std::vector<MoveDirection> Bishop::getBoardMoves() const{
         }
     }
     return boardMoves;
+}
+
+void Bishop::clearVecBoardPos(){
+    if(_vecBoardPos.empty()){
+        return;
+    }
+    ChessPiece::setBoardPos(_vecBoardPos.front());
+    _vecBoardPos.clear();
 }
 
 std::vector<TileData> Bishop::getMoveTiles(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const{
@@ -83,4 +92,40 @@ std::vector<TileData> Bishop::getMoveTiles(const std::array<ChessPiece::PlayerPi
     }
     _isFncGetMoveTilesCalled=false;
     return moveTiles;
+}
+
+bool Bishop::isDeadPosition(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, int32_t& idx){
+    if(_vecBoardPos.empty()){
+        _vecBoardPos.push_back(_boardPos);
+    }
+    const std::vector<TileData> moveTiles=Bishop::getMoveTiles(activePlayers);
+    std::vector<BoardPos>::iterator cIter;
+    for(const TileData& tileData:moveTiles){
+        if(TileType::TAKE==tileData.tileType){
+            Bishop::clearVecBoardPos();
+            return false;
+        }
+        if(TileType::GUARD==tileData.tileType){
+            continue;
+        }
+        cIter=std::find(_vecBoardPos.begin(),_vecBoardPos.end(),tileData.boardPos);
+        if(_vecBoardPos.end()==cIter){
+            _vecBoardPos.push_back(tileData.boardPos);
+        }
+    }
+    
+    const size_t sizeVec=_vecBoardPos.size();
+    ++idx;
+    if(static_cast<int32_t>(sizeVec)<=idx){
+        Bishop::clearVecBoardPos();
+        return true;
+    }
+
+    ChessPiece::setBoardPos(_vecBoardPos[idx]);
+    if(Bishop::isDeadPosition(activePlayers,idx)){
+        Bishop::clearVecBoardPos();
+        return true;
+    }
+    Bishop::clearVecBoardPos();
+    return false; 
 }

@@ -188,6 +188,7 @@ void BoardUtils::getBoardPosIfEnPassant(const std::unique_ptr<ChessPiece>& selec
 
         if(piece->getBoardPos()==boardPos){
             outCollisionRelativeId=i;
+            break;
         } else {
             Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
                                                 boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);
@@ -196,9 +197,9 @@ void BoardUtils::getBoardPosIfEnPassant(const std::unique_ptr<ChessPiece>& selec
         // Defines::WHITE_PLAYER_ID==currPlayerId ? boardPos=BoardUtils::getAdjacentPos(Defines::UP,boardPos) : 
         //                                         boardPos=BoardUtils::getAdjacentPos(Defines::DOWN,boardPos);            
 
-        if(outCollisionRelativeId==i){
-            break;
-        }     
+        // if(outCollisionRelativeId==i){
+        //     break;
+        // }     
     }
 }
 

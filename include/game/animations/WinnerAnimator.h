@@ -13,6 +13,7 @@
 #include "manager_utils/drawing/Text.h"
 #include "manager_utils/time/TimerClient.h"
 #include "manager_utils/drawing/Image.h"
+#include "game/defines/ChessDefines.h"
 // Forward Declarations
 class PieceHandlerProxy;
 
@@ -24,9 +25,9 @@ public:
                 int32_t starRsrcId,int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t targetsRsrcId, 
                 int32_t fontId, int32_t windowWidth, int32_t windowHeight);
     void draw() const;
-    void activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType);
+    void activate(int32_t playerId, const GameEndType gameEndType, WidgetFlip flipType);
     void deactivate();
-    bool isActive() const;
+    // bool isActive() const;
     void restart();
 private:
     class NumGenerator{

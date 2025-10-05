@@ -13,10 +13,10 @@
 class PieceHandlerProxy{
 public:
     virtual ~PieceHandlerProxy()=default;
-    virtual void rotateWinnerPieces(double angle)=0;
+    virtual void rotateWinnerPieces(const bool isNoWinner, const double angle)=0;
     virtual void onTurnTimeElapsed()=0;
     virtual const ChessPiece::PlayerPieces& getWinnerPieces()=0;
-    virtual void shiftWinnerPiecesPos()=0;
+    virtual void shiftWinnerPiecesPos(const bool isNoWinner)=0;
     virtual void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pair, const BoardPos& boardPos)=0;
     virtual const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const=0;
 };

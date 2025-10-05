@@ -335,3 +335,30 @@ void Pawn::checkForPawnPromotion(){ // Pawn::checkForPawnPromotion() is NOT adde
 void Pawn::setIsPawnTargetedForEnPassant(bool isPawnTargetedForEnPassant){ // Pawn::setIsPawnTargetedForEnPassant() is NOT added by Zhivko
     _isPawnTargetedForEnPassant=isPawnTargetedForEnPassant;
 }
+
+bool Pawn::isDeadPosition([[maybe_unused]]const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces, [[maybe_unused]]int32_t& idx){
+    return false;
+
+    // for(const ChessPiece::PlayerPieces& player:activePieces){
+    //     for(const std::unique_ptr<ChessPiece>& piece:player){
+    //         if(piece->getIsTaken()){
+    //             continue;
+    //         }
+    //         const BoardPos boardPos=piece->getBoardPos();
+    //         if(boardPos.col!=_boardPos.col){
+    //             continue;
+    //         }
+            
+    //         if(Defines::WHITE_PLAYER_ID==_playerId){
+    //             if(boardPos.row<_boardPos.row){
+    //                 return true;
+    //             }
+    //         } else {
+    //             if(boardPos.row>_boardPos.row){
+    //                 return true;
+    //             }
+    //         }
+    //     }
+    // }
+    // return false;
+}

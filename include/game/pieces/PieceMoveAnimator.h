@@ -22,7 +22,9 @@ public:
     int32_t init(GameProxy* gameProxy, int32_t whitePiecesHalvesRsrcId, int32_t blackPiecesHalvesRsrcId,
                 int32_t movePieceTimerId, int32_t movePieceHalvesTimerId, int32_t tileSize, int32_t firstTilePosX,
                 int32_t firstTilePosY, int32_t& collisionIdx,
-                const std::function<bool()>& isKingInCheckCb, const std::function<void()>& isInStalemateCb);
+                const std::function<bool()>& isKingInCheckCb,
+                const std::function<bool(bool)>& isInStalemateCb,
+                const std::function<bool()>& isDeadPosition);
                 
     void start(std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& pieces, BoardPos& targetBoardPos,
                         std::pair<int32_t,BoardPos>& pair, const int32_t currPlayerId, const int32_t selectedPieceIdx,
@@ -72,7 +74,8 @@ private:
     const ChessPiece::PlayerPieces* _opponentPiecesPtr=nullptr;
     std::pair<int32_t,BoardPos>* _castlingPairPtr=nullptr;
     std::function<bool()> _isKingInCheckCb;
-    std::function<void()> _isInStalemateCb;   
+    std::function<bool(bool)> _isInStalemateCb;
+    std::function<bool()> _isDeadPositionCb;  
 };
 
 

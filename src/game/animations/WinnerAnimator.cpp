@@ -75,6 +75,9 @@ int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::fu
 
 void WinnerAnimator::draw() const{
     _onWinText.draw();
+    if(_medals.empty()){
+        return;
+    }
     _targetImgs[static_cast<int32_t>(TargetImgs::KING)].draw();
     _targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)].draw();
 
@@ -93,17 +96,29 @@ void WinnerAnimator::draw() const{
     }
 }
 
-void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType){
+void WinnerAnimator::activate(int32_t playerId, const GameEndType gameEndType, WidgetFlip flipType){
     if(_isActive){
         std::cerr<<"Error, trying to active WinnerAnimator which is already active!"<<std::endl;
         return;
     }
-    _pieceHandlerProxy->shiftWinnerPiecesPos();
-    
+
     TimerClient::startTimer(75,_nextAnimTimerId,TimerType::PULSE);
     TimerClient::startTimer(60000,_endAnimTimerId,TimerType::ONESHOT);
     _isActive=(TimerClient::isActiveTimerId(_nextAnimTimerId) && TimerClient::isActiveTimerId(_endAnimTimerId));
-    _onWinText.show();
+    _onWinText.show();    
+
+    const bool isNoWinner=GameEndType::DRAW==gameEndType;
+    _pieceHandlerProxy->shiftWinnerPiecesPos(isNoWinner);
+
+    if(isNoWinner){
+        _onWinText.setText("Game ends in a draw!");
+        return;
+    }
+    
+    // TimerClient::startTimer(75,_nextAnimTimerId,TimerType::PULSE);
+    // TimerClient::startTimer(60000,_endAnimTimerId,TimerType::ONESHOT);
+    // _isActive=(TimerClient::isActiveTimerId(_nextAnimTimerId) && TimerClient::isActiveTimerId(_endAnimTimerId));
+    // _onWinText.show();
     WinnerAnimator::createMedals();
 
     Image& kingPieceImg=_targetImgs[static_cast<int32_t>(TargetImgs::KING)];
@@ -112,7 +127,7 @@ void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, Widge
     BoardPos kingBoardPos;
     BoardPos attackingPieceBoardPos;
 
-    if(isAutomaticWin){
+    if(GameEndType::WINNER_AUTOMATIC==gameEndType){
         kingBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(playerId);
         attackingPieceBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(opponentId);
         Defines::WHITE_PLAYER_ID==playerId ? _onWinText.setText("Black pieces win the game!") : _onWinText.setText("White pieces win the game!");
@@ -169,13 +184,16 @@ void WinnerAnimator::deactivate(){
 
 void WinnerAnimator::onTimeout(const int32_t timerId){
     if(timerId==_nextAnimTimerId){
-        WinnerAnimator::rotate();
         WinnerAnimator::moveText();
+        WinnerAnimator::rotate();
         // WinnerAnimator::rotateText();
 
+        if(_medals.empty()){
+            return;
+        }
+        // WinnerAnimator::rotate();
         WinnerAnimator::createStars();
         WinnerAnimator::updateStars();
-
         WinnerAnimator::createFireworks();
         WinnerAnimator::updateFireworks();
 
@@ -196,9 +214,9 @@ void WinnerAnimator::onTimeout(const int32_t timerId){
     std::cerr<<"Error, WinnerAnimator::onTimeout() received unsupported timerId: "<<timerId<<std::endl;
 }
 
-bool WinnerAnimator::isActive() const{
-    return _isActive;
-}
+// bool WinnerAnimator::isActive() const{
+//     return _isActive;
+// }
 
 void WinnerAnimator::restart(){
     _currRotAngle=0.0;
@@ -210,7 +228,6 @@ void WinnerAnimator::restart(){
 }
 
 void WinnerAnimator::rotate(){
-
     if(10.0==_currRotAngle){
         _deltaRotAngle=-1.0;
     }
@@ -220,8 +237,14 @@ void WinnerAnimator::rotate(){
     }
 
     _currRotAngle+=_deltaRotAngle;
+
+    const bool isNoWinner=_medals.empty();
     
-    _pieceHandlerProxy->rotateWinnerPieces(_deltaRotAngle);
+    _pieceHandlerProxy->rotateWinnerPieces(isNoWinner,_deltaRotAngle);
+
+    if(_medals.empty()){
+        return;
+    }
 
     // obtain the current rotation angle of an arbitrary medal (i.e the first one)...
     // the remaining chess pieces feature the same current rotation angle

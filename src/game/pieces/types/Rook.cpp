@@ -3,6 +3,7 @@
 // C system headers
 // C++ system headers
 #include <iostream>
+#include <algorithm> // NOT added by Zhivko
 // Third-party headers
 // Own headers
 #include "game/utils/BoardUtils.h"
@@ -36,6 +37,14 @@ std::vector<MoveDirection> Rook::getBoardMoves() const{
         }
     }
     return boardMoves;
+}
+
+void Rook::clearVecBoardPos(){
+    if(_vecBoardPos.empty()){
+        return;
+    }
+    ChessPiece::setBoardPos(_vecBoardPos.front());
+    _vecBoardPos.clear();
 }
 
 bool Rook::isCastlePossible(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers,
@@ -226,4 +235,41 @@ void Rook::setWhenFirstMoveIsMade() { // Rook::setWhenFirstMoveIsMade() is NOT a
     Defines::WHITE_PLAYER_ID==_playerId ?
     _isMoved=_boardPos!=BoardPos(Defines::WHITE_PLAYER_START_PAWN_ROW+1,_initialColumnPosition) :
     _isMoved=_boardPos!=BoardPos(Defines::BLACK_PLAYER_START_PAWN_ROW-1,_initialColumnPosition);
+}
+
+bool Rook::isDeadPosition(const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, int32_t& idx){
+    if(_vecBoardPos.empty()){
+        _vecBoardPos.push_back(_boardPos);
+    }
+    const std::vector<TileData> moveTiles=Rook::getMoveTiles(activePlayers);
+    std::vector<BoardPos>::iterator cIter;
+    for(const TileData& tileData:moveTiles){
+        if(TileType::TAKE==tileData.tileType){
+            Rook::clearVecBoardPos();
+            return false;
+        }
+        if(TileType::GUARD==tileData.tileType){
+            continue;
+        }
+        cIter=std::find(_vecBoardPos.begin(),_vecBoardPos.end(),tileData.boardPos);
+        if(_vecBoardPos.end()!=cIter){
+            continue;
+        }
+        _vecBoardPos.push_back(tileData.boardPos);
+    }
+    
+    const size_t sizeVec=_vecBoardPos.size();
+    ++idx;
+    if(static_cast<int32_t>(sizeVec)<=idx){
+        Rook::clearVecBoardPos();
+        return true;
+    }
+
+    ChessPiece::setBoardPos(_vecBoardPos[idx]);
+    if(Rook::isDeadPosition(activePlayers,idx)){
+        Rook::clearVecBoardPos();
+        return true;
+    }
+    Rook::clearVecBoardPos();
+    return false; 
 }

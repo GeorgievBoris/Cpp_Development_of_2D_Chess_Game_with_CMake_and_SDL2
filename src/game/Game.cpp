@@ -100,7 +100,7 @@ void Game::draw() const{
 
     _quitGameBtn.draw(); // NOT added by Zhivko
     _pieceHandler.draw(); // NOT added by Zhivko
-    if(_winnerAnimator.isActive()){ // NOT added by Zhivko
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
         _winnerAnimator.draw(); // NOT added by Zhivko
     } 
 }
@@ -109,9 +109,9 @@ void Game::handleEvent(InputEvent& e){
 
     if(!_gameLogic.isTimerActive()){ // NOT added by Zhivko
         if(!_piecePromotionPanel.isActive()){ // NOT added by Zhivko
-            if(!_isGameFinished){
+            if(GameEndType::NONE==_gameEndType){
                 return;
-            }
+            }         
         }
     }
 
@@ -121,9 +121,9 @@ void Game::handleEvent(InputEvent& e){
 
     _quitGameBtn.handleEvent(e); // NOT added by Zhivko
 
-    if(_isGameFinished){ // NOT added by Zhivko
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
         return;
-    }    
+    }   
     
     if(_piecePromotionPanel.isActive()){
         _piecePromotionPanel.handleEvent(e);
@@ -178,7 +178,7 @@ void Game::startPlayersTimer(){ // method Game::startPlayersTimer() is NOT added
 void Game::onGameTurnFinished(){
     if(_isPromotionActive){
         return; // this "if" statement and the "return" are NOT added by Zhivko
-    }
+    }    
     _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
 }
 
@@ -198,9 +198,9 @@ void Game::onBoardAnimFinished(){
         // a quick fix by Zhivko done in the last lecture 14
         return;
     }
-
-    if(_isGameFinished){ // NOT added by Zhivko
-        _winnerAnimator.activate(_gameLogic.getActivePlayerId(),_isAutomaticWin,_gameBoard.getWidgetFlip());
+    
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
+        _winnerAnimator.activate(_gameLogic.getActivePlayerId(),_gameEndType,_gameBoard.getWidgetFlip());
         regenerateGameFbo();
         return;
     }        
@@ -231,8 +231,7 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _winnerAnimator.restart();
     _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
-    _isGameFinished=false;
-    _isAutomaticWin=false;
+    _gameEndType=GameEndType::NONE;
     _isPieceMovementActive=false;
 }
 
@@ -264,10 +263,6 @@ void Game::correctInputEvent(InputEvent& e){ // Game::correctInputEvent() method
     e.pos.y-=GAME_Y_POS_SHIFT;
 }
 
-void Game::onGameFinish() { // Game::onGameFinish() is NOT added by Zhivko
-    _isGameFinished=true;
-}
-
 void Game::castleTextShow() { // Game::castleTextShow() is NOT added by Zhivko
     _gameLogic.startOnCastleTimer();
 }
@@ -276,19 +271,11 @@ void Game::castleTextHide(){ // Game::castleTextHide() is NOT added by Zhivko
     _gameLogic.stopOnCastleTimer();
 }
 
-void Game::setAutomaticWin(bool isAutomaticWin){ // GameProxy::setAutomaticWin() method is NOT added by Zhivko
-    _isAutomaticWin=isAutomaticWin;
-} 
-
-bool Game::isAutomaticWin(){ // GameProxy::isAutomaticWin() method is NOT added by Zhivko
-    return _isAutomaticWin;
-}
-
-bool Game::isWinnerAnimatorActive() { // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
-    return _winnerAnimator.isActive();
+bool Game::isGameBoardAnimatorActive() const { // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
+    return _gameBoardAnimator.isActive();
 }; 
 
-bool Game::isPromotionActive() { // Game::isPromotionActive() method is NOT added by Zhivko
+bool Game::isPromotionActive() const { // Game::isPromotionActive() method is NOT added by Zhivko
     return _isPromotionActive;
 }
 
@@ -300,6 +287,14 @@ void Game::setPieceMovementActive(bool isPieceMovementActive){ // Game::setPiece
     }   
 }
 
-bool Game::isPieceMovementActive(){ // Game::isPieceMovementActive() method is NOT added by Zhivko
+bool Game::isPieceMovementActive() const { // Game::isPieceMovementActive() method is NOT added by Zhivko
     return _isPieceMovementActive;
+}
+
+void Game::setGameEndType(const GameEndType gameEndType){ // Game::setGameEndType() method is NOT added by Zhivko
+    _gameEndType=gameEndType;
+}
+
+GameEndType Game::getGameEndType() const { // Game::getGameEndType() method is NOT added by Zhivko
+    return _gameEndType;
 }

@@ -1,6 +1,7 @@
 // Corresponding header
 #include "game/pieces/PieceHandler.h"
 // C system headers
+#include <cstring>
 // C++ system headers
 #include <iostream>
 #include <cmath>  // NOT added by Zhivko
@@ -53,7 +54,8 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
                                              movePieceTimerId,movePieceHalvesTimerId,
                                              TILE_SIZE,FIRST_TILE_X_POS,FIRST_TILE_Y_POS, _collisionIdx,
                                             [&](){return PieceHandler::isOpponentKingInCheck();},
-                                            [&](){PieceHandler::isOpponentInStalemate();})){
+                                            [&](bool isOpponentKingInCheck){return PieceHandler::isOpponentInStalemate(isOpponentKingInCheck);},
+                                            [&](){return PieceHandler::isDeadPosition();})){
         std::cerr<<"PieceMoveAnimator::init() failed\n";
         return EXIT_FAILURE;
     }
@@ -62,16 +64,21 @@ int32_t PieceHandler::init(GameBoardProxy* gameBoardProxy, GameProxy* gameProxy,
 }
 
 void PieceHandler::drawOnFbo(Fbo& fbo) const {
-    if(_gameProxy->isWinnerAnimatorActive()){
-        int32_t playerId;
-        _gameProxy->isAutomaticWin() ? playerId=_currPlayerId : playerId=BoardUtils::getOpponentId(_currPlayerId);
-        // The entire IF statement and its content are NOT added by Zhivko
-        for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
-            piece->drawOnFbo(fbo);
-        }
-        return;
-    }
     
+    if(!_gameProxy->isGameBoardAnimatorActive()){
+        const GameEndType gameEndType=_gameProxy->getGameEndType();
+        if(GameEndType::NONE!=gameEndType && GameEndType::DRAW!=gameEndType){
+            int32_t playerId;
+            GameEndType::WINNER_AUTOMATIC==gameEndType ? playerId=_currPlayerId : playerId=BoardUtils::getOpponentId(_currPlayerId);
+            for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
+                piece->drawOnFbo(fbo);
+            }
+            return;            
+        } else if(GameEndType::DRAW==gameEndType){
+            return;
+        }
+    }
+
     if(_gameProxy->isPieceMovementActive()){
         // The entire IF statement and its content are NOT added by Zhivko
         const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
@@ -99,9 +106,14 @@ void PieceHandler::drawOnFbo(Fbo& fbo) const {
     }
 }
 
-void PieceHandler::draw() const{
-   // The below code is NOT added by Zhivko
-    if(!_gameProxy->isWinnerAnimatorActive()){
+void PieceHandler::draw() const {
+    
+    if(_gameProxy->isGameBoardAnimatorActive()){
+        return;
+    }
+
+    const GameEndType gameEndType=_gameProxy->getGameEndType();
+    if(GameEndType::NONE==gameEndType){
         if(!_gameProxy->isPieceMovementActive()){
             return;
         }
@@ -119,10 +131,18 @@ void PieceHandler::draw() const{
             _pieces[_currPlayerId][pair.first]->draw();
         }
         return;
+    }    
+    
+    if(GameEndType::DRAW==gameEndType){
+        for(const ChessPiece::PlayerPieces& player:_pieces){
+            for(const std::unique_ptr<ChessPiece>& piece:player){
+                piece->draw();
+            }
+        }        
+        return;
     }
-
     int32_t playerId;
-    _gameProxy->isAutomaticWin() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
+    GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
    
     for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
         piece->draw();
@@ -214,6 +234,16 @@ void PieceHandler::doMovePiece(){
     _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_pawnEnPassantPtr);
     _gameProxy->setPieceMovementActive(true);
     _gameBoardProxy->onPieceUngrabbed();
+    
+    if(INVALID_RSRC_ID==_collisionIdx){
+        return;
+    }
+    Defines::WHITE_PLAYER_ID==_currPlayerId ? --_blackPiecesCount : --_whitePiecesCount;
+    const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
+    const PieceType takenPieceType=_pieces[opponentId][_collisionIdx]->getPieceType();
+    if(PieceType::KNIGHT==takenPieceType || PieceType::BISHOP==takenPieceType){
+        --_bishopsAndKnightsCount;
+    }
 }
 
 void PieceHandler::checkPawnMoveForEnPassant(){
@@ -356,20 +386,20 @@ bool PieceHandler::isOpponentKingInCheck() { // PieceHandler::isOpponentKingInCh
             ChessPiece* const chessPiecePtr=_pieces[opponentId][opponentPlayerKingIndex].get();
             King* const kingPiecePtr=static_cast<King*>(chessPiecePtr);
             kingPiecePtr->setIsInCheck(true);
-            std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
-            if(!PieceHandler::isOpponentKingInMate(true)){
-                std::cerr<<"pieces is in CHECK!"<<std::endl;
-            }
             return true;
         }
     }
     return false;
 }
 
-bool PieceHandler::isOpponentKingInMate(bool isKingInCheck){ // PieceHandler::isOpponentKingInMate() is NOT added by Zhivko
+bool PieceHandler::isOpponentInStalemate(bool isKingInCheck){ // PieceHandler::isOpponentKingInMate() is NOT added by Zhivko
     const int32_t currPlayerId=_currPlayerId; // save the initial value
     const int32_t selectedPieceId=_selectedPieceId; // save the initial value
     const BoardPos targetBoardPos=_targetBoardPos; // save the initial value
+    
+    if(isKingInCheck){
+        std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
+    }
 
     _currPlayerId=BoardUtils::getOpponentId(_currPlayerId);
     
@@ -392,6 +422,9 @@ bool PieceHandler::isOpponentKingInMate(bool isKingInCheck){ // PieceHandler::is
             
             if(!PieceHandler::isNextMoveCheckForKing()){
                 _currPlayerId=currPlayerId; _selectedPieceId=selectedPieceId; _targetBoardPos=targetBoardPos;
+                if(isKingInCheck){
+                    std::cerr<<"pieces is in CHECK!"<<std::endl;
+                }
                 return false;
             }
         }
@@ -400,22 +433,16 @@ bool PieceHandler::isOpponentKingInMate(bool isKingInCheck){ // PieceHandler::is
 
     _currPlayerId=currPlayerId; _selectedPieceId=selectedPieceId; _targetBoardPos=targetBoardPos; 
     if(isKingInCheck){
-        std::cerr<<"pieces is in CHECKMATE."<<std::endl;
-        std::cerr<<"The game has finished."<<std::endl;
+        std::cerr<<"pieces is in CHECKMATE!"<<std::endl;
+        std::cerr<<"The game has finished!"<<std::endl;
         std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID==_currPlayerId? std::cerr<<"white " : std::cerr<<"black ";
         std::cerr<<"pieces has won the game!"<<std::endl;
+    } else {
+        std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
+        std::cerr<<"pieces is in STALEMATE. The game ends in a draw!"<<std::endl;              
     }
-    _gameProxy->onGameFinish();
+
     return true;
-}
-
-void PieceHandler::isOpponentInStalemate(){ // PieceHandler::isOpponentInStalemate() is NOT added by Zhivko
-    if(!PieceHandler::isOpponentKingInMate()){
-        return;
-    }
-
-    std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId? std::cerr<<"white " : std::cerr<<"black ";
-    std::cerr<<"pieces is in STALEMATE. The game ends in a draw!"<<std::endl;
 }
 
 bool PieceHandler::isNextMoveCheckForKing(){ // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko 
@@ -510,9 +537,22 @@ void PieceHandler::promotePiece(PieceType pieceType){
     }
 
     _gameProxy->setPieceMovementActive(false); // NOT added by Zhivko
-    if(!PieceHandler::isOpponentKingInCheck()){ // NOT added by Zhivko
-        PieceHandler::isOpponentInStalemate(); // NOT added by Zhivko
+
+    const bool isOpponentKingInCheck=PieceHandler::isOpponentKingInCheck();
+    if(PieceHandler::isOpponentInStalemate(isOpponentKingInCheck)){
+        isOpponentKingInCheck ? _gameProxy->setGameEndType(GameEndType::WINNER_NON_AUTOMATIC) : _gameProxy->setGameEndType(GameEndType::DRAW);
+        return;
     }
+
+    if(isOpponentKingInCheck){
+        return;
+    }
+
+    // NOTE: probably it does not make sense to check for a dead position, when a pawn piece gets promoted
+    if(PieceHandler::isDeadPosition()){
+        _gameProxy->setGameEndType(GameEndType::DRAW);   
+    }
+
 }
 
 int32_t PieceHandler::restart(){
@@ -551,8 +591,7 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
         std::cerr<<"The game has finished."<<std::endl;
         std::cerr<<"The player with "; Defines::WHITE_PLAYER_ID!=_currPlayerId ? std::cerr<<"white " : std::cerr<<"black ";
         std::cerr<<"pieces has won the game."<<std::endl;
-        _gameProxy->onGameFinish();
-        _gameProxy->setAutomaticWin(true);
+        _gameProxy->setGameEndType(GameEndType::WINNER_AUTOMATIC);
     }
     _isPieceGrabbed=false;
     _gameBoardProxy->onPieceUngrabbed();
@@ -560,7 +599,7 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
 }
 
 const ChessPiece::PlayerPieces& PieceHandler::getWinnerPieces(){
-    if(_gameProxy->isAutomaticWin()){
+    if(GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType()){
         const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
         return _pieces[opponentId];
     }
@@ -573,23 +612,35 @@ void PieceHandler::changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pa
     _pieces[pawnPair.first][pawnPair.second]->setBoardPos(boardPos);
 }
 
-void PieceHandler::rotateWinnerPieces(double angle){
+void PieceHandler::rotateWinnerPieces(const bool isNoWinner, const double angle){
 
-    // obtain the current rotation angle of an arbitrary chess piece (i.e the first one)...
+    // logic is: obtain the current rotation angle of an arbitrary chess piece (i.e the first one)...
     // the remaining chess pieces feature the same current rotation angle
+    
     int32_t playerId;
-    _gameProxy->isAutomaticWin() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
+    GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType() ? playerId=BoardUtils::getOpponentId(_currPlayerId) : playerId=_currPlayerId;
 
     const double currAngle=_pieces[playerId].front()->getRotationAngle();
 
+    if(isNoWinner){
+        for(const ChessPiece::PlayerPieces& player:_pieces){
+            for(const std::unique_ptr<ChessPiece>& piece:player){
+                // how is  that possible ... a constant reference calls a non-constatnt method and no errors are given by compiler ???
+                piece->setRotationAngle(currAngle+angle);
+            }
+        }
+        return;   
+    }
+
     for(const std::unique_ptr<ChessPiece>& piece:_pieces[playerId]){
+        // how is  that possible ... a constant reference calls a non-constatnt method and no errors are given by compiler ???
         piece->setRotationAngle(currAngle+angle);
     }
 }
 
 const BoardPos PieceHandler::getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const {
 
-    if(_gameProxy->isAutomaticWin()){
+    if(GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType()){
         if(playerId==_currPlayerId){
             const int32_t kingIndx=PieceHandler::getKingIndex(playerId);
             return _pieces[playerId][kingIndx]->getBoardPos();
@@ -614,9 +665,28 @@ const BoardPos PieceHandler::getBoardPosOfKingAndAttackingPiece(const int32_t pl
     return _pieces[_currPlayerId][lastMovedPieceId]->getBoardPos();
 }
 
-void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
+void PieceHandler::shiftWinnerPiecesPos(const bool isNoWinner){ // NOT added by Zhivko
+    
+    if(isNoWinner){       
+        for(const ChessPiece::PlayerPieces& player:_pieces){
+            for(const std::unique_ptr<ChessPiece>& piece:player){
+                piece->setWidgetFlip(WidgetFlip::NONE);
+                if(Defines::BLACK_PLAYER_ID==_currPlayerId){
+                    continue;
+                }
+                const BoardPos& pieceOldBoardPos=piece->getBoardPos();
+                const BoardPos& invertedPieceBoardPos=BoardUtils::getInvertedBoardPos(pieceOldBoardPos,WidgetFlip::HORIZONTAL_AND_VERTICAL);
+                const Point& invertedPieceAbsPos=BoardUtils::getAbsPos(invertedPieceBoardPos);
+                const BoardPos pieceNewBoardPos=BoardUtils::getBoardPos(Point(invertedPieceAbsPos.x+GAME_X_POS_SHIFT,invertedPieceAbsPos.y+GAME_Y_POS_SHIFT));
+                piece->setBoardPos(pieceNewBoardPos);
+            }
+        }
+        return;
+    }
+
+
     if(Defines::BLACK_PLAYER_ID==_currPlayerId){
-        if(_gameProxy->isAutomaticWin()){
+        if(GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType()){
             return;
         }
         for(std::unique_ptr<ChessPiece>& piece:_pieces[_currPlayerId]){
@@ -628,7 +698,7 @@ void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
         return;
     }
 
-    if(_gameProxy->isAutomaticWin()){
+    if(GameEndType::WINNER_AUTOMATIC==_gameProxy->getGameEndType()){
         const int32_t opponentId=BoardUtils::getOpponentId(_currPlayerId);
         for(std::unique_ptr<ChessPiece>& piece:_pieces[opponentId]){
             const BoardPos& pieceOldBoardPos=piece->getBoardPos();
@@ -649,4 +719,135 @@ void PieceHandler::shiftWinnerPiecesPos(){ // NOT added by Zhivko
         piece->setBoardPos(pieceNewBoardPos);
         piece->setWidgetFlip(WidgetFlip::NONE);
     }
+}
+
+bool PieceHandler::isDeadPosition(){
+    // check for:
+    // 1) king against king
+    // 2) king against king and knight
+    // 3) king against king and bishop
+
+    if(1==_whitePiecesCount && 1==_blackPiecesCount){
+        return true;
+    }
+
+    const bool areThreePiecesLeft=((1==_whitePiecesCount && 2==_blackPiecesCount) || (2==_whitePiecesCount && 1==_blackPiecesCount));
+    const bool isBishopOrKnightLeft = 0<_bishopsAndKnightsCount;
+    if(areThreePiecesLeft && isBishopOrKnightLeft){
+        return true;
+    }
+
+    if(Defines::TOTAL_PIECES_COUNT==_whitePiecesCount || Defines::TOTAL_PIECES_COUNT==_blackPiecesCount){
+        return false;
+    }
+
+    // below code checks for dead position if pawns are on the board
+
+    // constexpr size_t maxPiecesNum=10; // 8 pawns + king + 1 bishop
+
+    // if(maxPiecesNum<_whitePiecesCount || maxPiecesNum<_blackPiecesCount){
+    //     return false;
+    // }
+
+    // int32_t chessColumns[Defines::PAWNS_COUNT]{};
+    // std::memset(chessColumns,2,sizeof(chessColumns));
+
+    int32_t idx{};
+    for(const ChessPiece::PlayerPieces& player:_pieces){
+        for(const std::unique_ptr<ChessPiece>& piece:player){
+            if(piece->getIsTaken()){
+                continue;
+            }
+
+            const PieceType currPieceType=piece->getPieceType();
+
+            if(PieceType::PAWN==currPieceType){
+                const std::vector<TileData>& moveTiles = piece->getMoveTiles(_pieces); // CHECK IF recursion happens !!!
+                if(moveTiles.empty()){
+                    continue;
+                }
+            
+                for(const TileData& tileData:moveTiles){
+                    if(TileType::GUARD!=tileData.tileType){
+                        return false;
+                    }
+                }
+                continue;
+            }
+
+            if(PieceType::QUEEN==currPieceType){
+                return false;
+            }
+            
+            if(piece->isDeadPosition(_pieces,idx)){
+                idx=0;
+                continue;
+            }
+            return false;
+
+            // ChessPiece* const chessPiecePtr=piece.get();
+            // if(PieceType::KING==currPieceType){
+            //     int32_t index{};
+            //     King* const kingPiecePtr=static_cast<King*>(chessPiecePtr);
+            //     if(kingPiecePtr->isDeadPosition(_pieces,index)){
+            //         continue;
+            //     }
+            //     return false;
+            // }
+
+            // if(PieceType::BISHOP==currPieceType){
+            //     int32_t index{};
+            //     Bishop* const bishopPiecePtr=static_cast<Bishop*>(chessPiecePtr);
+            //     if(bishopPiecePtr->isDeadPosition(_pieces,index)){
+            //         continue;
+            //     }
+            //     return false;
+            // }
+
+            // if(PieceType::ROOK==currPieceType){
+            //     int32_t index{};
+            //     Rook* const rookPiecePtr=static_cast<Rook*>(chessPiecePtr);
+            //     if(rookPiecePtr->isDeadPosition(_pieces,index)){
+            //         continue;
+            //     }
+            //     return false;
+            // }          
+
+            // if(PieceType::KNIGHT==currPieceType){
+            //     int32_t index{};
+            //     Knight* const rookPiecePtr=static_cast<Rook*>(chessPiecePtr);
+            //     if(rookPiecePtr->isDeadPosition(_pieces,index)){
+            //         continue;
+            //     }
+            //     return false;
+            // }                
+
+        }
+    }
+
+    // int32_t idx{};
+    // std::cout<<"idx = "<<idx<<'\n';
+    // const int32_t numOfCols=Defines::PAWNS_COUNT-1; // last column "h" with index 7 is irrelevant for analysis-does not matter if pawn pieces are there or not
+
+    // for(int32_t i=0;i<numOfCols;++i){
+    //     idx+=chessColumns[i];
+
+    //     if(0==i%2){ // think for smarter condition
+    //         if(0<i && 2==idx){
+    //             return false;
+    //         }
+    //         continue;
+    //     }
+
+    //     if(0==idx && 1<i){
+    //         return false;
+    //     }        
+
+    //     if(4==idx){
+    //         return false;
+    //     }
+    //     idx=0;
+    // }
+
+    return true;
 }

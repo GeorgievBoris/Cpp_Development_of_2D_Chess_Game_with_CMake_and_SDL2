@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GAME_ANIMATIONS_WINNERANIMATOR_H_
-#define INCLUDE_GAME_ANIMATIONS_WINNERANIMATOR_H_
+#ifndef INCLUDE_GAME_ANIMATOR_TYPES_GAMEENDANIMATOR_H_
+#define INCLUDE_GAME_ANIMATOR_TYPES_GAMEENDANIMATOR_H_
 
 // C system headers
 // C++ system headers
@@ -13,21 +13,23 @@
 #include "manager_utils/drawing/Text.h"
 #include "manager_utils/time/TimerClient.h"
 #include "manager_utils/drawing/Image.h"
+#include "game/defines/ChessDefines.h"
 // Forward Declarations
 class PieceHandlerProxy;
 
-// NOTE: "WinnerAnimator.h" is NOT created by Zhivko!
+// NOTE: "GameEndAnimator.h" is NOT created by Zhivko!
 
-class WinnerAnimator : public TimerClient {
+class GameEndAnimator : public TimerClient{
 public:
     int32_t init(PieceHandlerProxy* pieceHandlerProxy, const std::function<void()>& showStartScreenCb, int32_t nextAnimTimerId, int32_t endAnimTimerId,
                 int32_t starRsrcId,int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t targetsRsrcId, 
                 int32_t fontId, int32_t windowWidth, int32_t windowHeight);
     void draw() const;
-    void activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType);
+    void activate(int32_t playerId,GameEndType gameEndType, WidgetFlip flipType);
     void deactivate();
     bool isActive() const;
-    void restart();
+    void restart();                                
+
 private:
     class NumGenerator{
     public:
@@ -78,23 +80,22 @@ private:
     std::vector<int>::const_iterator _yRangeIter;
     std::list<std::pair<uint32_t,uint32_t>> _fireworksPosCounter;
     
-    int32_t _nextAnimTimerId;
-    int32_t _endAnimTimerId;
     int32_t _starRsrcId;
     int32_t _fireworksRsrcId;
     int32_t _medalRsrcId;
     int32_t _targetsRsrcId;
+    int32_t _nextAnimTimerId;
+    int32_t _endAnimTimerId;    
 
     double _currRotAngle=0.0;
     double _deltaRotAngle=1.0;
-    bool _isClockwiseRotation=true;
     bool _moveUp=false;
     bool _isActive=false;
     
-    // // use below parameters if WinnerAnimator::rotateText() is enabled
+    // // use below parameters if GameEndAnimator::rotateText() is enabled
     // int32_t _textWidth=0;
     // int32_t _textHeight=0;
     // int32_t _textCounter;
 };
 
-#endif // INCLUDE_GAME_ANIMATIONS_WINNERANIMATOR_H_
+#endif // INCLUDE_GAME_ANIMATOR_TYPES_GAMEENDANIMATOR_H_

@@ -103,7 +103,7 @@ SDL_Texture* DrawMgr::getTextureInternal(const DrawParams& drawParams) const {
     } else {
         std::cerr<<"Error, received unsupported WidgetType: "
         <<static_cast<int32_t>(drawParams.widgetType)<<" for rsrcId: "
-        <<drawParams.rsrcId<<std::endl;      
+        <<drawParams.rsrcId<<std::endl;    
     }
     return nullptr;
 }

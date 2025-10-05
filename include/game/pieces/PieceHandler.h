@@ -49,19 +49,18 @@ private:
     bool alertGameBoardIfCastling(const std::unique_ptr<ChessPiece>& piece) const; // PieceHandler::alertGameBoardIfCastlling() is NOT added by Zhivko
 
     bool isOpponentKingInCheck(); // PieceHandler::isOpponentKingInCheck() is NOT added by Zhivko
-    bool isOpponentKingInMate(bool isKingInCheck=false); // PieceHandler::isOpponentKingInMate() is NOT added by Zhivko
-    void isOpponentInStalemate(); // PieceHandler::isOpponentInStalemate() is NOT added by Zhivko
+    bool isOpponentInStalemate(bool isKingInCheck=false); // PieceHandler::isOpponentInStalemate() is NOT added by Zhivko
     bool isNextMoveCheckForKing(); // PieceHandler::isNextMoveCheckForKing() is NOT added by Zhivko
     bool isPositionTaken(const int32_t nonAttackedPlayerId, const BoardPos& attackedKingPos) const; // PieceHandler::isPositionTaken() is NOT added by Zhivko
     int32_t getKingIndex(int32_t playerId) const; // PieceHandler::getKingIndex() is NOT added by Zhivko
 
-    void rotateWinnerPieces(double angle) final; // PieceHandler::rotateWinnerPieces() is NOT added by Zhivko
-    void shiftWinnerPiecesPos() final; // PieceHandler::shiftWinnerPiecesPos() is NOT added by Zhivko
+    void rotatePiecesAtGameEnd(const double angle) final; // PieceHandler::rotatePiecesAtGameEnd() is NOT added by Zhivko
+    void shiftPiecesPosAtGameEnd(const bool isNoWinner) final; // PieceHandler::shiftPiecesPosAtGameEnd() is NOT added by Zhivko
     void onTurnTimeElapsed() final; // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
     const ChessPiece::PlayerPieces& getWinnerPieces() final; // PieceHandler::getWinnerPieces() is NOT added by Zhivko
     void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos) final; // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
     const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const final; // PieceHandler::getBoardPosOfKingAndAttackingPiece()
-
+    bool isDeadPosition(); // PieceHandler::isDeadPosition() is NOT added by Zhivko
 
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;
@@ -75,6 +74,9 @@ private:
     int32_t _selectedPieceId=0;
     int32_t _currPlayerId=0;
     int32_t _collisionIdx=INVALID_RSRC_ID;  // NOT added by Zhivko
+    size_t _whitePiecesCount=Defines::TOTAL_PIECES_COUNT; // NOT added by Zhivko
+    size_t _blackPiecesCount=Defines::TOTAL_PIECES_COUNT; // NOT added by Zhivko
+    int32_t _bishopsAndKnightsCount=Defines::BISHOPS_AND_KNIGHTS_COUNT; // NOT added by Zhivko
     bool _isPieceGrabbed=false;
     bool _isCastlingPossible=false; // NOT added by Zhivko
 };

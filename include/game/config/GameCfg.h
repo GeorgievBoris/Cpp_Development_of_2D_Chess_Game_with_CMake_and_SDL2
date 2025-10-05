@@ -37,7 +37,7 @@ struct GameCfg{
     int32_t blinkEnPassantTimerId; // NOT added by Zhivko
     int32_t blinkTileCastlingTimerId; // NOT added by Zhivko
     int32_t blinkTextCastlingTimerId; // NOT added by Zhivko
-    int32_t nextWinnerAnimTimerId; // NOT added by Zhivko
+    int32_t winnerNextAnimTimerId; // NOT added by Zhivko
     int32_t winnerAnimEndTimerId; // NOT added by Zhivko
     int32_t movePieceTimerId; // NOT added by Zhivko
     int32_t movePieceHalvesTimerId; // NOT added by Zhivko

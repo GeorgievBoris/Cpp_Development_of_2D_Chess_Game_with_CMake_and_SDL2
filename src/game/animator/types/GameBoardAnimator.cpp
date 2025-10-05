@@ -1,5 +1,5 @@
 // Corresponding header
-#include "game/board/GameBoardAnimator.h"
+#include "game/animator/types/GameBoardAnimator.h"
 // C system headers
 // C++ system headers
 #include <iostream>

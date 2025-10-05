@@ -1,5 +1,5 @@
 // Corresponding header
-#include "game/animations/WinnerAnimator.h"
+#include "game/animator/types/GameEndAnimator.h"
 // C system headers
 #include <cmath>
 #include <cstdlib>
@@ -16,7 +16,7 @@
 #include "game/utils/BoardUtils.h"
 
 
-int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::function<void()>& showStartScreenCb,int32_t nextAnimTimerId,
+int32_t GameEndAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::function<void()>& showStartScreenCb,int32_t nextAnimTimerId,
                                 int32_t endAnimTimerId, int32_t starRsrcId, int32_t fireworksRsrcId, int32_t medalRsrcId, int32_t targetsRsrcId,
                                 int32_t fontId, int32_t windowWidth, int32_t windowHeight){
     if(nullptr==pieceHandlerProxy){
@@ -67,14 +67,17 @@ int32_t WinnerAnimator::init(PieceHandlerProxy* pieceHandlerProxy, const std::fu
     std::generate(_yRange.begin(),_yRange.end(),NumGenerator());
     _yRangeIter=_yRange.begin();
     _onWinText.create("0",fontId,Colors::WHITE,Point(880,*_yRangeIter));
-    // _onWinText.create("0",fontId,Colors::WHITE,Point(880,500)); // use if WinnerAnimator::rotateText() is enabled
+    // _onWinText.create("0",fontId,Colors::WHITE,Point(880,500)); // use if GameEndAnimator::rotateText() is enabled
     _onWinText.hide();
     _windowFrame=Rectangle(0,0,windowWidth,windowHeight);
     return EXIT_SUCCESS;
 }
 
-void WinnerAnimator::draw() const{
+void GameEndAnimator::draw() const{
     _onWinText.draw();
+    if(_medals.empty()){
+        return;
+    }
     _targetImgs[static_cast<int32_t>(TargetImgs::KING)].draw();
     _targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)].draw();
 
@@ -93,18 +96,25 @@ void WinnerAnimator::draw() const{
     }
 }
 
-void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, WidgetFlip flipType){
+void GameEndAnimator::activate(int32_t playerId, GameEndType gameEndType, WidgetFlip flipType){
     if(_isActive){
-        std::cerr<<"Error, trying to active WinnerAnimator which is already active!"<<std::endl;
+        std::cerr<<"Error, trying to activate GameEndAnimator which is already active!"<<std::endl;
         return;
     }
-    _pieceHandlerProxy->shiftWinnerPiecesPos();
-    
+
     TimerClient::startTimer(75,_nextAnimTimerId,TimerType::PULSE);
     TimerClient::startTimer(60000,_endAnimTimerId,TimerType::ONESHOT);
     _isActive=(TimerClient::isActiveTimerId(_nextAnimTimerId) && TimerClient::isActiveTimerId(_endAnimTimerId));
     _onWinText.show();
-    WinnerAnimator::createMedals();
+
+    _pieceHandlerProxy->shiftPiecesPosAtGameEnd(GameEndType::DRAW==gameEndType);
+
+    if(GameEndType::DRAW==gameEndType){
+        _onWinText.setText("Game ends in a draw!");
+        return;
+    }
+    
+    GameEndAnimator::createMedals();
 
     Image& kingPieceImg=_targetImgs[static_cast<int32_t>(TargetImgs::KING)];
     Image& attackingPieceImg=_targetImgs[static_cast<int32_t>(TargetImgs::ATTACKING_PIECE)];
@@ -112,7 +122,7 @@ void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, Widge
     BoardPos kingBoardPos;
     BoardPos attackingPieceBoardPos;
 
-    if(isAutomaticWin){
+    if(GameEndType::WINNER_AUTOMATIC==gameEndType){
         kingBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(playerId);
         attackingPieceBoardPos=_pieceHandlerProxy->getBoardPosOfKingAndAttackingPiece(opponentId);
         Defines::WHITE_PLAYER_ID==playerId ? _onWinText.setText("Black pieces win the game!") : _onWinText.setText("White pieces win the game!");
@@ -143,7 +153,7 @@ void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, Widge
     kingPieceImg.show();
     attackingPieceImg.show();
 
-    // // use below parameters if WinnerAnimator::rotateText() is enabled
+    // // use ONLY IF GameEndAnimator::rotateText() is enabled
     // _textWidth=_onWinText.getWidth();
     // _textHeight=_onWinText.getHeight();
     // _textCounter=30;
@@ -152,7 +162,7 @@ void WinnerAnimator::activate(int32_t playerId, const bool isAutomaticWin, Widge
     // _onWinText.setRotationCenter({_onWinText.getWidth()/2,_onWinText.getHeight()/2});
 }
 
-void WinnerAnimator::deactivate(){
+void GameEndAnimator::deactivate(){
     if(!_isActive){
         return;
     }
@@ -167,17 +177,20 @@ void WinnerAnimator::deactivate(){
     _onWinText.hide();
 }
 
-void WinnerAnimator::onTimeout(const int32_t timerId){
+void GameEndAnimator::onTimeout(const int32_t timerId){
     if(timerId==_nextAnimTimerId){
-        WinnerAnimator::rotate();
-        WinnerAnimator::moveText();
-        // WinnerAnimator::rotateText();
+        GameEndAnimator::moveText();
+        GameEndAnimator::rotate();
+        // GameEndAnimator::rotateText();
 
-        WinnerAnimator::createStars();
-        WinnerAnimator::updateStars();
-
-        WinnerAnimator::createFireworks();
-        WinnerAnimator::updateFireworks();
+        if(_medals.empty()){
+            return;
+        }
+        // GameEndAnimator::rotate();
+        GameEndAnimator::createStars();
+        GameEndAnimator::updateStars();
+        GameEndAnimator::createFireworks();
+        GameEndAnimator::updateFireworks();
 
         if(_targetImgs[static_cast<int32_t>(TargetImgs::KING)].isVisible()){
             _targetImgs[static_cast<int32_t>(TargetImgs::KING)].hide();
@@ -193,24 +206,22 @@ void WinnerAnimator::onTimeout(const int32_t timerId){
         _showStartScreenCb();
         return;
     }
-    std::cerr<<"Error, WinnerAnimator::onTimeout() received unsupported timerId: "<<timerId<<std::endl;
+    std::cerr<<"Error, GameEndAnimator::onTimeout() received unsupported timerId: "<<timerId<<std::endl;
 }
 
-bool WinnerAnimator::isActive() const{
+bool GameEndAnimator::isActive() const{
     return _isActive;
 }
 
-void WinnerAnimator::restart(){
+void GameEndAnimator::restart(){
     _currRotAngle=0.0;
     _deltaRotAngle=1.0;
-    _isClockwiseRotation=true;
     _moveUp=false;
     _yRangeIter=_yRange.begin();
     _onWinText.setPosition(880,*_yRangeIter);
 }
 
-void WinnerAnimator::rotate(){
-
+void GameEndAnimator::rotate(){
     if(10.0==_currRotAngle){
         _deltaRotAngle=-1.0;
     }
@@ -221,7 +232,11 @@ void WinnerAnimator::rotate(){
 
     _currRotAngle+=_deltaRotAngle;
     
-    _pieceHandlerProxy->rotateWinnerPieces(_deltaRotAngle);
+    _pieceHandlerProxy->rotatePiecesAtGameEnd(_deltaRotAngle);
+
+    if(_medals.empty()){
+        return;
+    }
 
     // obtain the current rotation angle of an arbitrary medal (i.e the first one)...
     // the remaining chess pieces feature the same current rotation angle
@@ -230,10 +245,9 @@ void WinnerAnimator::rotate(){
     for(size_t i=0;i<medalsSize;++i){
         _medals[i].setRotationAngle(currAngle+_deltaRotAngle);
     }
-
 }
 
-void WinnerAnimator::moveText(){
+void GameEndAnimator::moveText(){
 
     if(!_moveUp){
         ++_yRangeIter;
@@ -256,7 +270,7 @@ void WinnerAnimator::moveText(){
     _onWinText.setPosition(Point(880,*_yRangeIter));
 }
 
-void WinnerAnimator::createStars(){
+void GameEndAnimator::createStars(){
     static uint32_t executionsStars=0;
     ++executionsStars;
     srand(static_cast<uint32_t>(executionsStars*time(nullptr)));
@@ -272,7 +286,7 @@ void WinnerAnimator::createStars(){
         const CurveTypes curveType=static_cast<CurveTypes>(type);
 
         std::unique_ptr<Image> unqPtrStar=std::make_unique<Image>();
-        unqPtrStar->create(_starRsrcId,WinnerAnimator::calcStarPos(curveType));
+        unqPtrStar->create(_starRsrcId,GameEndAnimator::calcStarPos(curveType));
         unqPtrStar->setWidth(unqPtrStar->getWidth()/6);
         unqPtrStar->setHeight(unqPtrStar->getHeight()/6);
         unqPtrStar->setRotationCenter(Point(unqPtrStar->getWidth()/2,unqPtrStar->getHeight()/2));
@@ -280,7 +294,7 @@ void WinnerAnimator::createStars(){
     }
 }
 
-void WinnerAnimator::updateStars(){
+void GameEndAnimator::updateStars(){
     std::list<std::pair<CurveTypes,std::unique_ptr<Image>>>::iterator iter=_stars.begin();
 
     for(;iter!=_stars.end();++iter){
@@ -290,14 +304,14 @@ void WinnerAnimator::updateStars(){
             iter=_stars.erase(iter);
             continue;
         }
-        unqPtrRef->setPosition(WinnerAnimator::calcStarPos(iter->first,absPos.x));
+        unqPtrRef->setPosition(GameEndAnimator::calcStarPos(iter->first,absPos.x));
 
         0==static_cast<uint8_t>(iter->first)%2 ? unqPtrRef->rotateRight(10) : unqPtrRef->rotateLeft(10);
     }
 
 }
 
-Point WinnerAnimator::calcStarPos(const CurveTypes type, const int32_t absX){
+Point GameEndAnimator::calcStarPos(const CurveTypes type, const int32_t absX){
     switch(type){
     case CurveTypes::LEFT_TO_RIGHT_DIAGONAL:
     {
@@ -350,7 +364,7 @@ Point WinnerAnimator::calcStarPos(const CurveTypes type, const int32_t absX){
     return Point::UNDEFINED;
 }
 
-void WinnerAnimator::createFireworks(){
+void GameEndAnimator::createFireworks(){
     const int32_t numNew=1+rand()%2;
 
     for(int32_t i=0;i<numNew;++i){
@@ -392,7 +406,7 @@ void WinnerAnimator::createFireworks(){
 
 }
 
-void WinnerAnimator::updateFireworks(){
+void GameEndAnimator::updateFireworks(){
     std::list<std::pair<std::pair<bool,Point>,std::unique_ptr<Image>>>::iterator iterFireworks=_fireworks.begin();
     std::list<std::pair<uint32_t,uint32_t>>::iterator iterFireworksMoveCount=_fireworksPosCounter.begin();
     
@@ -410,7 +424,7 @@ void WinnerAnimator::updateFireworks(){
                 iterFireworks->first.first ? (iterFireworks->first.second.x-=3,iterFireworks->first.second.y-=9):
                                              (iterFireworks->first.second.x+=3,iterFireworks->first.second.y-=9); 
             }
-            WinnerAnimator::calcFireworkPos(iterFireworks->first.second,fireworkRef);
+            GameEndAnimator::calcFireworkPos(iterFireworks->first.second,fireworkRef);
 
             --(iterFireworksMoveCount->first);
             ++iterFireworks; ++iterFireworksMoveCount;
@@ -419,19 +433,19 @@ void WinnerAnimator::updateFireworks(){
 
         fireworkRef->setNextFrame();
 
-        WinnerAnimator::calcFireworkPos(iterFireworks->first.second,fireworkRef);
+        GameEndAnimator::calcFireworkPos(iterFireworks->first.second,fireworkRef);
 
         ++iterFireworks; ++iterFireworksMoveCount;
     }
 }
 
-void WinnerAnimator::calcFireworkPos(const Point& pos, std::unique_ptr<Image>& fireworkRef){
+void GameEndAnimator::calcFireworkPos(const Point& pos, std::unique_ptr<Image>& fireworkRef){
     const int32_t width=fireworkRef->getWidth()/2;
     const int32_t height=fireworkRef->getHeight()/2;
     fireworkRef->setPosition({pos.x-width,pos.y-height});
 }
 
-void WinnerAnimator::createMedals(){
+void GameEndAnimator::createMedals(){
     const ChessPiece::PlayerPieces& pieces=_pieceHandlerProxy->getWinnerPieces();
     const size_t piecesCount=pieces.size();
     _medals.reserve(piecesCount);
@@ -448,7 +462,7 @@ void WinnerAnimator::createMedals(){
     }
 }
 
-// void WinnerAnimator::rotateText(){
+// void GameEndAnimator::rotateText(){
 //     const int32_t currWidth=_onWinText.getWidth();
 //     const int32_t currHeight=_onWinText.getHeight();
 //     const double currRotAngle=_onWinText.getRotationAngle();

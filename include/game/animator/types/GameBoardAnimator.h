@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GAME_BOARD_GAMEBOARDANIMATOR_H_
-#define INCLUDE_GAME_BOARD_GAMEBOARDANIMATOR_H_
+#ifndef INCLUDE_GAME_ANIMATOR_TYPES_GAMEBOARDANIMATOR_H_
+#define INCLUDE_GAME_ANIMATOR_TYPES_GAMEBOARDANIMATOR_H_
 
 // C system headers
 #include <cstdint>
@@ -38,10 +38,10 @@ private:
     Fbo* _gameFbo=nullptr;
     int32_t _currRotation{0};
     int32_t _targetRotation{0};
-    int32_t _gameFboRotTimerId=-1;
+    int32_t _gameFboRotTimerId=INVALID_RSRC_ID;
     WidgetFlip _targetFlipType=WidgetFlip::NONE;
     bool _isActive=false; // NOT added by Zhivko
 };
 
 
-#endif // INCLUDE_GAME_BOARD_GAMEBOARDANIMATOR_H_
+#endif // INCLUDE_GAME_ANIMATOR_TYPES_GAMEBOARDANIMATOR_H_

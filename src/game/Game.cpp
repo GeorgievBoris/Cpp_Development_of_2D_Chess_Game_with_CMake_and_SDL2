@@ -54,10 +54,10 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     _gameFbo.activateAlphaModulation();
     regenerateGameFbo();
 
-    if(EXIT_SUCCESS!=_gameBoardAnimator.init(static_cast<GameProxy*>(this),&_gameFbo,cfg.gameFboRotTimerId)){
-        std::cerr<<"_gameBoardAnimator.init() failed"<<std::endl;
-        return EXIT_FAILURE;
-    }
+    // if(EXIT_SUCCESS!=_gameBoardAnimator.init(static_cast<GameProxy*>(this),&_gameFbo,cfg.gameFboRotTimerId)){
+    //     std::cerr<<"_gameBoardAnimator.init() failed"<<std::endl;
+    //     return EXIT_FAILURE;
+    // }
 
     if(EXIT_SUCCESS!=_inputInverter.init(cfg.piecePromotionPanelCfg.gameBoardWidth,
                                             cfg.piecePromotionPanelCfg.gameBoardHeight)){
@@ -65,9 +65,10 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         return EXIT_FAILURE;
     }
 
-    if(EXIT_SUCCESS!=_winnerAnimator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),showStartScreenCb,
-                                                cfg.nextWinnerAnimTimerId, cfg.winnerAnimEndTimerId,cfg.winnerStarRsrcId,cfg.fireworksRsrcId,
-                                                cfg.winnerMedalRsrcId, cfg.targetsRsrcId, cfg.textFontId,cfg.windowWidth,cfg.windowHeight)){ 
+    if(EXIT_SUCCESS!=_animator.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),static_cast<GameProxy*>(this),_gameFbo,
+                                                showStartScreenCb, cfg.winnerNextAnimTimerId, cfg.winnerAnimEndTimerId,cfg.gameFboRotTimerId,
+                                                cfg.winnerStarRsrcId,cfg.fireworksRsrcId, cfg.winnerMedalRsrcId, cfg.targetsRsrcId,
+                                                cfg.textFontId,cfg.windowWidth,cfg.windowHeight)){ 
         // NOT added by Zhivko
         std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
@@ -88,7 +89,7 @@ void Game::draw() const{
         return; // NOT added by Zhivko
     }
     
-    if(_gameBoardAnimator.isActive()){
+    if(_animator.isGameBoardAnimatorActive()){
         _gameBoard.drawGameBoardOnly();
     }
     _gameFbo.draw();
@@ -100,8 +101,8 @@ void Game::draw() const{
 
     _quitGameBtn.draw(); // NOT added by Zhivko
     _pieceHandler.draw(); // NOT added by Zhivko
-    if(_winnerAnimator.isActive()){ // NOT added by Zhivko
-        _winnerAnimator.draw(); // NOT added by Zhivko
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
+        _animator.draw(); // NOT added by Zhivko
     } 
 }
 
@@ -109,9 +110,9 @@ void Game::handleEvent(InputEvent& e){
 
     if(!_gameLogic.isTimerActive()){ // NOT added by Zhivko
         if(!_piecePromotionPanel.isActive()){ // NOT added by Zhivko
-            if(!_isGameFinished){
+            if(GameEndType::NONE==_gameEndType){
                 return;
-            }
+            }         
         }
     }
 
@@ -121,9 +122,9 @@ void Game::handleEvent(InputEvent& e){
 
     _quitGameBtn.handleEvent(e); // NOT added by Zhivko
 
-    if(_isGameFinished){ // NOT added by Zhivko
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
         return;
-    }    
+    }   
     
     if(_piecePromotionPanel.isActive()){
         _piecePromotionPanel.handleEvent(e);
@@ -150,7 +151,7 @@ void Game::hide(){ // Game::hide() method is NOT added by Zhivko
     _gameBoard.hide();
     _quitGameBtn.hide();
     _piecePromotionPanel.hide();
-    _winnerAnimator.deactivate();
+    _animator.deactivate();
 }
 
 
@@ -159,7 +160,7 @@ void Game::start(){ // Game::start() method is NOT added by Zhivko
     Game::show();
 
     constexpr int32_t initialTargetRotation=0; // degrees
-    if(initialTargetRotation!=_gameBoardAnimator.getTargetRotation()){
+    if(initialTargetRotation!=_animator.getGameBoardTargetRotation()){
         Game::restart();
         return;
     }
@@ -179,7 +180,7 @@ void Game::onGameTurnFinished(){
     if(_isPromotionActive){
         return; // this "if" statement and the "return" are NOT added by Zhivko
     }
-    _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId());
+    _animator.startGameBoardAnim(_gameLogic.getActivePlayerId());
 }
 
 void Game::onPawnPromotion(){
@@ -190,7 +191,7 @@ void Game::onPawnPromotion(){
 void Game::promotePiece(PieceType pieceType){    
     _pieceHandler.promotePiece(pieceType);
     _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
-    _gameBoardAnimator.startAnim(_gameLogic.getActivePlayerId()); // NOT added by Zhivko
+    _animator.startGameBoardAnim(_gameLogic.getActivePlayerId()); // NOT added by Zhivko
 }
 
 void Game::onBoardAnimFinished(){
@@ -198,9 +199,9 @@ void Game::onBoardAnimFinished(){
         // a quick fix by Zhivko done in the last lecture 14
         return;
     }
-
-    if(_isGameFinished){ // NOT added by Zhivko
-        _winnerAnimator.activate(_gameLogic.getActivePlayerId(),_isAutomaticWin,_gameBoard.getWidgetFlip());
+    
+    if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
+        _animator.activateGameEndAnims(_gameLogic.getActivePlayerId(),_gameEndType,_gameBoard.getWidgetFlip());
         regenerateGameFbo();
         return;
     }        
@@ -222,17 +223,15 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
         return;
     }
     regenerateGameFbo();
-    _piecePromotionPanel.restart(); 
-    _gameBoardAnimator.restart();
+    _piecePromotionPanel.restart();
     _inputInverter.restart(); 
     _gameLogic.restart();
     _quitGameBtn.restart();
     _gameBoard.restart();
-    _winnerAnimator.restart();
+    _animator.restart();
     _gameBoard.setWidgetFlip(WidgetFlip::NONE);    
     _isPromotionActive=false;
-    _isGameFinished=false;
-    _isAutomaticWin=false;
+    _gameEndType=GameEndType::NONE;
     _isPieceMovementActive=false;
 }
 
@@ -264,10 +263,6 @@ void Game::correctInputEvent(InputEvent& e){ // Game::correctInputEvent() method
     e.pos.y-=GAME_Y_POS_SHIFT;
 }
 
-void Game::onGameFinish() { // Game::onGameFinish() is NOT added by Zhivko
-    _isGameFinished=true;
-}
-
 void Game::castleTextShow() { // Game::castleTextShow() is NOT added by Zhivko
     _gameLogic.startOnCastleTimer();
 }
@@ -276,19 +271,11 @@ void Game::castleTextHide(){ // Game::castleTextHide() is NOT added by Zhivko
     _gameLogic.stopOnCastleTimer();
 }
 
-void Game::setAutomaticWin(bool isAutomaticWin){ // GameProxy::setAutomaticWin() method is NOT added by Zhivko
-    _isAutomaticWin=isAutomaticWin;
-} 
-
-bool Game::isAutomaticWin(){ // GameProxy::isAutomaticWin() method is NOT added by Zhivko
-    return _isAutomaticWin;
-}
-
-bool Game::isWinnerAnimatorActive() { // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
-    return _winnerAnimator.isActive();
+bool Game::isGameBoardAnimatorActive() const { // Game::isWinnerAnimatorActive() method is NOT added by Zhivko
+    return _animator.isGameBoardAnimatorActive();
 }; 
 
-bool Game::isPromotionActive() { // Game::isPromotionActive() method is NOT added by Zhivko
+bool Game::isPromotionActive() const { // Game::isPromotionActive() method is NOT added by Zhivko
     return _isPromotionActive;
 }
 
@@ -300,6 +287,14 @@ void Game::setPieceMovementActive(bool isPieceMovementActive){ // Game::setPiece
     }   
 }
 
-bool Game::isPieceMovementActive(){ // Game::isPieceMovementActive() method is NOT added by Zhivko
+bool Game::isPieceMovementActive() const { // Game::isPieceMovementActive() method is NOT added by Zhivko
     return _isPieceMovementActive;
+}
+
+void Game::setGameEndType(const GameEndType gameEndType){ // Game::setGameEndType() method is NOT added by Zhivko
+    _gameEndType=gameEndType;
+}
+
+GameEndType Game::getGameEndType() const { // Game::getGameEndType() method is NOT added by Zhivko
+    return _gameEndType;
 }

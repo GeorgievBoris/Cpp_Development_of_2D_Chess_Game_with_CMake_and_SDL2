@@ -20,7 +20,9 @@ extern const int32_t GAME_Y_POS_SHIFT;
 int32_t PieceMoveAnimator::init(GameProxy* gameProxy, int32_t whitePiecesHalvesRsrcId, int32_t blackPiecesHalvesRsrcId,
                                 int32_t movePieceTimerId, int32_t movePieceHalvesTimerId, int32_t tileSize, int32_t firstTilePosX,
                                 int32_t firstTilePosY, int32_t& collisionIdx,
-                                const std::function<bool()>& isKingInCheckCb, const std::function<void()>& isInStalemateCb){  
+                                const std::function<bool()>& isKingInCheckCb,
+                                const std::function<bool(bool)>& isInStalemateCb,
+                                const std::function<bool()>& isDeadPosition){  
     
     if(INVALID_RSRC_ID==movePieceTimerId){
         std::cerr<<"Received unsupported timerId\n";
@@ -44,6 +46,7 @@ int32_t PieceMoveAnimator::init(GameProxy* gameProxy, int32_t whitePiecesHalvesR
     _firstTilePosY=firstTilePosY;
     _isKingInCheckCb=isKingInCheckCb;
     _isInStalemateCb=isInStalemateCb;
+    _isDeadPositionCb=isDeadPosition;
     _collisionIdxPtr=&collisionIdx;
     _whitePiecesHalvesRsrcId=whitePiecesHalvesRsrcId;
     _blackPiecesHalvesRsrcId=blackPiecesHalvesRsrcId;
@@ -295,9 +298,17 @@ void PieceMoveAnimator::finaliseMove(){
     } else {
         *_collisionIdxPtr=INVALID_RSRC_ID;
         _gameProxy->setPieceMovementActive(false);
-        if(!_isKingInCheckCb()){
-            _isInStalemateCb();
-        }
+
+        // try wrapping this in a function inside PieceHandler.h
+
+        const bool isOpponentKingInCheck=_isKingInCheckCb();
+        if(_isInStalemateCb(isOpponentKingInCheck)){
+            isOpponentKingInCheck ? _gameProxy->setGameEndType(GameEndType::WINNER_NON_AUTOMATIC) : _gameProxy->setGameEndType(GameEndType::DRAW);
+        } else if(isOpponentKingInCheck){
+            // left blank on purpose
+        } else if(_isDeadPositionCb()){
+            _gameProxy->setGameEndType(GameEndType::DRAW);
+        } 
     }
     _gameProxy->onGameTurnFinished();
 }

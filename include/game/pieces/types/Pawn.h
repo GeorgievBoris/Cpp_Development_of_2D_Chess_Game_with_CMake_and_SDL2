@@ -22,6 +22,7 @@ public:
     void checkForPawnPromotion(); // Pawn::checkForPawnPromotion() is NOT added by Zhivko
     void setIsPawnTargetedForEnPassant(bool isPawnTargetedForEnPassant); // Pawn::setIsPawnTargetedForEnPassant() is NOT added by Zhivko
 private:
+    bool isDeadPosition(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces, int32_t& idx) final;
     bool isEnPassantPossible(const BoardPos& boardPos, const ChessPiece::PlayerPieces& enemyPieces, int32_t& enemyPawnIndx) const; // Pawn::isEnPassantPossible() method is NOT added by Zhivko
     bool areEnPassantTilesValid(const BoardPos& boardPos,const BoardPos& kingBoardPos,const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers, const int32_t enemyPawnIndx) const; // Pawn::areEnPassantTilesValid() is NOT added by Zhivko
     std::vector<TileData> getWhiteMoveTiles(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces, 

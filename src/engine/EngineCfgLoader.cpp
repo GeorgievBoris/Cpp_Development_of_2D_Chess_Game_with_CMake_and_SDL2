@@ -238,7 +238,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blinkEnPassantTimerId=TimerId::BLINK_EN_PASSANT_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTileCastlingTimerId=TimerId::BLINK_TILE_CASTLING_TIMER_ID; // NOT added by Zhivko
     cfg.blinkTextCastlingTimerId=TimerId::BLINK_TEXT_CASTLING_TIMER_ID; // NOT added by Zhivko
-    cfg.nextWinnerAnimTimerId=TimerId::NEW_WINNER_ANIM_TIMER_ID; // NOT added by Zhivko
+    cfg.winnerNextAnimTimerId=TimerId::NEW_WINNER_ANIM_TIMER_ID; // NOT added by Zhivko
     cfg.winnerAnimEndTimerId=TimerId::WINNER_ANIM_END_TIMER_ID; // NOT added by Zhivko
     cfg.movePieceTimerId=TimerId::MOVE_PIECE_TIMER_ID; // NOT added by Zhivko
     cfg.movePieceHalvesTimerId=TimerId::MOVE_PIECE_HALVES_TIMER_ID; // NOT added by Zhivko

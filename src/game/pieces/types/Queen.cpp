@@ -72,11 +72,12 @@ std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPie
             }
 
             if(isAnotherPieceGetMoveTilesCalled){
-                moveTiles.emplace_back(pos,tileType);
-                if(TileType::MOVE!=tileType){
-                    break;
-                }                
-                continue;
+                // moveTiles.emplace_back(pos,tileType); // NOT NEEDED !
+                if(TileType::MOVE==tileType){
+                    continue;
+                }
+                moveTiles.emplace_back(pos,tileType);             
+                break;
             }
 
             if(TileType::TAKE==tileType){
@@ -95,4 +96,9 @@ std::vector<TileData> Queen::getMoveTiles(const std::array<ChessPiece::PlayerPie
     }
     _isFncGetMoveTilesCalled=false;
     return moveTiles;
+}
+
+bool Queen::isDeadPosition([[maybe_unused]]const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces,[[maybe_unused]] int32_t& idx){
+    // if a Queen piece is on the chess board, a dead position situation is not possible
+    return false;
 }

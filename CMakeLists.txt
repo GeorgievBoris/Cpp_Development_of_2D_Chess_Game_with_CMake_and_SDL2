@@ -25,7 +25,6 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/Game.h
                 ${_INC_DIR}/game/board/GameBoard.h
                 ${_INC_DIR}/game/board/MoveSelector.h
-                ${_INC_DIR}/game/board/GameBoardAnimator.h
                 ${_INC_DIR}/game/utils/BoardPos.h
                 ${_INC_DIR}/game/utils/BoardUtils.h
                 ${_INC_DIR}/game/pieces/types/ChessPiece.h
@@ -56,16 +55,17 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/StartScreen/buttons/StartScreenButton.h
                 ${_INC_DIR}/StartScreen/buttons/config/StartScreenButtonCfg.h
                 ${_INC_DIR}/game/buttons/QuitGameButton.h
-                ${_INC_DIR}/game/animations/WinnerAnimator.h
                 ${_INC_DIR}/game/proxies/PieceHandlerProxy.h
                 ${_INC_DIR}/game/pieces/PieceMoveAnimator.h
+                ${_INC_DIR}/game/animator/Animator.h
+                ${_INC_DIR}/game/animator/types/GameBoardAnimator.h
+                ${_INC_DIR}/game/animator/types/GameEndAnimator.h
 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
                 ${_SRC_DIR}/game/Game.cpp
                 ${_SRC_DIR}/game/board/GameBoard.cpp
                 ${_SRC_DIR}/game/board/MoveSelector.cpp
-                ${_SRC_DIR}/game/board/GameBoardAnimator.cpp
                 ${_SRC_DIR}/game/utils/BoardUtils.cpp
                 ${_SRC_DIR}/game/pieces/types/ChessPiece.cpp
                 # ${_SRC_DIR}/game/pieces/types/UnfinishedPiece.cpp
@@ -87,8 +87,10 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/StartScreen/StartScreen.cpp
                 ${_SRC_DIR}/StartScreen/buttons/StartScreenButton.cpp
                 ${_SRC_DIR}/game/buttons/QuitGameButton.cpp
-                ${_SRC_DIR}/game/animations/WinnerAnimator.cpp
                 ${_SRC_DIR}/game/pieces/PieceMoveAnimator.cpp
+                ${_SRC_DIR}/game/animator/Animator.cpp
+                ${_SRC_DIR}/game/animator/types/GameBoardAnimator.cpp
+                ${_SRC_DIR}/game/animator/types/GameEndAnimator.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

@@ -134,23 +134,8 @@ bool ChessPiece::isMoveTileValid(const BoardPos& boardPos, const BoardPos& kingB
     const BoardPos initialBoardPos=_boardPos;
     _boardPos=boardPos;
 
-    if(PieceType::KING!=_pieceType){
-        for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
-            const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
-            for(const TileData& tileData:moveTiles){
-                if(TileType::TAKE!=tileData.tileType){
-                    continue;
-                }
-                if(kingBoardPos!=tileData.boardPos){
-                    continue;
-                }
-                _boardPos=initialBoardPos;
-                return false;            
-            }        
-        }
-        _boardPos=initialBoardPos;
-        return true;        
-    }
+    BoardPos tempBoardPos;
+    PieceType::KING!=_pieceType ? tempBoardPos=kingBoardPos : tempBoardPos=boardPos;
 
     for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
         const std::vector<TileData> moveTiles=piece->getMoveTiles(activePlayers);
@@ -158,7 +143,8 @@ bool ChessPiece::isMoveTileValid(const BoardPos& boardPos, const BoardPos& kingB
             if(TileType::TAKE!=tileData.tileType){
                 continue;
             }
-            if(boardPos!=tileData.boardPos){
+
+            if(tempBoardPos!=tileData.boardPos){
                 continue;
             }
             _boardPos=initialBoardPos;
@@ -166,7 +152,7 @@ bool ChessPiece::isMoveTileValid(const BoardPos& boardPos, const BoardPos& kingB
         }
     }
     _boardPos=initialBoardPos;
-    return true;
+    return true;    
 }
 
 bool ChessPiece::isTakeTileValid(const BoardPos& boardPos, const BoardPos& kingBoardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const {
@@ -174,8 +160,15 @@ bool ChessPiece::isTakeTileValid(const BoardPos& boardPos, const BoardPos& kingB
     const ChessPiece::PlayerPieces& opponentPieces=activePlayers[opponentId];
     
     if(PieceType::KING!=_pieceType){
+        for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
+            if(PieceType::KING==piece->getPieceType() && boardPos==piece->getBoardPos()){
+                return true;
+            }
+        }
+
         const BoardPos initialBoardPos=_boardPos;
-        _boardPos=boardPos;
+        _boardPos=boardPos;        
+
         for(const std::unique_ptr<ChessPiece>& piece:opponentPieces){
             if(boardPos==piece->getBoardPos()){
                 continue;

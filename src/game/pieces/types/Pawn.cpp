@@ -126,8 +126,8 @@ std::vector<TileData> Pawn::getWhiteMoveTiles(const std::array<ChessPiece::Playe
             }
 
             if(isAnotherPieceGetMoveTilesCalled){
-                moveTiles.emplace_back(pos,tileType);
-                continue;
+                // moveTiles.emplace_back(pos,tileType); // NOT NEEDED !
+                break;
             }
             
             if(ChessPiece::isMoveTileValid(pos,kingBoardPos,activePieces)){
@@ -158,7 +158,7 @@ std::vector<TileData> Pawn::getWhiteMoveTiles(const std::array<ChessPiece::Playe
                     moveTiles.emplace_back(pos,tileType);
                 }
                 continue;
-            }        
+            }                 
 
             if(TileType::TAKE==tileType){
                 if(ChessPiece::isTakeTileValid(pos,kingBoardPos,activePieces)){
@@ -201,8 +201,8 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
             }
 
             if(isAnotherPieceGetMoveTilesCalled){
-                moveTiles.emplace_back(pos,tileType);
-                continue;
+                // moveTiles.emplace_back(pos,tileType); // NOT NEEDED !
+                break;
             }
             
             if(ChessPiece::isMoveTileValid(pos,kingBoardPos,activePieces)){
@@ -240,7 +240,7 @@ std::vector<TileData> Pawn::getBlackMoveTiles(const std::array<ChessPiece::Playe
                     moveTiles.emplace_back(pos,tileType);
                 }
                 continue;      
-            }
+            }            
 
             if(TileType::MOVE==tileType){
                 int32_t enemyPawnIndx=INVALID_RSRC_ID;
@@ -334,4 +334,19 @@ void Pawn::checkForPawnPromotion(){ // Pawn::checkForPawnPromotion() is NOT adde
 
 void Pawn::setIsPawnTargetedForEnPassant(bool isPawnTargetedForEnPassant){ // Pawn::setIsPawnTargetedForEnPassant() is NOT added by Zhivko
     _isPawnTargetedForEnPassant=isPawnTargetedForEnPassant;
+}
+
+bool Pawn::isDeadPosition(const std::array<ChessPiece::PlayerPieces, Defines::PLAYERS_COUNT>& activePieces, [[maybe_unused]]int32_t& idx){
+    const std::vector<TileData>& moveTiles = Pawn::getMoveTiles(activePieces); // CHECK IF recursion happens !!!
+    if(moveTiles.empty()){
+        return true;
+    }
+
+    for(const TileData& tileData:moveTiles){
+        if(TileType::GUARD!=tileData.tileType){
+            return false;
+        }
+    }
+    
+    return true;
 }

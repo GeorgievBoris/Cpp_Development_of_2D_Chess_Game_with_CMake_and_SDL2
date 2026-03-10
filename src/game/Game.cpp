@@ -54,11 +54,6 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     _gameFbo.activateAlphaModulation();
     regenerateGameFbo();
 
-    // if(EXIT_SUCCESS!=_gameBoardAnimator.init(static_cast<GameProxy*>(this),&_gameFbo,cfg.gameFboRotTimerId)){
-    //     std::cerr<<"_gameBoardAnimator.init() failed"<<std::endl;
-    //     return EXIT_FAILURE;
-    // }
-
     if(EXIT_SUCCESS!=_inputInverter.init(cfg.piecePromotionPanelCfg.gameBoardWidth,
                                             cfg.piecePromotionPanelCfg.gameBoardHeight)){
         std::cerr<<"_inputInverter.init() failed"<<std::endl;
@@ -72,7 +67,16 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         // NOT added by Zhivko
         std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
-    }    
+    }
+
+    if(EXIT_SUCCESS!=_logScreen.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),static_cast<GameProxy*>(this),cfg.textFontId,cfg.logScreenRsrcId)){
+        std::cerr<<"_logScreen.init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    _logFbo.create(cfg.logScreenWidth,cfg.logScreenHeight,{1025,80},Colors::FULL_TRANSPARENT);
+    _logFbo.activateAlphaModulation();
+    regenerateLogFbo();
 
     Game::hide(); // NOT added by Zhivko
 
@@ -103,7 +107,9 @@ void Game::draw() const{
     _pieceHandler.draw(); // NOT added by Zhivko
     if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
         _animator.draw(); // NOT added by Zhivko
-    } 
+    }
+    _logFbo.draw(); // NOT added by Zhivko
+    _logScreen.draw(); // NOT added by Zhivko
 }
 
 void Game::handleEvent(InputEvent& e){    
@@ -135,6 +141,7 @@ void Game::handleEvent(InputEvent& e){
 
     _inputInverter.invertEvent(e);
     _pieceHandler.handleEvent(e);
+    _logScreen.handleEvent(e); // NOT added by Zhivko
 }
 
 void Game::show(){ // Game::show() method is NOT added by Zhivko
@@ -152,6 +159,7 @@ void Game::hide(){ // Game::hide() method is NOT added by Zhivko
     _quitGameBtn.hide();
     _piecePromotionPanel.hide();
     _animator.deactivate();
+    _logScreen.deinit();
 }
 
 
@@ -204,7 +212,10 @@ void Game::onBoardAnimFinished(){
         _animator.activateGameEndAnims(_gameLogic.getActivePlayerId(),_gameEndType,_gameBoard.getWidgetFlip());
         regenerateGameFbo();
         return;
-    }        
+    }
+
+    _logScreen.update(_gameLogic.getActivePlayerId());   
+    regenerateLogFbo();
     _gameLogic.finishTurn();
     _pieceHandler.setCurrentPlayerId(_gameLogic.getActivePlayerId());
     _gameLogic.startPlayersTimer(); // NOT added by Zhivko
@@ -233,6 +244,8 @@ void Game::restart(){ // Game::restart() method is NOT added by Zhivko
     _isPromotionActive=false;
     _gameEndType=GameEndType::NONE;
     _isPieceMovementActive=false;
+    _logScreen.deinit();
+    regenerateLogFbo();
 }
 
 void Game::regenerateGameFbo() {
@@ -297,4 +310,22 @@ void Game::setGameEndType(const GameEndType gameEndType){ // Game::setGameEndTyp
 
 GameEndType Game::getGameEndType() const { // Game::getGameEndType() method is NOT added by Zhivko
     return _gameEndType;
+}
+
+void Game::regenerateLogFbo(){ // Game::regenerateLogFbo() is NOT added by Zhivko
+    _logFbo.unlock();
+    _logFbo.reset();
+
+    _logScreen.drawOnFbo(_logFbo);
+
+    _logFbo.update();
+    _logFbo.lock();
+}
+
+void Game::showLogFbo(bool isVisible){
+    if(isVisible){
+        _logFbo.show();
+        return;
+    }
+    _logFbo.hide();
 }

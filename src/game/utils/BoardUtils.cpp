@@ -256,11 +256,9 @@ void BoardUtils::getBoardPosIfCastling(const ChessPiece::PlayerPieces& pieces, c
         if(PieceType::KING!=pieces[i]->getPieceType()){
             continue;
         }
-
         if(pieces[i]->getBoardPos()!=newBoardPos){
             return;
         }
-    
         pair.first=static_cast<int32_t>(i);
         pair.second=pieces[i]->getBoardPos();
         0==pieceBoardPos.col ? (pair.second.col-=2, newBoardPos.col=pair.second.col+1) 

@@ -11,7 +11,7 @@
 int32_t DebugConsole::init(int64_t maxFrames, int32_t fontId){
     _maxFrames=maxFrames;
     
-    Point textPos=Point(0,0);
+    Point textPos=Point(1025,830);
     _debugTexts[FPS_TEXT_IDX].create("0",fontId,Colors::YELLOW,textPos);
 
     textPos.y+=40;

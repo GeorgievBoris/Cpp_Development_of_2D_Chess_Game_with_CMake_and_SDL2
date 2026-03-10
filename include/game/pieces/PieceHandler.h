@@ -61,11 +61,13 @@ private:
     void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos) final; // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
     const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const final; // PieceHandler::getBoardPosOfKingAndAttackingPiece()
     bool isDeadPosition(); // PieceHandler::isDeadPosition() is NOT added by Zhivko
+    const std::pair<PieceType,std::pair<BoardPos,BoardPos>> getTypeAndPosOfLastMovedPiece() const final; // PieceHandler::getTypeAndPosOfLastMovedPiece() is NOT added by Zhivko
 
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;
     PieceMoveAnimator _pieceMoveAnimator; // NOT added by Zhivko
     BoardPos _targetBoardPos; // NOT added by Zhivko
+    BoardPos _initBoardPosOfLastMovedPiece; // NOT added by Zhivko
 
     std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT> _pieces;
     std::unique_ptr<ChessPiece>* _pawnEnPassantPtr=nullptr; // NOT added by Zhivko

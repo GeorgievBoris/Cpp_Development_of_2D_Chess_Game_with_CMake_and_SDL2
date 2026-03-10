@@ -21,6 +21,7 @@
 #include "game/animator/Animator.h" // NOT added by Zhivko
 
 #include "game/buttons/QuitGameButton.h" // NOT added by Zhivko
+#include "game/logScreen/LogScreen.h" // NOT added by Zhivko
 
 // Forward Declarations
 class InputEvent;
@@ -57,6 +58,8 @@ private:
     bool isPieceMovementActive() const final; // Game::isPieceMovementActive() method is NOT added by Zhivko
     void setGameEndType(const GameEndType gameEndType) final; // Game::setGameEndType() method is NOT added by Zhivko
     GameEndType getGameEndType() const final; // Game::getGameEndType() method is NOT added by Zhivko
+    void regenerateLogFbo(); // Game::regenerateLogFbo() is NOT added by Zhivko
+    void showLogFbo(bool isVisible) final; // Game::showLogFbo() is NOT added by Zhivko
 
     // NOTE: think about grouping GameBoardAnimator, WinnerAnimator and PieceAnimator into one Animator classs
     GameBoard _gameBoard;
@@ -65,9 +68,11 @@ private:
     PiecePromotionPanel _piecePromotionPanel;
     InputInverter _inputInverter;
     Fbo _gameFbo;
+    LogScreen _logScreen;
 
     QuitGameButton _quitGameBtn; // NOT added by Zhivko
     Animator _animator; // NOT added by Zhivko
+    Fbo _logFbo; // NOT added by Zhivko
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     bool _isGameHidden=true; // NOT added by Zhivko

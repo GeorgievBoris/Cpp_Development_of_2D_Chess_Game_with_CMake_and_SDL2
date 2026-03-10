@@ -189,11 +189,9 @@ void PieceHandler::handlePieceGrabbedEvent(const InputEvent& e){
     }
 
     const std::unique_ptr<ChessPiece>& currPlayerSelectedPiece=_pieces[_currPlayerId][_selectedPieceId]; // NOT added by Zhivko
-    
     if(_isCastlingPossible){
         BoardUtils::getBoardPosIfCastling(_pieces[_currPlayerId],currPlayerSelectedPiece,_targetBoardPos,pair); // NOT added by Zhivko
     }
-    
     if(INVALID_RSRC_ID==pair.first){ // NOT added by Zhivko
         if(!PieceHandler::isMoveValid()){ // NOT added by Zhivko
             _gameBoardProxy->onPieceUngrabbed();
@@ -230,6 +228,7 @@ void PieceHandler::handlePieceUngrabbedEvent(const InputEvent& e){
 }
 
 void PieceHandler::doMovePiece(){
+    _initBoardPosOfLastMovedPiece=_pieces[_currPlayerId][_selectedPieceId]->getBoardPos();
     PieceHandler::checkPawnMoveForEnPassant();
     _pieceMoveAnimator.start(_pieces,_targetBoardPos,pair,_currPlayerId,_selectedPieceId,_pawnEnPassantPtr);
     _gameProxy->setPieceMovementActive(true);
@@ -593,6 +592,7 @@ void PieceHandler::onTurnTimeElapsed(){ // PieceHandler::onTurnTimeElapsed() is 
         _gameProxy->setGameEndType(GameEndType::WINNER_AUTOMATIC);
     }
     _isPieceGrabbed=false;
+    _selectedPieceId=INVALID_RSRC_ID;
     _gameBoardProxy->onPieceUngrabbed();
     _gameProxy->onGameTurnFinished();
 }
@@ -714,7 +714,7 @@ void PieceHandler::shiftPiecesPosAtGameEnd(const bool isNoWinner){ // NOT added 
     }
 }
 
-bool PieceHandler::isDeadPosition(){
+bool PieceHandler::isDeadPosition(){ // NOT added by Zhivko
     // check for:
     // 1) king against king
     // 2) king against king and knight
@@ -749,4 +749,13 @@ bool PieceHandler::isDeadPosition(){
         }
     }
     return true;
+}
+
+const std::pair<PieceType,std::pair<BoardPos,BoardPos>> PieceHandler::getTypeAndPosOfLastMovedPiece() const { // NOT added by Zhivko
+    
+    if(INVALID_RSRC_ID==_selectedPieceId){
+        return std::pair<PieceType,std::pair<BoardPos,BoardPos>>(PieceType::UNKNOWN,std::pair<BoardPos,BoardPos>({INVALID_RSRC_ID,INVALID_RSRC_ID},{INVALID_RSRC_ID,INVALID_RSRC_ID}));
+    }
+    const PieceType pieceType = _pieces[_currPlayerId][_selectedPieceId]->getPieceType();
+    return std::pair<PieceType,std::pair<BoardPos,BoardPos>>(pieceType,std::pair<BoardPos,BoardPos>(_initBoardPosOfLastMovedPiece,_targetBoardPos));
 }

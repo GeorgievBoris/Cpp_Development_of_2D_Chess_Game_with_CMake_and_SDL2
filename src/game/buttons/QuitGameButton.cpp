@@ -8,7 +8,6 @@
 #include "sdl_utils/InputEvent.h"
 #include "manager_utils/drawing/Fbo.h"
 
-
 int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showStartScreenCallBack,
                                              const std::function<void()>& gameLogicAndWinnerAnimatorCallBack){
     if(INVALID_RSRC_ID==rsrcId){
@@ -17,7 +16,7 @@ int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showSt
     }
 
     // const Point pos = Point::ZERO;
-    const Point pos(1050,0);
+    const Point pos(1025,0);
     Image::create(rsrcId,pos);
     Widget::show();
     _showStartScreenCallBack=showStartScreenCallBack;

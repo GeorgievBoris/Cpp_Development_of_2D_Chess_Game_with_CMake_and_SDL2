@@ -47,6 +47,7 @@ private:
     const TileData* _enPassantEnemyPawn=nullptr; // NOT added by Zhivko
     const TileData* _enPassantMovePos=nullptr; // NOT added by Zhivko
     WidgetFlip _flipType=WidgetFlip::NONE; // NOT added by Zhivko
+    static const std::pair<Point,Point> pairDeltaXY; // NOT added by Zhivko
     MoveSelector _moveSelector;
     std::vector<TileData> _currMoveTiles;
 };

@@ -45,6 +45,10 @@ struct GameCfg{
 
     int32_t windowWidth; // NOT added by Zhivko
     int32_t windowHeight; // NOT added by Zhivko
+
+    int32_t logScreenHeight; // NOT added by Zhivko
+    int32_t logScreenWidth; // NOT added by Zhivko
+    int32_t logScreenRsrcId; // NOT added by Zhivko
 };
 
 #endif // GAME_CONFIG_GAMECFG_H_

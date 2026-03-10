@@ -24,7 +24,8 @@ public:
     virtual void setPieceMovementActive(bool isPieceMovementActive)=0; // GameProxy::setPieceMovementActive() method is NOT added by Zhivko
     virtual bool isPieceMovementActive() const =0; // GameProxy::isPieceMovementActive() method is NOT added by Zhivko
     virtual void setGameEndType(const GameEndType gameEndType)=0; // Game::setGameEndType() method is NOT added by Zhivko
-    virtual GameEndType getGameEndType() const =0; // Game::getGameEndType() method is NOT added by Zhivko
+    virtual GameEndType getGameEndType() const =0; // GameProxy::getGameEndType() method is NOT added by Zhivko
+    virtual void showLogFbo(bool isVisible)=0; // GameProxy::showLogFbo() method is NOT added by Zhivko
     // virtual void stopPlayersTimer()=0; // GameProxy::stopPlayersTimer() method is NOT added by Zhivko
 };
 

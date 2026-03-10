@@ -17,7 +17,7 @@ constexpr int32_t GAME_X_POS_SHIFT=0; // NOT added by Zhivko
 constexpr int32_t GAME_Y_POS_SHIFT=0; // NOT added by Zhivko
 
 // constants
-static constexpr auto WINDOW_WIDTH=900+400; // "+ 400" is NOT added by Zhivko
+static constexpr auto WINDOW_WIDTH=900+600; // "+ 600" is NOT added by Zhivko
 static constexpr auto WINDOW_HEIGHT=1000+100; // "+100" is NOT added by Zhivko
 static constexpr auto WINDOW_NAME="Hardware_Rendering";
 
@@ -53,6 +53,11 @@ constexpr int32_t WINNER_MEDAL_HEIGHT=1010;
 constexpr int32_t WINNER_MEDAL_WIDTH=650;
 
 constexpr int32_t WINNER_ANIMATOR_FIREWORKS_FRAMES=11;
+
+constexpr int32_t LOG_SCREEN_WIDTH=450;
+constexpr int32_t LOG_SCREEN_HEIGHT=770;
+constexpr int32_t LOG_SCREEN_BACKGROUND_WIDTH=450;
+constexpr int32_t LOG_SCREEN_BACKGROUND_HEIGHT=770;
 }
 
 static constexpr auto ANGELINE_VINTAGE_40_FONT_SIZE=40;
@@ -196,6 +201,11 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     }
     cfg.imageConfigs.emplace(TextureId::TARGETS,imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/logScreenBackground.png");
+    imageCfg.frames.emplace_back(0,0,LOG_SCREEN_BACKGROUND_WIDTH,LOG_SCREEN_BACKGROUND_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::LOG_SCREEN_BACKGROUND,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -229,6 +239,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.whitePiecesHalvesRsrcId=TextureId::WHITE_PIECES_HALVES; // NOT added by Zhivko
     cfg.blackPiecesHalvesRsrcId=TextureId::BLACK_PIECES_HALVES; // NOT added by Zhivko
     cfg.targetsRsrcId=TextureId::TARGETS; // NOT added by Zhivko
+    cfg.logScreenRsrcId=TextureId::LOG_SCREEN_BACKGROUND; // NOT added by Zhivko
     
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
@@ -244,6 +255,8 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.movePieceHalvesTimerId=TimerId::MOVE_PIECE_HALVES_TIMER_ID; // NOT added by Zhivko
     cfg.windowHeight=WINDOW_HEIGHT; // NOT added by Zhivko
     cfg.windowWidth=WINDOW_WIDTH; // NOT added by Zhivko
+    cfg.logScreenHeight=LOG_SCREEN_HEIGHT; // NOT added by Zhivko
+    cfg.logScreenWidth=LOG_SCREEN_WIDTH; // NOT added by Zhivko
     
     cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 

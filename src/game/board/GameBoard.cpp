@@ -11,6 +11,8 @@
 extern const int32_t GAME_X_POS_SHIFT;
 extern const int32_t GAME_Y_POS_SHIFT;
 
+const std::pair<Point,Point> GameBoard::pairDeltaXY {{0,-2},{-2,-4}};
+
 GameBoard::~GameBoard(){ // added by Zhivko as a fix in the beginning of Lecture 11 Game 2/4
 // check if the the bug of Lecture 11 Game 2/4 is fixed as shown in the ~GameBoard() below...
 // .. then delete the entire dtor here!!
@@ -159,10 +161,22 @@ bool GameBoard::isMoveAllowed(const BoardPos& pos) const {
         if(nullptr==castlingKingTilePtr){ // NOT added by Zhivko
             return false; // NOT added by Zhivko
         }
-
+        
         const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(pos,_flipType); //NOT added by Zhivko
         const BoardPos shiftedSelectedPos=BoardUtils::shiftBoardPositions(invertedBoardPos); // NOT added by Zhivko
-        if(shiftedSelectedPos!=BoardUtils::getBoardPos(castlingKingTilePtr->getPosition())){ // NOT added by Zhivko
+        const Point absPosImg=castlingKingTilePtr->getPosition();
+
+        Point deltaXY; // this fix is done in order to position more accurately the MOVE, TAKE, GUARD tiles on the chess board - from aesthetics point of view!
+        if(WidgetFlip::HORIZONTAL_AND_VERTICAL==_flipType){
+            deltaXY.x=pairDeltaXY.second.x; deltaXY.y=pairDeltaXY.second.y;
+        }
+        if(WidgetFlip::NONE==_flipType){
+            deltaXY.x=pairDeltaXY.first.x; deltaXY.y=pairDeltaXY.first.y;
+        }
+
+        const Point shiftedAbsPosImg(absPosImg.x-deltaXY.x,absPosImg.y-deltaXY.y);
+
+        if(shiftedSelectedPos!=BoardUtils::getBoardPos(shiftedAbsPosImg)){ // NOT added by Zhivko
             return false; // NOT added by Zhivko
         }
         return true; // NOT added by Zhivko
@@ -175,10 +189,10 @@ void GameBoard::shiftMoveTilesPos(const BoardPos& boardPos){ // GameBoard::shift
 
     Point deltaXY; // this fix is done in order to position more accurately the MOVE, TAKE, GUARD tiles on the chess board - from aesthetics point of view!
     if(WidgetFlip::HORIZONTAL_AND_VERTICAL==_flipType){
-        deltaXY.x=-2; deltaXY.y=-4;
+        deltaXY.x=pairDeltaXY.second.x; deltaXY.y=pairDeltaXY.second.y;
     }
     if(WidgetFlip::NONE==_flipType){
-        deltaXY.x=0; deltaXY.y=-2;
+        deltaXY.x=pairDeltaXY.first.x; deltaXY.y=pairDeltaXY.first.y;
     }
     _moveSelector.shiftMoveTilesPos(_flipType,boardImgAbsPos,deltaXY); // this correction is NOT added by Zhivko
     const BoardPos invertedBoardPos=BoardUtils::getInvertedBoardPos(boardPos,_flipType); // NOT added by Zhivko

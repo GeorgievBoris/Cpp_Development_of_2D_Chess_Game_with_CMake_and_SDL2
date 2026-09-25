@@ -8,6 +8,8 @@
 // C++ system headers
 #include <list>
 #include <utility>
+#include <functional>
+#include <iosfwd>
 // Third-party headers
 // Own headers
 #include "manager_utils/drawing/Text.h"
@@ -22,13 +24,14 @@ class InputEvent;
 
 class LogScreen {
 public:
-    int32_t init(PieceHandlerProxy* pieceHandlerProxy, GameProxy* gameProxy, const int32_t fontId, const int32_t rsrcId);
+    int32_t init(PieceHandlerProxy* pieceHandlerProxy, GameProxy* gameProxy, const int32_t fontId,int32_t rsrcId,std::function<void(std::ofstream&)>& funcClb);
     void deinit();
     void draw() const;
     void update(int32_t playerId);
     void drawOnFbo(Fbo& fbo);
     void handleEvent(const InputEvent& e);
 private:
+    void savePiecesState(std::ofstream& outputFile) const;
     Text _logScreenNote;
     std::pair<Text,Text> _logScreenTitle;
     Image _logScreenBckg;

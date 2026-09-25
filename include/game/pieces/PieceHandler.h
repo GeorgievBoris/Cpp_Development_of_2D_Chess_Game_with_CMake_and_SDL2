@@ -6,6 +6,7 @@
 // C++ system headers
 #include <vector>
 #include <array>
+#include <iosfwd>
 // Third-party headers
 // Own headers
 #include "game/defines/ChessDefines.h"
@@ -59,9 +60,10 @@ private:
     void onTurnTimeElapsed() final; // PieceHandler::onTurnTimeElapsed() is NOT added by Zhivko
     const ChessPiece::PlayerPieces& getWinnerPieces() final; // PieceHandler::getWinnerPieces() is NOT added by Zhivko
     void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pawnPair, const BoardPos& boardPos) final; // PieceHandler::changePawnPosIfEnPassant() is NOT added by Zhivko
-    const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const final; // PieceHandler::getBoardPosOfKingAndAttackingPiece()
+    const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const final; // PieceHandler::getBoardPosOfKingAndAttackingPiece() is NOT added by Zhivko
     bool isDeadPosition(); // PieceHandler::isDeadPosition() is NOT added by Zhivko
     const std::pair<PieceType,std::pair<BoardPos,BoardPos>> getTypeAndPosOfLastMovedPiece() const final; // PieceHandler::getTypeAndPosOfLastMovedPiece() is NOT added by Zhivko
+    void savePiecesState(std::ofstream& outputFile) const final; // PieceHandler::savePiecesState() is NOT added by Zhivko
 
     GameBoardProxy* _gameBoardProxy=nullptr;
     GameProxy* _gameProxy=nullptr;

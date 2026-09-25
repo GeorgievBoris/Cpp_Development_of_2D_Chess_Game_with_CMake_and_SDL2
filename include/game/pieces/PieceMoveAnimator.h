@@ -33,6 +33,7 @@ public:
     BoardPos getTakenPieceBoardPosInv(const BoardPos& takenPieceBoardPos);
     bool isCapturedPieceActive() const;
     int32_t getLastMovedPieceId() const;
+    Point getAbsPosOfTakenPiece(const BoardPos& boardPos) const;
 private:
     void onTimeout(int32_t timerId) final;
     void movePieceHalves();
@@ -48,7 +49,7 @@ private:
     Point getInvAbsPosForAnim(const Point& absPos, WidgetFlip flipType);
     void shiftBoardPosOfMovedPiece(std::unique_ptr<ChessPiece>& piece, const int32_t currPlayerId);
     bool doPiecesPosOverlap(const Point& targetPos, const Point& posLeft);
-    Point getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces);
+    Point findAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces);
     bool isTargetPosChangedIfEnPassant();
 
     int32_t _lastMovedPieceId=INVALID_RSRC_ID;

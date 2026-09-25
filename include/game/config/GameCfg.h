@@ -29,6 +29,7 @@ struct GameCfg{
     int32_t winnerMedalRsrcId; // NOT added by Zhivko
     int32_t whitePiecesHalvesRsrcId;// NOT added by Zhivko
     int32_t blackPiecesHalvesRsrcId;// NOT added by Zhivko
+    int32_t saveGameButtonRsrcId; // NOT added by Zhivko
 
     int32_t blinkTargetTimerId;
     int32_t gameFboRotTimerId;

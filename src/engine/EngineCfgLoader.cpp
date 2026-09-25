@@ -46,6 +46,9 @@ constexpr int32_t START_SCREEN_BACKGROUND_WIDTH=WINDOW_WIDTH; // fix the .png!!!
 constexpr int32_t QUIT_GAME_BUTTON_WIDTH=169;
 constexpr int32_t QUIT_GAME_BUTTON_HEIGHT=66;
 
+constexpr int32_t SAVE_GAME_BUTTON_WIDTH=232;
+constexpr int32_t SAVE_GAME_BUTTON_HEIGHT=66;
+
 constexpr int32_t WINNER_STAR_HEIGHT=280;
 constexpr int32_t WINNER_STAR_WIDTH=300;
 
@@ -206,6 +209,11 @@ static void populateImageContainerCfg(ImageContainerCfg& cfg){
     imageCfg.frames.emplace_back(0,0,LOG_SCREEN_BACKGROUND_WIDTH,LOG_SCREEN_BACKGROUND_HEIGHT);
     cfg.imageConfigs.emplace(TextureId::LOG_SCREEN_BACKGROUND,imageCfg);
     imageCfg.frames.clear();
+
+    imageCfg.location=getFilePath("resources/p/saveGameButton.png");
+    imageCfg.frames.emplace_back(0,0,SAVE_GAME_BUTTON_WIDTH,SAVE_GAME_BUTTON_HEIGHT);
+    cfg.imageConfigs.emplace(TextureId::SAVE_GAME_BUTTON,imageCfg);
+    imageCfg.frames.clear();
 }
 
 static void populateTextContainerCfg(TextContainerCfg& cfg){
@@ -240,7 +248,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.blackPiecesHalvesRsrcId=TextureId::BLACK_PIECES_HALVES; // NOT added by Zhivko
     cfg.targetsRsrcId=TextureId::TARGETS; // NOT added by Zhivko
     cfg.logScreenRsrcId=TextureId::LOG_SCREEN_BACKGROUND; // NOT added by Zhivko
-    
+    cfg.saveGameButtonRsrcId=TextureId::SAVE_GAME_BUTTON; // NOT added by Zhivko
 
     cfg.blinkTargetTimerId=TimerId::BLINK_TARGET_TIMER_ID;
     cfg.gameFboRotTimerId=TimerId::GAME_FBO_ROT_TIMER_ID;
@@ -257,6 +265,7 @@ static void populateGameCfg(GameCfg& cfg){
     cfg.windowWidth=WINDOW_WIDTH; // NOT added by Zhivko
     cfg.logScreenHeight=LOG_SCREEN_HEIGHT; // NOT added by Zhivko
     cfg.logScreenWidth=LOG_SCREEN_WIDTH; // NOT added by Zhivko
+    
     
     cfg.textFontId=FontId::ANGELINE_VINTAGE_40;
 

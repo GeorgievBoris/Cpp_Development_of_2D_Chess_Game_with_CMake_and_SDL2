@@ -3,6 +3,7 @@
 // C system headers
 // C++ system headers
 #include <iostream>
+#include <iosfwd>
 // Third-party headers
 // Own headers
 #include "sdl_utils/InputEvent.h"
@@ -68,8 +69,9 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
         std::cerr<<"_winnerAnimator.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
-
-    if(EXIT_SUCCESS!=_logScreen.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),static_cast<GameProxy*>(this),cfg.textFontId,cfg.logScreenRsrcId)){
+    
+    std::function<void(std::ofstream&)> logScreenClb;
+    if(EXIT_SUCCESS!=_logScreen.init(static_cast<PieceHandlerProxy*>(&_pieceHandler),static_cast<GameProxy*>(this),cfg.textFontId,cfg.logScreenRsrcId,logScreenClb)){
         std::cerr<<"_logScreen.init() failed"<<std::endl;
         return EXIT_FAILURE;
     }
@@ -77,6 +79,11 @@ int32_t Game::init(const GameCfg& cfg, const std::function<void()>& showStartScr
     _logFbo.create(cfg.logScreenWidth,cfg.logScreenHeight,{1025,80},Colors::FULL_TRANSPARENT);
     _logFbo.activateAlphaModulation();
     regenerateLogFbo();
+
+    if(EXIT_SUCCESS!=_saveGameBtn.init(cfg.saveGameButtonRsrcId,static_cast<PieceHandlerProxy*>(&_pieceHandler),logScreenClb)){
+        std::cerr<<"_saveGameBtn::init() failed"<<std::endl;
+        return EXIT_FAILURE;
+    }
 
     Game::hide(); // NOT added by Zhivko
 
@@ -110,6 +117,7 @@ void Game::draw() const{
     }
     _logFbo.draw(); // NOT added by Zhivko
     _logScreen.draw(); // NOT added by Zhivko
+    _saveGameBtn.draw(); //NOT added by Zhivko
 }
 
 void Game::handleEvent(InputEvent& e){    
@@ -127,6 +135,7 @@ void Game::handleEvent(InputEvent& e){
     }
 
     _quitGameBtn.handleEvent(e); // NOT added by Zhivko
+    _saveGameBtn.handleEvent(e); // NOT added by Zhivko
 
     if(GameEndType::NONE!=_gameEndType){ // NOT added by Zhivko
         return;

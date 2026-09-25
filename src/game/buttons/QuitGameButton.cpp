@@ -11,7 +11,7 @@
 int32_t QuitGameButton::init(int32_t rsrcId, const std::function<void()>& showStartScreenCallBack,
                                              const std::function<void()>& gameLogicAndWinnerAnimatorCallBack){
     if(INVALID_RSRC_ID==rsrcId){
-        std::cerr<<"QuitGameButton::init() failed."<<std::endl;
+        std::cerr<<"Error, received invalid rsrcId."<<std::endl;
         return EXIT_FAILURE;
     }
 

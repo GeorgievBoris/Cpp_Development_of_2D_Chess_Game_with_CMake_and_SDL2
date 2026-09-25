@@ -61,6 +61,7 @@ add_executable(${PROJECT_NAME}
                 ${_INC_DIR}/game/animator/types/GameBoardAnimator.h
                 ${_INC_DIR}/game/animator/types/GameEndAnimator.h
                 ${_INC_DIR}/game/logScreen/LogScreen.h
+                ${_INC_DIR}/game/buttons/SaveGameButton.h
 
                 ${_SRC_DIR}/engine/Engine.cpp
                 ${_SRC_DIR}/engine/EngineCfgLoader.cpp
@@ -93,6 +94,7 @@ add_executable(${PROJECT_NAME}
                 ${_SRC_DIR}/game/animator/types/GameBoardAnimator.cpp
                 ${_SRC_DIR}/game/animator/types/GameEndAnimator.cpp
                 ${_SRC_DIR}/game/logScreen/LogScreen.cpp
+                ${_SRC_DIR}/game/buttons/SaveGameButton.cpp
 )
 
 set_target_cpp_standard(${PROJECT_NAME} 17)

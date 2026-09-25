@@ -67,6 +67,7 @@ protected:
     bool isTakeTileValid(const BoardPos& boardPos, const BoardPos& kingBoardPos, const std::array<ChessPiece::PlayerPieces,Defines::PLAYERS_COUNT>& activePlayers) const;    
     Image _pieceImg;
     mutable BoardPos _boardPos; // "mutable" is NOT added by Zhivko
+    Point _absPos=Point::ZERO; // NOT added by Zhivko
     int32_t _playerId;
     PieceType _pieceType;
     bool _isTaken=false; // NOT added by Zhivko

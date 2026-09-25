@@ -70,3 +70,7 @@ void Text::setColor(const Color& color){
 std::string Text::getTextContent() const{
     return _textContent;
 }
+
+const Color& Text::getTextColor() const{
+    return _color;
+}

@@ -4,6 +4,8 @@
 #include <cstdlib>
 // C++ system headers
 #include <iostream>
+#include <fstream>
+#include <functional>
 // Third-party headers
 // Own headers
 #include "utils/drawing/Color.h"
@@ -17,7 +19,7 @@ size_t LogScreen::_counter{};
 size_t LogScreen::_counterMissedWhitesTurns{};
 size_t LogScreen::_counterMissedBlacksTurns{};
 
-int32_t LogScreen::init(PieceHandlerProxy* pieceHandlerProxy,GameProxy* gameProxy, const int32_t fontId, const int32_t rsrcId){
+int32_t LogScreen::init(PieceHandlerProxy* pieceHandlerProxy,GameProxy* gameProxy, const int32_t fontId,int32_t rsrcId,std::function<void(std::ofstream&)>& funcClb){
     if(INVALID_RSRC_ID==fontId){
         std::cerr<<"Error, received invalid fondId\n";
         return EXIT_FAILURE;
@@ -35,6 +37,7 @@ int32_t LogScreen::init(PieceHandlerProxy* pieceHandlerProxy,GameProxy* gameProx
     _pieceHandlerProxy=pieceHandlerProxy;
     _gameProxy=gameProxy;
     _fontId=fontId;
+    _isLogScreenVisible=true;
 
     // const Point bckgAbsPos(0,90);
     const Point titleAbsPos(10,10);
@@ -44,6 +47,9 @@ int32_t LogScreen::init(PieceHandlerProxy* pieceHandlerProxy,GameProxy* gameProx
     _separator.create(" ",fontId,Colors::RED,titleAbsPos);
     _logScreenNote.create("Press 'L' to show log screen",_fontId,Colors::RED,{1025,80});
     _logScreenNote.hide();
+
+    funcClb=[&](std::ofstream& outputFile){LogScreen::savePiecesState(outputFile);};
+    // funcClb=std::bind(&LogScreen::savePiecesState,this,std::placeholders::_1);
 
     return EXIT_SUCCESS;
 }
@@ -132,8 +138,6 @@ void LogScreen::update(int32_t playerId){
         textMissedTurns.append(textBlacks);
         textMissedTurns.insert(0," ( ");
         finalText.append(textMissedTurns);
-        _counterMissedBlacksTurns=0;
-        _counterMissedWhitesTurns=0;
     }
 
     Defines::WHITE_PLAYER_ID==playerId ? 
@@ -186,5 +190,24 @@ void LogScreen::handleEvent(const InputEvent& e){
     _isLogScreenVisible=!_isLogScreenVisible;
     _isLogScreenVisible ? _logScreenNote.hide() : _logScreenNote.show();
     _gameProxy->showLogFbo(_isLogScreenVisible);
+    return;
+}
+
+void LogScreen::savePiecesState(std::ofstream& outputFile) const{
+    outputFile<<'\n';
+    outputFile<<_counterMissedWhitesTurns<<' '<<_counterMissedBlacksTurns<<' '<<_counter;
+    std::list<Text>::const_iterator const iterBegin=_movedPieces.cbegin();
+    std::list<Text>::const_iterator iter=_movedPieces.cend();
+    while(true){
+        --iter;
+        const Text& textMovedPiece=*iter;
+        const Color& textColor=textMovedPiece.getTextColor();
+        outputFile<<'\n'<<textMovedPiece.getTextContent()<<','<<' ';
+        Colors::BLACK==textColor ? outputFile<<'b' : outputFile<<'w';
+        if(iterBegin==iter){
+            break;
+        }
+    }
+    outputFile.close();
     return;
 }

@@ -4,6 +4,7 @@
 // C system headers
 // C++ system headers
 #include <utility>
+#include <fstream>
 // Third-party headers
 // Own headers
 #include "game/pieces/types/ChessPiece.h"
@@ -21,6 +22,7 @@ public:
     virtual void changePawnPosIfEnPassant(const std::pair<int32_t,int32_t>& pair, const BoardPos& boardPos)=0;
     virtual const BoardPos getBoardPosOfKingAndAttackingPiece(const int32_t playerId) const=0;
     virtual const std::pair<PieceType,std::pair<BoardPos,BoardPos>> getTypeAndPosOfLastMovedPiece() const=0;
+    virtual void savePiecesState(std::ofstream& outputFile) const=0;
 };
 
 

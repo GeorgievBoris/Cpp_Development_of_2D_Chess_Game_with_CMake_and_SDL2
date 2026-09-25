@@ -27,6 +27,7 @@ enum ResourceId{
     BLACK_PIECES_HALVES, // NOT added by Zhivko    
     TARGETS, // NOT added by Zhivko
     LOG_SCREEN_BACKGROUND, // NOT added by Zhivko
+    SAVE_GAME_BUTTON, // NOT added by Zhivko
     COUNT
 };
 

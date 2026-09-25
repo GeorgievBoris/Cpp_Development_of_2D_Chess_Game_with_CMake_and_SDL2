@@ -5,6 +5,7 @@
 // C++ system headers
 #include <iostream>
 #include <cmath>  // NOT added by Zhivko
+#include <fstream> // NOT added by Zhivko
 // Third-party headers
 // Own headers
 #include "sdl_utils/InputEvent.h"
@@ -758,4 +759,83 @@ const std::pair<PieceType,std::pair<BoardPos,BoardPos>> PieceHandler::getTypeAnd
     }
     const PieceType pieceType = _pieces[_currPlayerId][_selectedPieceId]->getPieceType();
     return std::pair<PieceType,std::pair<BoardPos,BoardPos>>(pieceType,std::pair<BoardPos,BoardPos>(_initBoardPosOfLastMovedPiece,_targetBoardPos));
+}
+
+void PieceHandler::savePiecesState(std::ofstream& outputFile) const{
+    int32_t startIdx=Defines::WHITE_PLAYER_ID;
+    if(Defines::BLACK_PLAYER_ID==_currPlayerId){
+        startIdx=Defines::BLACK_PLAYER_ID;
+    }
+
+    int32_t counter=0;
+
+    while(counter<Defines::PLAYERS_COUNT){
+        const ChessPiece::PlayerPieces& currPieces=_pieces[startIdx];
+
+        const size_t piecesSize=currPieces.size();
+
+        Defines::WHITE_PLAYER_ID==startIdx ? outputFile<<"White pieces:\n" : outputFile<<"Black pieces:\n";
+        
+        for(size_t i=0;i<piecesSize;++i){
+            const std::unique_ptr<ChessPiece>& currPiece=currPieces[i];
+            const PieceType pieceType=currPiece->getPieceType();
+            switch(pieceType){
+            case PieceType::KING:
+                outputFile<<"King, ";
+                break;
+            case PieceType::QUEEN:
+                outputFile<<"Queen, ";
+                break;
+            case PieceType::PAWN:
+                outputFile<<"Pawn, ";
+                break;
+            case PieceType::KNIGHT:
+                outputFile<<"Knight, ";
+                break;
+            case PieceType::ROOK:
+                outputFile<<"Rook, ";
+                break;
+            case PieceType::BISHOP:
+                outputFile<<"Bishop, ";
+                break;
+            case PieceType::UNKNOWN:
+                outputFile<<"Error - Unknown!, ";
+                continue;            
+            }
+
+            if(currPiece->getIsTaken()){
+                outputFile<<"TAKEN, ";
+                const BoardPos boardPos=currPiece->getBoardPos();
+                const Point absPos=_pieceMoveAnimator.getAbsPosOfTakenPiece(boardPos);
+                outputFile<<absPos.x<<','<<' '<<absPos.y;
+            } else {
+                outputFile<<"ACTIVE, ";
+                const BoardPos currBoardPos=currPiece->getBoardPos();
+                outputFile<<currBoardPos.row<<','<<' '<<currBoardPos.col;                
+            }
+
+            if(PieceType::KING==pieceType){
+                const ChessPiece* const currPiecePtr=currPiece.get();
+                const King* const kingPiecePtr=static_cast<const King*>(currPiecePtr);
+                kingPiecePtr->getIsCastlePossible() ? outputFile<<", TRUE" : outputFile<<", FALSE";
+                kingPiecePtr->isMoved() ? outputFile<<", TRUE" : outputFile<<", FALSE";
+                kingPiecePtr->isInCheck() ? outputFile<<", TRUE" : outputFile<<", FALSE";
+            }
+
+            if(PieceType::ROOK==pieceType){
+                const ChessPiece* const currPiecePtr=currPiece.get();
+                const Rook* const rookPiecePtr=static_cast<const Rook*>(currPiecePtr);
+                rookPiecePtr->getIsCastlingPossible() ? outputFile<<", TRUE" : outputFile<<", FALSE";
+                rookPiecePtr->isMoved() ? outputFile<<", TRUE" : outputFile<<", FALSE";
+            }
+
+            outputFile<<'\n';
+        }
+
+        ++counter;
+        Defines::WHITE_PLAYER_ID==startIdx ? startIdx+=counter : startIdx-=counter;
+        if(1==counter){
+            outputFile<<'\n';
+        }
+    }
 }

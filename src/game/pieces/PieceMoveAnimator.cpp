@@ -123,9 +123,14 @@ int32_t PieceMoveAnimator::getLastMovedPieceId() const{
     return _lastMovedPieceId;
 }
 
+Point PieceMoveAnimator::getAbsPosOfTakenPiece(const BoardPos& boardPos) const{
+    return {(boardPos.col*_tileSize)+_firstTilePosX-boardPos.remCol,
+            (boardPos.row*_tileSize)+_firstTilePosY-boardPos.remRow};       
+}
+
 void PieceMoveAnimator::onTimeout(int32_t timerId) {
     if(timerId!=_movePieceTimerId && timerId!=_movePieceHalvesTimerId){
-        std::cerr<<"PieceHandler received unsupported timerId: "<<timerId<<std::endl;
+        std::cerr<<"PieceMoveAnimator received unsupported timerId: "<<timerId<<std::endl;
         return;
     }   
     
@@ -163,7 +168,7 @@ void PieceMoveAnimator::movePieceHalves(){
     _capturedPiece.reset(); _capturedPiece=nullptr;
 
     opponentPiece->setIsTaken(true);
-    const Point absPosTaken=PieceMoveAnimator::getAbsPosOfTakenPiece(*_opponentPiecesPtr);
+    const Point absPosTaken=PieceMoveAnimator::findAbsPosOfTakenPiece(*_opponentPiecesPtr);
     const BoardPos boardPosTaken=PieceMoveAnimator::getBoardPosForAnim(absPosTaken);
     opponentPiece->setBoardPos(boardPosTaken);
     if(_gameProxy->isPromotionActive()){
@@ -440,7 +445,7 @@ bool PieceMoveAnimator::doPiecesPosOverlap(const Point& targetPos, const Point& 
            border.isPointInside(posBottLeft) || border.isPointInside(posBottRight);
 }
 
-Point PieceMoveAnimator::getAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces) {
+Point PieceMoveAnimator::findAbsPosOfTakenPiece(const ChessPiece::PlayerPieces& pieces) {
     const size_t size=pieces.size();
     const int32_t playerId=pieces.front()->getPlayerId();
     uint32_t counter{0};

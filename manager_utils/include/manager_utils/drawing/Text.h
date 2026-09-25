@@ -19,6 +19,7 @@ public:
     void setText(const std::string& text);
     void setColor(const Color& color);
     std::string getTextContent() const;
+    const Color& getTextColor() const; /// not added by Zhivko
 private:
     std::string _textContent;
     Color _color=Colors::BLACK;

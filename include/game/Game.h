@@ -22,6 +22,7 @@
 
 #include "game/buttons/QuitGameButton.h" // NOT added by Zhivko
 #include "game/logScreen/LogScreen.h" // NOT added by Zhivko
+#include "game/buttons/SaveGameButton.h" // NOT added by Zhivko
 
 // Forward Declarations
 class InputEvent;
@@ -73,6 +74,7 @@ private:
     QuitGameButton _quitGameBtn; // NOT added by Zhivko
     Animator _animator; // NOT added by Zhivko
     Fbo _logFbo; // NOT added by Zhivko
+    SaveGameButton _saveGameBtn; // NOT added by Zhivko
 
     bool _isPromotionActive=false; // a quick fix by Zhivko done in the last lecture 14
     bool _isGameHidden=true; // NOT added by Zhivko
